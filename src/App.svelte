@@ -1,7 +1,11 @@
 <script lang="ts">
   import svelteLogo from './assets/svelte.svg'
   import Counter from './lib/Counter.svelte'
-  import { Button } from "carbon-components-svelte"
+  import ImportModal from './lib/ImportModal/ImportModal.svelte'
+  import { ImportModalType } from './lib/ImportModal/ImportModalType'
+  
+  let isImportModalOpen: boolean  = false
+  let clickedImport: ImportModalType = ImportModalType.NONE
 </script>
 
 <main>
@@ -29,7 +33,9 @@
   <p class="read-the-docs">
     Click on the Vite and Svelte logos to learn more
   </p>
-  <Button kind="danger">Danger button</Button>
+  <button on:click={()=> isImportModalOpen = !isImportModalOpen}>Add Data</button>
+  <ImportModal bind:clickedImport bind:open={isImportModalOpen}/>
+  <p>Selected import method is {clickedImport}</p>
 </main>
 
 <style>
