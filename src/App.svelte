@@ -1,6 +1,7 @@
 <script lang="ts">
   import svelteLogo from './assets/svelte.svg'
   import Counter from './lib/Counter.svelte'
+  import { Button } from "carbon-components-svelte"
 </script>
 
 <main>
@@ -28,6 +29,7 @@
   <p class="read-the-docs">
     Click on the Vite and Svelte logos to learn more
   </p>
+  <Button kind="danger">Danger button</Button>
 </main>
 
 <style>
@@ -43,6 +45,6 @@
     filter: drop-shadow(0 0 2em #ff3e00aa);
   }
   .read-the-docs {
-    color: #888;
+    color: #088;
   }
 </style>
