@@ -1,8 +1,24 @@
 <script lang="ts">
-import Main from "./lib/Main.svelte";
+    import { MenuItem } from "./lib/MenuItem";
+    import Main from "./lib/Main.svelte";
+    import Plot from "./lib/Plot.svelte";
+
+    let selectedMenuItem: MenuItem = MenuItem.HOME;
 </script>
 
-<Main/>
-  
+<ul id="menu">
+	<li><a href="/" on:click|preventDefault={() => (selectedMenuItem = MenuItem.HOME)}>Home</a></li> |
+	<li><a href="/" on:click|preventDefault={() => (selectedMenuItem = MenuItem.PLOT)}>Plot</a></li>
+</ul>
+
+{#if selectedMenuItem === MenuItem.HOME}
+    <Main />
+{:else if selectedMenuItem === MenuItem.PLOT}
+    <Plot />
+{/if}
+
 <style>
+    ul#menu li {
+        display: inline;
+    }
 </style>

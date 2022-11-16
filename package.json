@@ -17,8 +17,12 @@
     "svelte-check": "^2.9.2",
     "svelte-preprocess": "^4.10.7",
     "svelte-sidebar-menu": "^0.9.12",
+    "svelte-switch-case": "^2.0.0",
     "tslib": "^2.4.0",
     "typescript": "^4.6.4",
     "vite": "^3.2.0"
+  },
+  "dependencies": {
+    "svelte_sidebar": "^0.1.1"
   }
 }
