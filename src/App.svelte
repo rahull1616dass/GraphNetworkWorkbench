@@ -1,7 +1,7 @@
 <script lang="ts">
     import { MenuItem } from "./lib/MenuItem";
     import Main from "./lib/Main.svelte";
-    import Plot from "./lib/Plot.svelte";
+    import Plot from "./lib/Plot/Plot.svelte";
 
     let selectedMenuItem: MenuItem = MenuItem.HOME;
 </script>
@@ -14,7 +14,7 @@
 {#if selectedMenuItem === MenuItem.HOME}
     <Main />
 {:else if selectedMenuItem === MenuItem.PLOT}
-    <Plot />
+   <!--<Plot /> --> 
 {/if}
 
 <style>
