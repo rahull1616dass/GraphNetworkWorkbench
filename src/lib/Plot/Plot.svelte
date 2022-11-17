@@ -1,6 +1,8 @@
 <script lang="ts">
-    import type { VisualizationSpec, VegaLite } from "svelte-vega";
-    import VisSpec from "./VisSpec";
+    /*
+
+    import { Vega } from "svelte-vega"
+
   
     const data = {
       table: [
@@ -16,9 +18,20 @@
     };
   
     // For an example, see https://github.com/vega/svelte-vega/blob/main/packages/storybook/stories/spec1.ts
-    const spec: VisualizationSpec = {
+    const spec = VisSpec
+    */
+    import type { VisualizationSpec } from "svelte-vega"
+    import  MiserablesData  from "../../data/VisSpec"
+    import {default as vegaEmbed} from 'vega-embed';
+    var spec = "https://vega.github.io/vega/examples/force-directed-layout.vg.json";
 
-    }
+    vegaEmbed("#viz", MiserablesData, { actions: false }).catch(error => console.log(error) );
+
   </script>
   
-  <VegaLite {data} {spec} />
+  <!--
+  <Vega {data} {spec} />
+  -->
+  <div id="viz"></div>
+
+<p>Hello Plotsdfas</p>

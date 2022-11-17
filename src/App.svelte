@@ -14,7 +14,7 @@
 {#if selectedMenuItem === MenuItem.HOME}
     <Main />
 {:else if selectedMenuItem === MenuItem.PLOT}
-   <!--<Plot /> --> 
+   <Plot />
 {/if}
 
 <style>
