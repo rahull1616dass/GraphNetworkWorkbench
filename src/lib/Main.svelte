@@ -9,6 +9,7 @@
   </script>
   
   <main>
+      <!--
     <div>
       <a href="https://vitejs.dev" target="_blank"> 
         <img src="/vite.svg" class="logo" alt="Vite Logo" />
@@ -33,6 +34,7 @@
     <p class="read-the-docs">
       Click on the Vite and Svelte logos to learn more
     </p>
+    -->
     <button on:click={()=> isImportModalOpen = !isImportModalOpen}>Add Data</button>
     <ImportModal bind:clickedImport bind:open={isImportModalOpen}/>
     <p>Selected import method is {clickedImport}</p>
