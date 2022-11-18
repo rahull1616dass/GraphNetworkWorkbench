@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { Endpoints } from "../../constants"
   import { onMount } from "svelte"
   import { netzschleuderNetworkNames } from "../../stores"

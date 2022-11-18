@@ -25,6 +25,9 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "fast-xml-parser": "^4.0.11",
+    "graph-format-converter": "^1.5.2",
+    "graphml-js": "^0.4.0",
     "lodash": "^4.17.21",
     "svelte_sidebar": "^0.1.1",
     "svelte-vega": "^1.2.0"

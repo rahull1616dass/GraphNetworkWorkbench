@@ -1,16 +1,17 @@
 <script lang="ts">
-    import svelteLogo from "../assets/svelte.svg";
-    import Counter from "./Counter.svelte";
-    import ImportModal from "./ImportModal/ImportModal.svelte";
-    import { ImportModalType } from "./ImportModal/ImportModalType";
-    import FromWeb from "./FromWeb/FromWeb.svelte";
+  import svelteLogo from "../assets/svelte.svg"
+  import Counter from "./Counter.svelte"
+  import ImportModal from "./ImportModal/ImportModal.svelte"
+  import { ImportModalType } from "./ImportModal/ImportModalType"
+  import FromWeb from "./FromWeb/FromWeb.svelte"
+    import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte"
 
-    let isImportModalOpen: boolean = false;
-    let selectedImportType: ImportModalType = ImportModalType.NONE;
+  let isImportModalOpen: boolean = false
+  let selectedImportType: ImportModalType = ImportModalType.NONE
 </script>
 
 <main>
-    <!--
+  <!--
     <div>
       <a href="https://vitejs.dev" target="_blank"> 
         <img src="/vite.svg" class="logo" alt="Vite Logo" />
@@ -36,15 +37,17 @@
       Click on the Vite and Svelte logos to learn more
     </p>
     -->
-    {#if selectedImportType === ImportModalType.NONE}
-        <button on:click={() => (isImportModalOpen = !isImportModalOpen)}
-            >Add Data</button
-        >
-        <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
-        <p>Selected import method is {selectedImportType}</p>
-    {:else if selectedImportType === ImportModalType.FROM_WEB}
-        <FromWeb />
-    {/if}
+  {#if selectedImportType === ImportModalType.NONE}
+    <button on:click={() => (isImportModalOpen = !isImportModalOpen)}
+      >Add Data</button
+    >
+    <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
+    <p>Selected import method is {selectedImportType}</p>
+  {:else if selectedImportType === ImportModalType.FROM_WEB}
+    <FromWeb />
+  {:else if selectedImportType === ImportModalType.UPLOAD}
+    <UploadNetwork />
+  {/if}
 </main>
 
 <style>
