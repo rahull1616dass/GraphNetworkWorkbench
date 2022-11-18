@@ -2,7 +2,6 @@
     import { MenuItem } from "./components/MenuItem";
     import Main from "./components/Main.svelte";
     import Plot from "./components/Plot/Plot.svelte";
-    import { testStoreValue } from "./stores";
 
     let selectedMenuItem: MenuItem = MenuItem.HOME;
 </script>
@@ -31,10 +30,6 @@
     <Plot />
 {/if}
 
-<p>Imported store value is = {$testStoreValue}</p>
-<button on:click|preventDefault={() => ($testStoreValue += "!")}
-    >Change store value</button
->
 
 <style>
     ul#menu li {

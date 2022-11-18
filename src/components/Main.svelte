@@ -4,7 +4,8 @@
   import ImportModal from "./ImportModal/ImportModal.svelte"
   import { ImportModalType } from "./ImportModal/ImportModalType"
   import FromWeb from "./FromWeb/FromWeb.svelte"
-    import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte"
+  import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte"
+  import { testStoreValue } from "../stores"
 
   let isImportModalOpen: boolean = false
   let selectedImportType: ImportModalType = ImportModalType.NONE
@@ -43,6 +44,10 @@
     >
     <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
     <p>Selected import method is {selectedImportType}</p>
+    <p>Imported store value is = {$testStoreValue}</p>
+    <button on:click|preventDefault={() => ($testStoreValue += "!")}
+      >Change store value</button
+    >
   {:else if selectedImportType === ImportModalType.FROM_WEB}
     <FromWeb />
   {:else if selectedImportType === ImportModalType.UPLOAD}

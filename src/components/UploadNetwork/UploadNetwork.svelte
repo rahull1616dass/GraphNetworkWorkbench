@@ -19,10 +19,11 @@
     }
 
   }
-  let xmlOutput = new XMLParser().parse(files[0])
+  /*let xmlOutput = new XMLParser().parse(files[0])
   console.log(networkSample)
   const graphmlInstance = GraphFormatConverter.fromGraphml(xmlOutput));
   console.log(graphmlInstance)
+  */
 
 </script>
 
