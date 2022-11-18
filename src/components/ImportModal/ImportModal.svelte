@@ -2,7 +2,7 @@
     import { Modal } from "carbon-components-svelte"
     import { ImportModalType } from "./ImportModalType"
     export let open: boolean = false
-    export let clickedImport: ImportModalType
+    export let selectedImportType: ImportModalType
 </script>
 
 {#if open}
@@ -13,11 +13,11 @@
   secondaryButtonText="Upload"
   on:click:button--primary={() => {
       open = false
-     clickedImport = ImportModalType.FROM_WEB
+      selectedImportType = ImportModalType.FROM_WEB
   }}
   on:click:button--secondary={() => {
     open = false
-   clickedImport = ImportModalType.UPLOAD
+    selectedImportType = ImportModalType.UPLOAD
 }}
   on:open
   on:close

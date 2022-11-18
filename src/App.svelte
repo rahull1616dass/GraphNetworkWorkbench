@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { MenuItem } from "./lib/MenuItem";
-    import Main from "./lib/Main.svelte";
-    import Plot from "./lib/Plot/Plot.svelte";
+    import { MenuItem } from "./components/MenuItem";
+    import Main from "./components/Main.svelte";
+    import Plot from "./components/Plot/Plot.svelte";
+    import { test_store_value } from "./stores"
 
     let selectedMenuItem: MenuItem = MenuItem.HOME;
 </script>
@@ -17,6 +18,8 @@
    <Plot/>
 {/if}
 
+<p>Imported store value is = {$test_store_value}</p>
+<button on:click|preventDefault={() => $test_store_value += '!'}>Change store value</button>
 <style>
     ul#menu li {
         display: inline;
