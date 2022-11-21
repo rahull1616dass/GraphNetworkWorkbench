@@ -2,7 +2,8 @@
   import { GraphFormatConverter } from "graph-format-converter"
   import networkSample from "./networkSample"
   import { XMLParser } from "fast-xml-parser"
-  import parseNetwork  from "./networkParser"
+  import { parseNetwork } from "./networkParser"
+  import type ParseResult from "papaparse"
 
   /*
    TODO Make this work with the 'File type'. Right now, this throws an eror on the bind:file if declared as 
@@ -11,6 +12,7 @@
    So with the current implementation, we assume files FileList always contain one element and thus we can index the alone file via files[0].
   */
   let files: FileList
+  let networkElement
 
   $: if (files) {
     // Note that `files` is of type `FileList`, not an Array:
@@ -19,8 +21,16 @@
     for (const file of files) {
       console.log(`${file.name}: ${file.size} bytes`)
     }
+    console.log("parse")
+    // See https://stackoverflow.com/a/66487071/11330757
+    console.log("Parsing network...")
     parseNetwork(files[0])
+        .then((network: ParseResult) => {
+      console.log(`Parsed network: ${network as ParseResult}`)
+      networkElement = JSON.stringify(network.data[0])
+    })
   }
+
   /*let xmlOutput = new XMLParser().parse(files[0])
   console.log(networkSample)
   const graphmlInstance = GraphFormatConverter.fromGraphml(xmlOutput));
@@ -38,6 +48,7 @@
       <p>{file.name} ({file.size} bytes)</p>
     {/each}
   {/if}
+  <p>Network element at position 0 is {networkElement}</p>
 </main>
 
 <style>
