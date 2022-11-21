@@ -8,14 +8,16 @@
     const res = await fetch(Endpoints.NETZSCHLEUDER_NETWORK_NAMES, {
       mode: "no-cors"
     })
-      /*.then((resp) => {
-        if (!resp.ok) {
+    .then((resp) => {
+        /*if (!resp.ok) {
           throw `Server error: [${resp.status}] [${resp.statusText}] [${resp.url}]`
-        }
-        return resp.json()
-      })*/
+        }*/
+        console.log(resp)
+        return resp.text()
+      })
       .then((data) => {
-        console.log("Received data: " + JSON.stringify(data))
+        //console.log("Received data: " + JSON.stringify(data))
+        console.log(`${data} is the text`)
         //netzschleuderNetworkNames.set(data)
       })
       .catch((error) => {
