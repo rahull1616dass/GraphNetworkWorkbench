@@ -2,15 +2,14 @@
     import { MenuItem } from "./definitions/menuItem"
     import Main from "./components/pages/Main.svelte"
     import Plot from  "./components/pages/Plot.svelte"
-
-    let selectedMenuItem: MenuItem = MenuItem.HOME;
+    import { selectedMenuItem } from "./stores"
 </script>
 
 <ul id="menu">
     <li>
         <a
             href="/"
-            on:click|preventDefault={() => (selectedMenuItem = MenuItem.HOME)}
+            on:click|preventDefault={() => ($selectedMenuItem = MenuItem.HOME)}
             >Home</a
         >
     </li>
@@ -18,15 +17,15 @@
     <li>
         <a
             href="/"
-            on:click|preventDefault={() => (selectedMenuItem = MenuItem.PLOT)}
+            on:click|preventDefault={() => ($selectedMenuItem = MenuItem.PLOT)}
             >Plot</a
         >
     </li>
 </ul>
 
-{#if selectedMenuItem === MenuItem.HOME}
+{#if $selectedMenuItem === MenuItem.HOME}
     <Main />
-{:else if selectedMenuItem === MenuItem.PLOT}
+{:else if $selectedMenuItem === MenuItem.PLOT}
     <Plot />
 {/if}
 

@@ -3,15 +3,21 @@
   import { XMLParser } from "fast-xml-parser"
   import { parseNetwork } from "./networkParser"
   import type ParseResult from "papaparse"
-  import type { Link } from "../../../definitions/network"
+  import type { Link, Metadata } from "../../../definitions/network"
   import type { Node } from "../../../definitions/network"
   import { Network } from "../../../definitions/network"
-  import { ErrorData } from "../../../definitions/errorData"
-  import { networksList } from "../../../stores"
+  import { ModalData } from "../../../definitions/errorData"
+  import { MenuItem } from  "../../../definitions/menuItem"
+  import { selectedMenuItem, networksList } from "../../../stores"
   import { UploadedFileType } from "../../../definitions/uploadedFileType"
-  import { Button, Modal } from "carbon-components-svelte"
+  import {
+    Button,
+    Modal,
+    TextInput,
+    FileUploader,
+  } from "carbon-components-svelte"
 
-  let errorModalData: ErrorData = new ErrorData()
+  let modalData: ModalData = new ModalData()
   /*
    TODO Make this work with the 'File type'. Right now, this throws an eror on the bind:file if declared as 
    a File, so we use a FileList even though we will get only one file. We can be sure that we will only get one, since we do not declare
@@ -20,18 +26,20 @@
   */
   // Note that `files` is of type `FileList`, not an Array:
   // https://developer.mozilla.org/en-US/docs/Web/API/FileList
-  let nodeFiles: FileList
-  let edgeFiles: FileList
-  let nodes: Node[] = []
-  let edges: Link[] = []
 
-  $: if (edgeFiles) {
+  // TODO OnClose callback doesn't work for now
+  let nodeFiles: File[] = []
+  let edgeFiles: File[] = []
+  let newNetwork = new Network()
+  let isUploadComplete = false
+
+  $: if (edgeFiles.length > 0) {
     let edgeFile = edgeFiles[0]
     console.log(`Selected edge file: ${edgeFile.name}: ${edgeFile.size} bytes`)
     parseFile(edgeFile, UploadedFileType.EDGE_FILE)
   }
 
-  $: if (nodeFiles) {
+  $: if (nodeFiles.length > 0) {
     let nodeFile = nodeFiles[0]
     console.log(`Selected node file: ${nodeFile.name}: ${nodeFile.size} bytes`)
     parseFile(nodeFile, UploadedFileType.NODE_FILE)
@@ -43,39 +51,52 @@
       console.log(`Parsed network: ${parsedNetwork as ParseResult}`)
       switch (uploadedFileType) {
         case UploadedFileType.NODE_FILE:
-          nodes = <Node[]>JSON.parse(JSON.stringify(parsedNetwork.data))
+          newNetwork.nodes = <Node[]>(
+            JSON.parse(JSON.stringify(parsedNetwork.data))
+          )
           break
         case UploadedFileType.EDGE_FILE:
-          edges = <Link[]>JSON.parse(JSON.stringify(parsedNetwork.data))
+          newNetwork.links = <Link[]>(
+            JSON.parse(JSON.stringify(parsedNetwork.data))
+          )
           break
       }
-      let networkObject: Network = new Network(
-        new Array(),
-        <Link[]>JSON.parse(JSON.stringify(parsedNetwork.data))
-      )
-      networksList.update((networksList) => {
-        return [...networksList, networkObject]
-      })
-      console.log("x")
     })
   }
 
   function onSaveButtonClicked() {
-    console.log(`Save button clicked with nodes: ${nodes} and edges: ${edges}`)
-    if (nodes.length == 0) {
-      errorModalData.messageBody = "Please upload a valid nodes file."
-      errorModalData.isOpen = true
+    console.log(
+      `Save button clicked with nodes: ${newNetwork.nodes} and edges: ${newNetwork.links}`
+    )
+    if (newNetwork.nodes.length == 0) {
+      modalData.messageBody = "Please upload a valid nodes file."
+      modalData.isOpen = true
       return
     }
-    if (edges.length == 0) {
-      errorModalData.messageBody = "Please upload a valid edges file."
-      errorModalData.isOpen = true
+    if (newNetwork.links.length == 0) {
+      modalData.messageBody = "Please upload a valid edges file."
+      modalData.isOpen = true
       return
     }
-    let networkObject: Network = new Network(nodes, edges)
+    networksList.update((networksList) => {
+      return [...networksList, newNetwork]
+    })
+
+    //TODO Newline does not render in the modal currently.
+    modalData.messageBody = `Network successfully uploaded.\nName: ${newNetwork.metadata.name}
+                            \nDescription: ${newNetwork.metadata.description}
+                            \nNodes: ${newNetwork.nodes.length} \nEdges: ${newNetwork.links.length}`
+    modalData.isOpen = true
+    isUploadComplete = true
     console.log("x")
   }
 
+
+  function onModalClose(){
+    if(isUploadComplete){
+        $selectedMenuItem = MenuItem.HOME
+    }
+  }
   /*let xmlOutput = new XMLParser().parse(files[0])
   console.log(networkSample)
   const graphmlInstance = GraphFormatConverter.fromGraphml(xmlOutput));
@@ -85,40 +106,66 @@
 
 <main>
   <div class="root">
+    <div class="metadata">
+      <label for="network-name">Network Name</label>
+      <TextInput
+        bind:value={newNetwork.metadata.name}
+        type="text"
+        id="network-name"
+        labelText="Network Name"
+      />
+
+      <TextInput
+        bind:value={newNetwork.metadata.description}
+        type="text"
+        id="network-description"
+        labelText="Network Desciption"
+      />
+    </div>
+
     <div class="nodes_file">
-      <label for="nodes_file">Upload nodes file</label>
-      <input bind:files={nodeFiles} id="nodes_file" type="file" />
-      {#if nodeFiles}
+      <FileUploader
+        labelTitle="Upload nodes file"
+        buttonLabel="Add file"
+        status="complete"
+        bind:files={nodeFiles}
+      />
+      <!--
+      {#if nodeFiles.length > 0}
         <h2>Selected node file:</h2>
         <p>{nodeFiles[0].name} ({nodeFiles[0].size} bytes)</p>
       {/if}
+      -->
     </div>
 
     <div class="edges_file">
-      <label for="edges_file">Upload edges file</label>
-      <input bind:files={edgeFiles} id="edges_file" type="file" />
-      {#if nodeFiles}
+      <FileUploader
+        labelTitle="Upload edges file"
+        buttonLabel="Add file"
+        status="complete"
+        bind:files={edgeFiles}
+      />
+      <!--
+      {#if edgeFiles.length > 0}
         <h2>Selected edge file:</h2>
-        <p>{nodeFiles[0].name} ({nodeFiles[0].size} bytes)</p>
+        <p>{edgeFiles[0].name} ({edgeFiles[0].size} bytes)</p>
       {/if}
+      -->
     </div>
-
-    {#if $networksList.length > 0}
-      <p>Network element at position 0 is {$networksList[0].links}</p>
-    {/if}
 
     <div class="save_button">
       <Button on:click={onSaveButtonClicked}>Save Network</Button>
     </div>
-    {#if errorModalData.isOpen}
+
+    {#if modalData.isOpen}
       <Modal
         passiveModal
-        bind:open={errorModalData.isOpen}
-        modalHeading={errorModalData.messageHeader}
+        bind:open={modalData.isOpen}
+        modalHeading={modalData.messageHeader}
         on:open
-        on:close
+        on:close={onModalClose}
       >
-        {errorModalData.messageBody}
+        {modalData.messageBody}
       </Modal>
     {/if}
   </div>
@@ -131,6 +178,11 @@
     align-items: center;
     height: 100vh;
   }
+
+  .metadata {
+    margin: 1rem;
+  }
+
   .save_button {
     margin-top: 1rem;
   }

@@ -1,10 +1,18 @@
 export class Network{
     constructor(
-        readonly nodes: Node[],
-        readonly links: Link[]
+        public metadata: Metadata = new Metadata(),
+        public nodes: Node[] = [],
+        public links: Link[] = []
     ){}
 }
 
+
+export class Metadata{
+    constructor(
+        public name: string,
+        public description: string
+    ){}
+}
 export class Link{
     constructor(
         readonly source: string,
