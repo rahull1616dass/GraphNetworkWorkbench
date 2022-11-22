@@ -23,7 +23,10 @@ export class Link{
 
 export class Node{
     constructor(
+        readonly name: string,
         readonly id: string,
-        readonly group: number
+        readonly group: number,
+        readonly index: number,
+        readonly pos: Array<string>
     ){}
 }
