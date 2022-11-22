@@ -1,11 +1,9 @@
 <script lang="ts">
-  import svelteLogo from "../assets/svelte.svg"
-  import Counter from "./Counter.svelte"
-  import ImportModal from "./ImportModal/ImportModal.svelte"
-  import { ImportModalType } from "../definitions/ImportModalType"
-  import FromWeb from "./FromWeb/FromWeb.svelte"
+  import ImportModal from "../common/ImportModal.svelte"
+  import { ImportModalType } from "../../definitions/importModalType"
+  import FromWeb from "./FromWeb.svelte"
   import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte"
-  import { testStoreValue } from "../stores"
+  import { testStoreValue } from "../../stores"
 
   let isImportModalOpen: boolean = false
   let selectedImportType: ImportModalType = ImportModalType.NONE

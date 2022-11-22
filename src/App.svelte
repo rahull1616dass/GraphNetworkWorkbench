@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { MenuItem } from "./definitions/menuItem";
-    import Main from "./components/Main.svelte";
-    import Plot from "./components/Plot/Plot.svelte";
+    import { MenuItem } from "./definitions/menuItem"
+    import Main from "./components/pages/Main.svelte"
+    import Plot from  "./components/pages/Plot.svelte"
 
     let selectedMenuItem: MenuItem = MenuItem.HOME;
 </script>
