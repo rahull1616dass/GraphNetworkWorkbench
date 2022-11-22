@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Endpoints } from "../../constants"
+  import { Endpoints } from "../../definitions/constants"
   import { onMount } from "svelte"
   import { netzschleuderNetworkNames } from "../../stores"
   import { SideNavItems } from "carbon-components-svelte"

@@ -4,7 +4,9 @@
   import { XMLParser } from "fast-xml-parser"
   import { parseNetwork } from "./networkParser"
   import type ParseResult from "papaparse"
-
+  import type { Link } from "../../definitions/network"
+  import { Network } from "../../definitions/network"
+  import { networksList } from "../../stores"
   /*
    TODO Make this work with the 'File type'. Right now, this throws an eror on the bind:file if declared as 
    a File, so we use a FileList even though we will get only one file. We can be sure that we will only get one, since we do not declare
@@ -12,7 +14,12 @@
    So with the current implementation, we assume files FileList always contain one element and thus we can index the alone file via files[0].
   */
   let files: FileList
+  let edgeFiles: FileList
   let networkElement
+
+  $: if (edgeFiles) {
+    console.log(edgeFiles)
+  }
 
   $: if (files) {
     // Note that `files` is of type `FileList`, not an Array:
@@ -24,10 +31,16 @@
     console.log("parse")
     // See https://stackoverflow.com/a/66487071/11330757
     console.log("Parsing network...")
-    parseNetwork(files[0])
-        .then((network: ParseResult) => {
-      console.log(`Parsed network: ${network as ParseResult}`)
-      networkElement = JSON.stringify(network.data[0])
+    parseNetwork(files[0]).then((parsedNetwork: ParseResult) => {
+      console.log(`Parsed network: ${parsedNetwork as ParseResult}`)
+      let networkObject: Network = new Network(
+        new Array(),
+        <Link[]>JSON.parse(JSON.stringify(parsedNetwork.data))
+      )
+      networksList.update((networksList) => {
+        return [...networksList, networkObject]
+      })
+      console.log("x")
     })
   }
 
@@ -42,13 +55,18 @@
   <label for="many">Upload multiple files of any type:</label>
   <input bind:files id="many" type="file" />
 
+  <label for="edges">Upload multiple files of any type:</label>
+
   {#if files}
     <h2>Selected files:</h2>
     {#each Array.from(files) as file}
       <p>{file.name} ({file.size} bytes)</p>
     {/each}
   {/if}
-  <p>Network element at position 0 is {networkElement}</p>
+
+  {#if $networksList.length > 0}
+    <p>Network element at position 0 is {$networksList[0].links}</p>
+  {/if}
 </main>
 
 <style>

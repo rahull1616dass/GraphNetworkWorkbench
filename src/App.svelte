@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { MenuItem } from "./components/menuItem";
+    import { MenuItem } from "./definitions/menuItem";
     import Main from "./components/Main.svelte";
     import Plot from "./components/Plot/Plot.svelte";
 

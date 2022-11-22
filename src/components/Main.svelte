@@ -2,7 +2,7 @@
   import svelteLogo from "../assets/svelte.svg"
   import Counter from "./Counter.svelte"
   import ImportModal from "./ImportModal/ImportModal.svelte"
-  import { ImportModalType } from "./ImportModal/ImportModalType"
+  import { ImportModalType } from "../definitions/ImportModalType"
   import FromWeb from "./FromWeb/FromWeb.svelte"
   import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte"
   import { testStoreValue } from "../stores"
