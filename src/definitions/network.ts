@@ -9,8 +9,8 @@ export class Network{
 
 export class Metadata{
     constructor(
-        public name: string,
-        public description: string
+        public name: string = undefined,
+        public description: string = undefined
     ){}
 }
 export class Link{
@@ -23,10 +23,10 @@ export class Link{
 
 export class Node{
     constructor(
-        readonly name: string,
-        readonly id: string,
-        readonly group: number,
-        readonly index: number,
-        readonly pos: Array<string>
+        readonly name: string = undefined,
+        readonly id: string = undefined,
+        readonly group: number = undefined,
+        readonly index: number = undefined,
+        readonly pos: string[] = undefined
     ){}
 }
