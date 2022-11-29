@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte"
   import MiserablesData from "../../data/VisSpec"
   import SampleNetwork from "../../data/SampleNetwork"
   import { default as vegaEmbed } from "vega-embed"
@@ -6,12 +7,46 @@
   import { ModalData } from "../../definitions/errorData"
   import NodeDetailModal from "./NodeDetailModal.svelte"
   import type { Node } from "../../definitions/network"
-  import NetworkListItem  from "../common/NetworkListItem.svelte"
+  import NetworkListItem from "../common/NetworkListItem.svelte"
+
+  function loadNetwork() {
+    console.log("changing to ", selectedNetworkIndex)
+    SampleNetwork.data[0].values = $networksList[selectedNetworkIndex].nodes
+    SampleNetwork.data[1].values = $networksList[selectedNetworkIndex].links
+    createVegaEmbed(SampleNetwork)
+  }
+
+  function createVegaEmbed(embeddedNetwork: any) {
+    vegaEmbed("#viz", embeddedNetwork, { actions: false })
+      .then((result) => {
+        result.view.addEventListener("click", function (event, item) {
+          console.log("CLICK", item)
+          modalProps = item.datum
+        })
+      })
+      .catch((error) => console.log(error))
+  }
+
+
+  // Run an onMount function to initialize the plot
+  onMount(() => {
+    // Anytime the networksList store value is updated, update the network
+    if ($networksList && $networksList.length > 0) {
+      loadNetwork()
+    } else {
+      // If the networksList store is empty, load the default Miserables network
+      createVegaEmbed(MiserablesData)
+    }
+  })
+
   let modalData: ModalData = new ModalData()
+
+  let selectedNetworkIndex: number = 0
+  // Anytime the selected network index from the menu changes, we need to update the vegaEmbed
+  $: selectedNetworkIndex, loadNetwork()
 
   // Props to pass to the modal anytime user clicks on a node from the vegaEmbed
   let modalProps: any = undefined
-
   // Anytime the user clicks on a node, modalProps will be updated. This will trigger the modal to open
   $: modalProps, (modalData.isOpen = true)
 
@@ -26,37 +61,6 @@
       })
     }
 
-  // Anytime the networksList is updated, update the network
-  if ($networksList && $networksList.length > 0) {
-    /*
-    Remove the default data from the Miserables Network that is stored in the url key
-    data[0] = nodes, data[1] = links
-    */
-    SampleNetwork.data[0].values = $networksList[0].nodes
-    SampleNetwork.data[1].values = $networksList[0].links
-    vegaEmbed("#viz", SampleNetwork, { actions: false })
-      .then((result) => {
-        result.view.addEventListener("click", function (event, item) {
-          console.log("CLICK", item)
-          modalProps = item.datum
-        })
-      })
-      .catch((error) => console.log(error))
-  } else {
-    // Refer https://www.koderhq.com/tutorial/svelte/json-storage/
-    /*
-    delete MiserablesData.data[0].url
-    delete MiserablesData.data[1].url
-    MiserablesData.data[0].values = $networksList[0].nodes
-    MiserablesData.data[1].values = $networksList[0].links
-     */
-
-    vegaEmbed("#viz", MiserablesData, { actions: false }).catch((error) =>
-      console.log(error)
-    )
-  }
-
-  console.log("x")
 </script>
 
 <main>
@@ -79,15 +83,23 @@
     />
   {/if}
 
- <!-- Define a right menu where each item is a NetworkListItem-->
+  <!-- Define a right menu where each item is a NetworkListItem-->
   <div class="networks_list">
     <div class="networks_list_header">
       <p>Networks</p>
     </div>
     <div class="networks_list_items">
-      {#each $networksList as network}
-        <NetworkListItem network={network} />
+      {#each $networksList as network, index}
+        <NetworkListItem
+          {network}
+          {index}
+          selected={selectedNetworkIndex == index}
+          on:selectItem={(event) => {
+            selectedNetworkIndex = event.detail.selectedIndex
+          }}
+        />
       {/each}
+    </div>
   </div>
 </main>
 
