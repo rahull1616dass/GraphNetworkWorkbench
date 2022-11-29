@@ -31,7 +31,8 @@
 
 
 <style>
-    ul#menu li {
-        display: inline;
+    ul#menu{
+        width: 100%;
+        display: inline-block;
     }
 </style>

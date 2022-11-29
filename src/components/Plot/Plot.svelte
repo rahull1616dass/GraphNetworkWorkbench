@@ -59,26 +59,7 @@
 </script>
 
 <main>
-  {#if $networksList.length == 0}
-    <div class="no_networks">
-      <h1>
-        No networks to display. Displaying the default Miserables network 🥺
-      </h1>
-    </div>
-  {:else}
-    <div class="networks" />
-  {/if}
-
-  <div id="viz" />
-  {#if modalData.isOpen && modalProps != undefined}
-    <NodeDetailModal
-      bind:open={modalData.isOpen}
-      bind:node={updatedNode}
-      bind:modalProps
-    />
-  {/if}
-
-  <!-- Define a right menu where each item is a NetworkListItem-->
+  <!-- Define a left menu where each item is a NetworkListItem-->
   <div class="networks_list">
     <div class="networks_list_header">
       <p>Networks</p>
@@ -96,9 +77,38 @@
       {/each}
     </div>
   </div>
+  <div class="content">
+    {#if $networksList.length == 0}
+      <div class="no_networks">
+        <h1>
+          No networks to display. Displaying the default Miserables network 🥺
+        </h1>
+      </div>
+    {:else}
+      <div class="networks" />
+    {/if}
+
+    <div id="viz" />
+    {#if modalData.isOpen && modalProps != undefined}
+      <NodeDetailModal
+        bind:open={modalData.isOpen}
+        bind:node={updatedNode}
+        bind:modalProps
+      />
+    {/if}
+  </div>
 </main>
 
 <style>
+  .content{
+    margin-left: 20%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    right: 0;
+    width: 80%;
+    height: 100%;
+  }
   .networks_list_header {
     display: flex;
     justify-content: center;
@@ -112,7 +122,7 @@
     overflow-y: scroll;
     overflow-x: hidden;
     position: absolute;
-    right: 0;
+    left: 0;
     top: 0;
     bottom: 0;
     width: 20%;
