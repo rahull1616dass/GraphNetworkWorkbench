@@ -7,8 +7,8 @@
   import type { Node } from "../../../definitions/network"
   import { Network } from "../../../definitions/network"
   import { ModalData } from "../../../definitions/errorData"
-  import { MenuItem } from  "../../../definitions/menuItem"
-  import { selectedMenuItem, networksList } from "../../../stores"
+  import { MenuItem } from "../../../definitions/menuItem"
+  import { selectedMenuItem, networksList, paletteColors } from "../../../stores"
   import { UploadedFileType } from "../../../definitions/uploadedFileType"
   import {
     Button,
@@ -16,6 +16,8 @@
     TextInput,
     FileUploader,
   } from "carbon-components-svelte"
+  import { Palette } from "@untemps/svelte-palette"
+
 
   let modalData: ModalData = new ModalData()
   /*
@@ -91,10 +93,9 @@
     console.log("x")
   }
 
-
-  function onModalClose(){
-    if(isUploadComplete){
-        $selectedMenuItem = MenuItem.HOME
+  function onModalClose() {
+    if (isUploadComplete) {
+      $selectedMenuItem = MenuItem.HOME
     }
   }
   /*let xmlOutput = new XMLParser().parse(files[0])
@@ -107,67 +108,77 @@
 <main>
   <div class="root">
     <div class="metadata">
-      <label for="network-name">Network Name</label>
-      <TextInput
-        bind:value={newNetwork.metadata.name}
-        type="text"
-        id="network-name"
-        labelText="Network Name"
-      />
+      <div class="metadata_title">
+        <TextInput
+          bind:value={newNetwork.metadata.name}
+          type="text"
+          id="network-name"
+          labelText="Network Name"
+        />
+      </div>
+      <div class="metadata_description">
+        <TextInput
+          bind:value={newNetwork.metadata.description}
+          type="text"
+          id="network-description"
+          labelText="Network Description"
+        />
+        <div class="palette">
+          <div class="labels">Network Color</div>
+          <Palette
+            colors={$paletteColors}
+            on:select={({ detail: { color } }) =>
+              (newNetwork.metadata.color = color)}
+          />
 
-      <TextInput
-        bind:value={newNetwork.metadata.description}
-        type="text"
-        id="network-description"
-        labelText="Network Desciption"
-      />
-    </div>
-
-    <div class="nodes_file">
-      <FileUploader
-        labelTitle="Upload nodes file"
-        buttonLabel="Add file"
-        status="complete"
-        bind:files={nodeFiles}
-      />
-      <!--
+          <div class="nodes_file">
+            <FileUploader
+              labelTitle="Upload nodes file"
+              buttonLabel="Add file"
+              status="complete"
+              bind:files={nodeFiles}
+            />
+            <!--
       {#if nodeFiles.length > 0}
         <h2>Selected node file:</h2>
         <p>{nodeFiles[0].name} ({nodeFiles[0].size} bytes)</p>
       {/if}
       -->
-    </div>
+          </div>
 
-    <div class="edges_file">
-      <FileUploader
-        labelTitle="Upload edges file"
-        buttonLabel="Add file"
-        status="complete"
-        bind:files={edgeFiles}
-      />
-      <!--
+          <div class="edges_file">
+            <FileUploader
+              labelTitle="Upload edges file"
+              buttonLabel="Add file"
+              status="complete"
+              bind:files={edgeFiles}
+            />
+            <!--
       {#if edgeFiles.length > 0}
         <h2>Selected edge file:</h2>
         <p>{edgeFiles[0].name} ({edgeFiles[0].size} bytes)</p>
       {/if}
       -->
-    </div>
+          </div>
 
-    <div class="save_button">
-      <Button on:click={onSaveButtonClicked}>Save Network</Button>
-    </div>
+          <div class="save_button">
+            <Button on:click={onSaveButtonClicked}>Save Network</Button>
+          </div>
 
-    {#if modalData.isOpen}
-      <Modal
-        passiveModal
-        bind:open={modalData.isOpen}
-        modalHeading={modalData.messageHeader}
-        on:open
-        on:close={onModalClose}
-      >
-        {modalData.messageBody}
-      </Modal>
-    {/if}
+          {#if modalData.isOpen}
+            <Modal
+              passiveModal
+              bind:open={modalData.isOpen}
+              modalHeading={modalData.messageHeader}
+              on:open
+              on:close={onModalClose}
+            >
+              {modalData.messageBody}
+            </Modal>
+          {/if}
+        </div>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -181,6 +192,14 @@
 
   .metadata {
     margin: 1rem;
+  }
+
+  .palette {
+    margin-top: 1rem;
+  }
+
+  .labels {
+    text-align: left;
   }
 
   .save_button {

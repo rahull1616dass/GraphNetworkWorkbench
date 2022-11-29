@@ -108,14 +108,14 @@
     padding: 0.5rem;
   }
   .networks_list {
-    margin-top: 5%;
+    margin-top: 5.6%;
     overflow-y: scroll;
     overflow-x: hidden;
     position: absolute;
     right: 0;
     top: 0;
     bottom: 0;
-    width: 150px;
+    width: 20%;
     background-color: #f5f5f5;
   }
 </style>

@@ -10,7 +10,8 @@ export class Network{
 export class Metadata{
     constructor(
         public name: string = undefined,
-        public description: string = undefined
+        public description: string = undefined,
+        public color: string = undefined
     ){}
 }
 export class Link{

@@ -16,20 +16,26 @@
   class="root"
   class:selected
 >
-  <div class="network_name">
-    {network.metadata.name}
+  <div class="network_color" style="--bg-color: {network.metadata.color}">
+
   </div>
-  <div class="network_description">
-    {network.metadata.description}
-  </div>
-  <div class="network_details">
-    <img src={networkIcon} class="network_icon" alt="Network Icon" />
-    {network.nodes.length} nodes, {network.links.length} edges
+  <div class="content">
+    <div class="network_name">
+      {network.metadata.name}
+    </div>
+    <div class="network_description">
+      {network.metadata.description}
+    </div>
+    <div class="network_details">
+      <img src={networkIcon} class="network_icon" alt="Network Icon" />
+      {network.nodes.length} nodes, {network.links.length} edges
+    </div>
   </div>
 </div>
 
 <style lang="scss">
   .root {
+    display: flex;
     background-color: #f5f5f5;
     border-radius: 5px;
     padding: 10px;
@@ -37,10 +43,19 @@
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
     margin: 10px;
-    text-align: left;
     &.selected {
       background-color: #e5e5e5;
     }
+  }
+  
+  .content{
+    text-align: left;
+  }
+  .network_color {
+    width: 10px;
+    height: 50px;
+    background-color: var(--bg-color);
+    margin-right: 10px;
   }
   .network_details {
     font-size: 0.8rem;
