@@ -5,9 +5,11 @@
   import { default as vegaEmbed } from "vega-embed"
   import { networksList } from "../../../stores"
   import { ModalData } from "../../../definitions/errorData"
+  import { HoverData } from "../../../definitions/hoverData"
   import NodeDetailModal from "./NodeDetailModal.svelte"
   import type { Node } from "../../../definitions/network"
   import NetworkListItem from "../../common/NetworkListItem.svelte"
+  import Hover from "./Hover.svelte"
 
   function loadNetwork() {
     if ($networksList && $networksList.length > 0) {
@@ -26,6 +28,10 @@
           modalProps = item.datum
           modalData.isOpen = true
         })
+        result.view.addEventListener("mouseover", function (event, item) {
+          console.log("MOUSEOVER", item)
+          hoverData = new HoverData(item.datum.name, item.x, item.y)
+        })
       })
       .catch((error) => console.log(error))
   }
@@ -37,6 +43,7 @@
   })
 
   let modalData: ModalData = new ModalData()
+  let hoverData: HoverData = undefined
 
   let selectedNetworkIndex: number = 0
   // Anytime the selected network index from the menu changes, we need to update the vegaEmbed
@@ -98,6 +105,7 @@
         />
       {/if}
   </div>
+  <Hover {hoverData} />
 </main>
 
 <style>
