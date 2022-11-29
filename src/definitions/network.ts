@@ -24,7 +24,7 @@ export class Link{
 
 export class Node{
     constructor(
-        readonly name: string = undefined,
+        public name: string = undefined,
         readonly id: string = undefined,
         readonly group: number = undefined,
         readonly index: number = undefined,

@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import MiserablesData from "../../data/VisSpec"
-  import SampleNetwork from "../../data/SampleNetwork"
+  import MiserablesData from "../../../data/VisSpec"
+  import SampleNetwork from "../../../data/SampleNetwork"
   import { default as vegaEmbed } from "vega-embed"
-  import { networksList } from "../../stores"
-  import { ModalData } from "../../definitions/errorData"
+  import { networksList } from "../../../stores"
+  import { ModalData } from "../../../definitions/errorData"
   import NodeDetailModal from "./NodeDetailModal.svelte"
-  import type { Node } from "../../definitions/network"
-  import NetworkListItem from "../common/NetworkListItem.svelte"
+  import type { Node } from "../../../definitions/network"
+  import NetworkListItem from "../../common/NetworkListItem.svelte"
 
   function loadNetwork() {
     if ($networksList && $networksList.length > 0) {
@@ -47,15 +47,15 @@
   $: modalProps, (modalData.isOpen = true)
 
   // Anytime the user updates a node in the modal, update the network
-  let updatedNode: Node = undefined
-  $: updatedNode,
-    () => {
-      console.log("Updated node: ", updatedNode)
-      networksList.update((networks) => {
-        networks[0].nodes[updatedNode.index] = updatedNode
-        return networks
-      })
-    }
+  function updateNode(event: CustomEvent) {
+    console.log("updating node", event.detail.newNode)
+    let newNode: Node = event.detail.newNode
+    networksList.update((networksList) => {
+      networksList[selectedNetworkIndex].nodes[newNode.index] = newNode
+      return networksList
+    })
+    loadNetwork()
+  }
 </script>
 
 <main>
@@ -89,13 +89,13 @@
     {/if}
 
     <div id="viz" />
-    {#if modalData.isOpen && modalProps != undefined}
-      <NodeDetailModal
-        bind:open={modalData.isOpen}
-        bind:node={updatedNode}
-        bind:modalProps
-      />
-    {/if}
+      {#if modalData.isOpen}
+        <NodeDetailModal
+          {modalProps}
+          on:closeModal={() => (modalData.isOpen = false)}
+          on:updateNode={updateNode}
+        />
+      {/if}
   </div>
 </main>
 
