@@ -24,6 +24,7 @@
         result.view.addEventListener("click", function (event, item) {
           console.log("CLICK", item)
           modalProps = item.datum
+          modalData.isOpen = true
         })
       })
       .catch((error) => console.log(error))
@@ -43,8 +44,7 @@
 
   // Props to pass to the modal anytime user clicks on a node from the vegaEmbed
   let modalProps: any = undefined
-  // Anytime the user clicks on a node, modalProps will be updated. This will trigger the modal to open
-  $: modalProps, (modalData.isOpen = true)
+
 
   // Anytime the user updates a node in the modal, update the network
   function updateNode(event: CustomEvent) {
@@ -91,6 +91,7 @@
     <div id="viz" />
       {#if modalData.isOpen}
         <NodeDetailModal
+          bind:open={modalData.isOpen}
           {modalProps}
           on:closeModal={() => (modalData.isOpen = false)}
           on:updateNode={updateNode}

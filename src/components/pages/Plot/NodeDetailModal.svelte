@@ -26,7 +26,22 @@
 
 <main>
   {#if node != undefined}
-    <p>{node.name}</p>
+    <Modal
+      modalHeading="Node Details"
+      bind:open
+      preventCloseOnClickOutside
+      primaryButtonText="Update Node"
+      secondaryButtonText="Cancel"
+      on:click:button--primary={() => {
+        console.log("textInputs", textInputs)
+        node.name = textInputs.name
+        dispatch("updateNode", { newNode: node })
+        open = false
+      }}
+      on:click:button--secondary={() => {
+        open = false
+      }}
+    >
       <Form>
         {#each Object.keys(node) as key}
           <TextInput
@@ -41,11 +56,7 @@
           />
         {/each}
       </Form>
-      <button on:click={() => {
-        console.log("textInputs", textInputs)
-        node.name = textInputs.name
-        dispatch("updateNode", { newNode: node })}
-        }>Update Node</button>
+    </Modal>
   {/if}
 </main>
 
