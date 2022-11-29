@@ -6,7 +6,7 @@
   import { ModalData } from "../../definitions/errorData"
   import NodeDetailModal from "./NodeDetailModal.svelte"
   import type { Node } from "../../definitions/network"
-
+  import NetworkListItem  from "../common/NetworkListItem.svelte"
   let modalData: ModalData = new ModalData()
 
   // Props to pass to the modal anytime user clicks on a node from the vegaEmbed
@@ -78,7 +78,37 @@
       bind:modalProps
     />
   {/if}
+
+ <!-- Define a right menu where each item is a NetworkListItem-->
+  <div class="networks_list">
+    <div class="networks_list_header">
+      <p>Networks</p>
+    </div>
+    <div class="networks_list_items">
+      {#each $networksList as network}
+        <NetworkListItem network={network} />
+      {/each}
+  </div>
 </main>
 
 <style>
+  .networks_list_header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.5rem;
+  }
+  .networks_list {
+    margin-top: 5%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 150px;
+    background-color: #f5f5f5;
+  }
 </style>
