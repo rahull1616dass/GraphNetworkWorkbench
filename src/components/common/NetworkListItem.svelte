@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte"
   import type { Network } from "../../definitions/network"
-  import networkIcon from "../../../public/network.svg"
+  import networkIcon from "../../assets/network.svg"
 
   const dispatch = createEventDispatcher()
 
