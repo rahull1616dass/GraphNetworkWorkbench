@@ -10,10 +10,12 @@
   import NetworkListItem from "../common/NetworkListItem.svelte"
 
   function loadNetwork() {
-    console.log("changing to ", selectedNetworkIndex)
-    SampleNetwork.data[0].values = $networksList[selectedNetworkIndex].nodes
-    SampleNetwork.data[1].values = $networksList[selectedNetworkIndex].links
-    createVegaEmbed(SampleNetwork)
+    if ($networksList && $networksList.length > 0) {
+      console.log("changing to ", selectedNetworkIndex)
+      SampleNetwork.data[0].values = $networksList[selectedNetworkIndex].nodes
+      SampleNetwork.data[1].values = $networksList[selectedNetworkIndex].links
+      createVegaEmbed(SampleNetwork)
+    } else createVegaEmbed(MiserablesData)
   }
 
   function createVegaEmbed(embeddedNetwork: any) {
@@ -27,16 +29,10 @@
       .catch((error) => console.log(error))
   }
 
-
   // Run an onMount function to initialize the plot
   onMount(() => {
     // Anytime the networksList store value is updated, update the network
-    if ($networksList && $networksList.length > 0) {
-      loadNetwork()
-    } else {
-      // If the networksList store is empty, load the default Miserables network
-      createVegaEmbed(MiserablesData)
-    }
+    loadNetwork()
   })
 
   let modalData: ModalData = new ModalData()
@@ -60,7 +56,6 @@
         return networks
       })
     }
-
 </script>
 
 <main>
