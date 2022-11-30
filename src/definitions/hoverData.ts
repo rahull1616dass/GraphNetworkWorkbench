@@ -1,6 +1,7 @@
+import type { Node } from "./network";
 export class HoverData{
     constructor(
-        readonly nodeName: string = undefined,
+        readonly node: Node,
         readonly x: number = undefined,
         readonly y: number = undefined,
     ){}

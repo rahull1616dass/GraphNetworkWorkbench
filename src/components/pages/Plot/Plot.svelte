@@ -7,7 +7,7 @@
   import { ModalData } from "../../../definitions/errorData"
   import { HoverData } from "../../../definitions/hoverData"
   import NodeDetailModal from "./NodeDetailModal.svelte"
-  import type { Node } from "../../../definitions/network"
+  import { Node } from "../../../definitions/network"
   import NetworkListItem from "../../common/NetworkListItem.svelte"
   import Hover from "./Hover.svelte"
 
@@ -30,7 +30,17 @@
         })
         result.view.addEventListener("mouseover", function (event, item) {
           console.log("MOUSEOVER", item)
-          hoverData = new HoverData(item.datum.name, item.x, item.y)
+          hoverData = new HoverData(
+            new Node(
+              item.datum.name,
+              undefined,
+              item.datum.group,
+              item.datum.index,
+              undefined
+            ),
+            event.clientX,
+            event.clientY
+          )
         })
       })
       .catch((error) => console.log(error))
@@ -51,7 +61,6 @@
 
   // Props to pass to the modal anytime user clicks on a node from the vegaEmbed
   let modalProps: any = undefined
-
 
   // Anytime the user updates a node in the modal, update the network
   function updateNode(event: CustomEvent) {
@@ -96,20 +105,20 @@
     {/if}
 
     <div id="viz" />
-      {#if modalData.isOpen}
-        <NodeDetailModal
-          bind:open={modalData.isOpen}
-          {modalProps}
-          on:closeModal={() => (modalData.isOpen = false)}
-          on:updateNode={updateNode}
-        />
-      {/if}
+    {#if modalData.isOpen}
+      <NodeDetailModal
+        bind:open={modalData.isOpen}
+        {modalProps}
+        on:closeModal={() => (modalData.isOpen = false)}
+        on:updateNode={updateNode}
+      />
+    {/if}
   </div>
   <Hover {hoverData} />
 </main>
 
 <style>
-  .content{
+  .content {
     margin-left: 20%;
     display: flex;
     flex-direction: column;

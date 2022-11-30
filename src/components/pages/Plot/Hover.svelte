@@ -6,8 +6,9 @@
 
 <main>
     {#if hoverData != undefined}
-        <div class="root" style="--x: {hoverData.x}px; --y: {hoverData.y*2}px;">
-            {hoverData.nodeName} {hoverData.x} {hoverData.y}
+        <div class="root" style="--x: {hoverData.x}px; --y: {hoverData.y}px;">
+            {hoverData.node.name}<br>
+            Group: {hoverData.node.group}
         </div>
     {/if}
 

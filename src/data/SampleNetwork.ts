@@ -78,7 +78,7 @@ export default {
             "name": "color",
             "type": "ordinal",
             "domain": { "data": "node-data", "field": "group" },
-            "range": { "scheme": "category20c" }
+            "range": { "scheme": "category10" }
         }
     ],
     "marks": [

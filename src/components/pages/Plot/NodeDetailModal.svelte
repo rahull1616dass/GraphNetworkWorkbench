@@ -29,6 +29,7 @@
     <Modal
       modalHeading="Node Details"
       bind:open
+      size="sm"
       preventCloseOnClickOutside
       primaryButtonText="Update Node"
       secondaryButtonText="Cancel"
