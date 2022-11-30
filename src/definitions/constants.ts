@@ -1,3 +1,5 @@
 export const enum Endpoints {
-    NETZSCHLEUDER_NETWORK_NAMES = "https://networks.skewed.de/api/nets"
+    NETZSCHELEUDER = "https://networks.skewed.de/api/",
+    NETZSCLEUDER_NET = "net/",
+    NETZSCHELEUDER_NETS = "nets"
 }
