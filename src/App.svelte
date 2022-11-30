@@ -23,14 +23,20 @@
     </li>
 </ul>
 
+<div class="root">
+
 {#if $selectedMenuItem === MenuItem.HOME}
     <Main />
 {:else if $selectedMenuItem === MenuItem.PLOT}
     <Plot />
 {/if}
-
+</div>
 
 <style>
+    .root {
+        overflow: auto;
+        background-color: whitesmoke;
+    }
     ul#menu{
         width: 100%;
         display: inline-block;
