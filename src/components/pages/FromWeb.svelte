@@ -6,6 +6,10 @@
   import FetchableAccordionItem from "../common/FetchableAccordionItem.svelte"
   import { Accordion } from "carbon-components-svelte"
   import request from "../../request"
+  import decompressResponse from 'decompress-response'
+  import { parseReadableStream }  from "./UploadNetwork/networkParser"
+  import { parse } from "vega"
+
 
   onMount(async () => {
     console.log(`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCHELEUDER_NETS}`)
@@ -15,8 +19,18 @@
     )
   })
 
-
-
+  async function onFetchNetwork(event) {
+    const response = await request(
+      `https://networks.skewed.de/net/${event.detail.networkName}/files/${event.detail.networkName}.csv.zip`,
+      undefined,
+      false
+    )
+    // Unzip the response file
+    let file = decompressResponse(response)
+    parseReadableStream(file.body, undefined)
+    // https://stackoverflow.com/a/61013504/11330757
+    console.log(response)
+  }
 </script>
 
 <main>
@@ -28,7 +42,7 @@
           <FetchableAccordionItem
             title={networkName}
             endpoint={`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCLEUDER_NET}${networkName}`}
-            on:fetchNetwork={() => `${Endpoints.NETZSCHELEUDER}/files/${networkName}.csv.zip`}
+            on:fetchNetwork={onFetchNetwork}
           />
         {/each}
       </div>

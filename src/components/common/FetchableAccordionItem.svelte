@@ -4,7 +4,7 @@
 <script lang="ts">
   import { AccordionItem, Button } from "carbon-components-svelte"
   import request from "../../request"
-  import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher } from "svelte"
 
   export let title: string
   export let endpoint: string
@@ -13,10 +13,10 @@
   const dispatch = createEventDispatcher()
 
   const onAccordionClick = async (event: MouseEvent) => {
-      if (content == undefined) {
-        content = await request(endpoint)
-      }
-      console.log(content.description)
+    if (content == undefined) {
+      content = await request(endpoint)
+    }
+    console.log(content.description)
   }
 </script>
 
@@ -28,14 +28,20 @@
 >
   {#if content}
     <div class="root">
-    <div class="content">
-      <b>Title:</b> {content.title} <br>
-      <b>Description:</b> {content.description}
-    </div>  
-    <div class="import_button">
-    <Button on:click={() => dispatch('fetchNetwork', title)} size="small" on:click>Import Network</Button> 
-  </div>
-  </div>
+      <div class="content">
+        <b>Title:</b>
+        {content.title} <br />
+        <b>Description:</b>
+        {content.description}
+      </div>
+      <div class="import_button">
+        <Button
+          on:click={() => dispatch("fetchNetwork", { networkName: title })}
+          size="small"
+          on:click>Import Network</Button
+        >
+      </div>
+    </div>
   {:else}
     <p>Fetching content...</p>
   {/if}

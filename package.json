@@ -26,6 +26,7 @@
   "dependencies": {
     "@untemps/svelte-palette": "^1.9.2",
     "cors": "^2.8.5",
+    "decompress-response": "^8.0.0",
     "fast-xml-parser": "^4.0.11",
     "graph-format-converter": "^1.5.2",
     "graphml-js": "^0.4.0",
