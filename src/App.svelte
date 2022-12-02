@@ -38,6 +38,8 @@
 
 {#if $selectedMenuItem === MenuItem.HOME}
     <Main />
+{:else if $selectedMenuItem === MenuItem.LOGIN}
+    
 {:else if $selectedMenuItem === MenuItem.REGISTER}
     <Register />
 {:else if $selectedMenuItem === MenuItem.PLOT}
