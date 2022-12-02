@@ -3,7 +3,7 @@
 -->
 <script lang="ts">
   import { AccordionItem, Button } from "carbon-components-svelte"
-  import request from "../../request"
+  import request from "../../api/request"
   import { createEventDispatcher } from "svelte"
 
   export let title: string

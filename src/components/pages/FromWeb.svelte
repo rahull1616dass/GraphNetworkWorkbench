@@ -5,7 +5,7 @@
   import { SideNavItems } from "carbon-components-svelte"
   import FetchableAccordionItem from "../common/FetchableAccordionItem.svelte"
   import { Accordion } from "carbon-components-svelte"
-  import request from "../../request"
+  import request from "../../api/request"
   import decompressResponse from 'decompress-response'
   import { parseReadableStream }  from "./UploadNetwork/networkParser"
   import { parse } from "vega"
@@ -25,9 +25,10 @@
       undefined,
       false
     )
-    // Unzip the response file
-    let file = decompressResponse(response)
-    parseReadableStream(file.body, undefined)
+    // Extract the zipped file on response.body to a REadableStream
+    const readableStream = decompressResponse(response).body
+
+    parseReadableStream(readableStream, undefined)
     // https://stackoverflow.com/a/61013504/11330757
     console.log(response)
   }
