@@ -2,6 +2,7 @@
     import { MenuItem } from "./definitions/menuItem"
     import Main from "./components/pages/Main.svelte"
     import Plot from  "./components/pages/Plot/Plot.svelte"
+    import Register from "./components/pages/Register.svelte"
     import { selectedMenuItem } from "./stores"
     import { addDocument } from "./api/firebase"
 
@@ -10,6 +11,13 @@
 </script>
 
 <ul id="menu">
+    <li>
+        <a
+            href="/"
+            on:click|preventDefault={() => ($selectedMenuItem = MenuItem.REGISTER)}
+            >Register</a
+        >
+    </li>
     <li>
         <a
             href="/"
@@ -30,6 +38,8 @@
 
 {#if $selectedMenuItem === MenuItem.HOME}
     <Main />
+{:else if $selectedMenuItem === MenuItem.REGISTER}
+    <Register />
 {:else if $selectedMenuItem === MenuItem.PLOT}
     <Plot />
 {/if}
