@@ -8,7 +8,11 @@
   import { Network } from "../../../definitions/network"
   import { ModalData } from "../../../definitions/errorData"
   import { MenuItem } from "../../../definitions/menuItem"
-  import { selectedMenuItem, networksList, paletteColors } from "../../../stores"
+  import {
+    selectedMenuItem,
+    networksList,
+    paletteColors,
+  } from "../../../stores"
   import { UploadedFileType } from "../../../definitions/uploadedFileType"
   import {
     Button,
@@ -17,7 +21,7 @@
     FileUploader,
   } from "carbon-components-svelte"
   import { Palette } from "@untemps/svelte-palette"
-
+  import cryptoRandomString from "crypto-random-string"
 
   let modalData: ModalData = new ModalData()
   /*
@@ -29,11 +33,17 @@
   // Note that `files` is of type `FileList`, not an Array:
   // https://developer.mozilla.org/en-US/docs/Web/API/FileList
 
+  
+  let idPlaceHolder = cryptoRandomString({length: 4, type: 'url-safe'})
+  $: idPlaceHolder = idPlaceHolder.replace (/^/,newNetwork.metadata.name);
+  
   // TODO OnClose callback doesn't work for now
   let nodeFiles: File[] = []
   let edgeFiles: File[] = []
   let newNetwork = new Network()
   let isUploadComplete = false
+
+
 
   $: if (edgeFiles.length > 0) {
     let edgeFile = edgeFiles[0]
@@ -115,6 +125,15 @@
           id="network-name"
           labelText="Network Name"
         />
+        <div class="metadata_id">
+          <TextInput
+            bind:value={newNetwork.metadata.id}
+            type="text"
+            bind:placeholder={idPlaceHolder}
+            id="network-id"
+            labelText="A unique network ID"
+          />
+        </div>
       </div>
       <div class="metadata_description">
         <TextInput

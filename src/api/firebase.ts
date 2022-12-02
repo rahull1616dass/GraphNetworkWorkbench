@@ -1,13 +1,20 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app"
-import { getAnalytics } from "firebase/analytics"
+import { initializeApp, type FirebaseApp } from "firebase/app"
+import { getFirestore, collection, addDoc } from "firebase/firestore"
 import firebaseConfig from "../../firebase_config"
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
+export const app: FirebaseApp = initializeApp(firebaseConfig)
+export const db = getFirestore(app)
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+export async function addDocument(){
+    try {
+        const docRef = await addDoc(collection(db, "users"), {
+          first: "Ada",
+          last: "Lovelace",
+          born: 1815
+        });
+        console.log("Document written with ID: ", docRef.id);
+      } catch (e) {
+        console.error("Error adding document: ", e);
+      }
+}

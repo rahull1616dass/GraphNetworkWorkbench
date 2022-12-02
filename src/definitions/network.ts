@@ -9,6 +9,7 @@ export class Network{
 
 export class Metadata{
     constructor(
+        public id: string = undefined,
         public name: string = undefined,
         public description: string = undefined,
         public color: string = undefined

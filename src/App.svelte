@@ -3,6 +3,10 @@
     import Main from "./components/pages/Main.svelte"
     import Plot from  "./components/pages/Plot/Plot.svelte"
     import { selectedMenuItem } from "./stores"
+    import { addDocument } from "./api/firebase"
+
+    //addDocument()
+
 </script>
 
 <ul id="menu">
@@ -13,7 +17,6 @@
             >Home</a
         >
     </li>
-    |
     <li>
         <a
             href="/"
