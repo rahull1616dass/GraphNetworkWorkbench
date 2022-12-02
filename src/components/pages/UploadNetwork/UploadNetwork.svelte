@@ -6,7 +6,7 @@
   import type { Link, Metadata } from "../../../definitions/network"
   import type { Node } from "../../../definitions/network"
   import { Network } from "../../../definitions/network"
-  import { ModalData } from "../../../definitions/errorData"
+  import { ModalData } from "../../../definitions/modalData"
   import { MenuItem } from "../../../definitions/menuItem"
   import {
     selectedMenuItem,
@@ -36,7 +36,7 @@
   
   let idPlaceHolder = cryptoRandomString({length: 4, type: 'url-safe'})
   $: idPlaceHolder = idPlaceHolder.replace (/^/,newNetwork.metadata.name);
-  
+
   // TODO OnClose callback doesn't work for now
   let nodeFiles: File[] = []
   let edgeFiles: File[] = []

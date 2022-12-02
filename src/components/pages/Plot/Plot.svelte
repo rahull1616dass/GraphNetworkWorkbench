@@ -4,7 +4,7 @@
     import SampleNetwork from "../../../data/SampleNetwork"
     import { default as vegaEmbed } from "vega-embed"
     import { networksList } from "../../../stores"
-    import { ModalData } from "../../../definitions/errorData"
+    import { ModalData } from "../../../definitions/modalData"
     import { HoverData } from "../../../definitions/hoverData"
     import NodeDetailModal from "./NodeDetailModal.svelte"
     import { Node } from "../../../definitions/network"
