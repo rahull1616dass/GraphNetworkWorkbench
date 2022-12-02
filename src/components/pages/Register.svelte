@@ -11,6 +11,8 @@
   import * as EmailValidator from "email-validator"
   import { registerUser } from "../../api/firebase"
   import { ModalData } from "../../definitions/modalData"
+  import { selectedMenuItem}  from "../../stores"
+  import { MenuItem } from "../../definitions/menuItem"
 
   let modalData = new ModalData()
   let user: User = new User()
@@ -32,8 +34,7 @@
     showProgress = true
     registerUser(user)
       .then((user: User) => {
-        modalData = "Success😎! You can now log in."
-        onRegisterComplete("User registered successfully")
+        onRegisterComplete("Success😎! You can now log in.")
       })
       .catch((error: any) => {
         let errorMessage: string
@@ -124,6 +125,7 @@
     modalHeading={modalData.messageHeader}
     on:close={() => {
       modalData.isOpen = false
+      $selectedMenuItem = MenuItem.HOME
     }}>{modalData.messageBody}</Modal
   >
 </div>
