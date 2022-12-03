@@ -7,22 +7,22 @@
       Modal,
       ProgressBar,
     } from "carbon-components-svelte"
-    import { User, type UserLogin } from "../../definitions/user"
-    import { loginUser } from "../../api/firebase"
+    import { LoginUser } from "../../definitions/user"
+    import { loginUser }  from "../../api/firebase"
     import { ModalData } from "../../definitions/modalData"
     import { selectedMenuItem}  from "../../stores"
     import { MenuItem } from "../../definitions/menuItem"
   
     let modalData = new ModalData()
-    let user: User = new User()
+    let user: LoginUser = new LoginUser()
     let showProgress: boolean = false
     let isSuccess: boolean = false
   
     const onLoginButtotnClicked = () => {
       showProgress = true
       loginUser(user)
-        .then((user: User) => {
-            isSuccess = true
+        .then((user: LoginUser) => {
+          isSuccess = true
           onLoginComplete("Success😎! You are logged in.")
         })
         .catch((error: any) => {

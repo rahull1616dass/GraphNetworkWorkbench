@@ -2,6 +2,7 @@ import { writable, readable } from "svelte/store"
 import type { Writable, Readable } from "svelte/store"
 import type { Network } from "./definitions/network"
 import { MenuItem } from "./definitions/menuItem"
+import type { User } from "firebase/auth"
 
 export const selectedMenuItem: Writable<MenuItem> = writable(MenuItem.HOME)
 export const testStoreValue: Writable<string> = writable("test val")
@@ -19,3 +20,4 @@ export const paletteColors: Readable<string[]> = readable([
   "#bcbd22",
   "#17becf",
 ])
+export const userStore: Writable<User> = writable(undefined)

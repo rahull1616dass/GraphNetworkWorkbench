@@ -4,6 +4,11 @@
   import FromWeb from "./FromWeb.svelte"
   import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte"
   import { testStoreValue } from "../../stores"
+  import { getAuth } from "firebase/auth"
+  import { userStore } from "../../stores"
+
+  let isLoggedIn: boolean = false
+  $: isLoggedIn = $userStore !== undefined && getAuth().currentUser !== null
 
   let isImportModalOpen: boolean = false
   let selectedImportType: ImportModalType = ImportModalType.NONE
@@ -36,6 +41,11 @@
       Click on the Vite and Svelte logos to learn more
     </p>
     -->
+  <div class="loggedInText">
+    {#if isLoggedIn}
+      Logged In as {$userStore.email}
+    {/if}
+  </div>
   {#if selectedImportType === ImportModalType.NONE}
     <button on:click={() => (isImportModalOpen = !isImportModalOpen)}
       >Add Data</button
@@ -54,4 +64,8 @@
 </main>
 
 <style>
+  .loggedInText {
+    color: red;
+    margin: 10px;
+  }
 </style>

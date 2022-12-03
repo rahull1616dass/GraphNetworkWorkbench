@@ -4,19 +4,22 @@
   import Plot from "./components/pages/Plot/Plot.svelte"
   import Register from "./components/pages/Register.svelte"
   import Login from "./components/pages/Login.svelte"
-  import { selectedMenuItem } from "./stores"
-  import { addDocument } from "./api/firebase"
+  import { selectedMenuItem, userStore } from "./stores"
+  import { getAuth } from "firebase/auth"
 
-  //addDocument()
+  let isLoggedIn: boolean = false
+  $: isLoggedIn = $userStore !== undefined && getAuth().currentUser !== null
 </script>
 
 <ul id="menu">
   <li>
-    <a
-      href="/"
-      on:click|preventDefault={() => ($selectedMenuItem = MenuItem.LOGIN)}
-      >Login</a
-    >
+    {#if !isLoggedIn}
+      <a
+        href="/"
+        on:click|preventDefault={() => ($selectedMenuItem = MenuItem.LOGIN)}
+        >Login</a
+      >
+    {/if}
   </li>
   <li>
     <a
@@ -45,7 +48,7 @@
   {#if $selectedMenuItem === MenuItem.HOME}
     <Main />
   {:else if $selectedMenuItem === MenuItem.LOGIN}
-    <Login/>
+    <Login />
   {:else if $selectedMenuItem === MenuItem.REGISTER}
     <Register />
   {:else if $selectedMenuItem === MenuItem.PLOT}

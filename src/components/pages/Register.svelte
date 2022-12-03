@@ -7,7 +7,7 @@
     Modal,
     ProgressBar,
   } from "carbon-components-svelte"
-  import { User, type UserLogin } from "../../definitions/user"
+  import { LoginUser } from "../../definitions/user"
   import * as EmailValidator from "email-validator"
   import { registerUser } from "../../api/firebase"
   import { ModalData } from "../../definitions/modalData"
@@ -15,7 +15,7 @@
   import { MenuItem } from "../../definitions/menuItem"
 
   let modalData = new ModalData()
-  let user: User = new User()
+  let user: LoginUser = new LoginUser()
   let isPasswordInvalid: boolean = false
   let isPasswordShort: boolean = false
   let doPasswordsMatch: boolean = false
@@ -33,7 +33,7 @@
   const onRegisterButtonClicked = () => {
     showProgress = true
     registerUser(user)
-      .then((user: User) => {
+      .then(() => {
         onRegisterComplete("Success😎! You can now log in.")
       })
       .catch((error: any) => {

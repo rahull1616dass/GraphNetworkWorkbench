@@ -8,36 +8,30 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth"
 import firebaseConfig from "../../firebase_config"
-import type { User } from "../definitions/user"
+import type { LoginUser } from "../definitions/user"
+import { userStore } from "../stores"
 
 export const app: FirebaseApp = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
 
 const enum Database {
   USERS = "Users",
+  NETWORKS = "Networks",
 }
 
-export async function addDocument() {
-  try {
-    const docRef = await addDoc(collection(db, "users"), {
-      first: "Ada",
-      last: "Lovelace",
-      born: 1815,
-    })
-    console.log("Document written with ID: ", docRef.id)
-  } catch (e) {
-    console.error("Error adding document: ", e)
-  }
-}
-
-export async function registerUser(user: User): Promise<User> {
+export async function registerUser(loginUser: LoginUser): Promise<void> {
   return new Promise((resolve, reject) => {
-    createUserWithEmailAndPassword(getAuth(app), user.email, user.password)
+    createUserWithEmailAndPassword(
+      getAuth(app),
+      loginUser.email,
+      loginUser.password
+    )
       .then((userCredential) => {
         // Signed in
-        user.uid = userCredential.user.uid
-        setUserDocument(user).then(() => {
-          resolve(user)
+        loginUser.uid = userCredential.user.uid
+        setUserDocument(loginUser).then(() => {
+          userStore.set(userCredential.user)
+          resolve()
         })
       })
       .catch((error) => {
@@ -46,12 +40,13 @@ export async function registerUser(user: User): Promise<User> {
   })
 }
 
-export async function loginUser(user: User): Promise<User> {
+export async function loginUser(user: LoginUser): Promise<LoginUser> {
   return new Promise((resolve, reject) => {
     signInWithEmailAndPassword(getAuth(app), user.email, user.password)
       .then((userCredential) => {
         // Signed in
         const signedInUser = userCredential.user
+        userStore.set(userCredential.user)
         resolve(user)
       })
       .catch((error) => {
@@ -60,13 +55,13 @@ export async function loginUser(user: User): Promise<User> {
   })
 }
 
-async function setUserDocument(user: User): Promise<void> {
+async function setUserDocument(user: LoginUser): Promise<void> {
   return new Promise((resolve, reject) => {
-    setDoc(doc(db, Database.USERS, user.uid), { 
+    setDoc(doc(db, Database.USERS, user.uid), {
       // Explicitly set the fields rather than using the spread operator
       // to avoid setting the passwords to the document
       email: user.email,
-      uid: user.uid
+      uid: user.uid,
     })
       .then(() => {
         resolve()
