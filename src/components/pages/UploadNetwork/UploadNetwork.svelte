@@ -24,8 +24,10 @@
   import { Palette } from "@untemps/svelte-palette"
   import cryptoRandomString from "crypto-random-string"
   import { uploadNetworkToStorage } from "../../../api/firebase"
+  import { ProgressBarData } from "../../../definitions/progressBarData"
 
   let modalData: ModalData = new ModalData()
+  let progressBarData: ProgressBarData = new ProgressBarData()
   /*
    TODO Make this work with the 'File type'. Right now, this throws an eror on the bind:file if declared as 
    a File, so we use a FileList even though we will get only one file. We can be sure that we will only get one, since we do not declare
@@ -44,8 +46,7 @@
   let newNetwork = new Network()
 
   let isUploadSuccessful = false
-  let showProgress: boolean = false
-  let progressBarText: string = "Uploading network..."
+
 
   $: if (edgeFiles.length > 0) {
     let edgeFile = edgeFiles[0]
@@ -79,6 +80,7 @@
   }
 
   function onSaveButtonClicked() {
+    progressBarData.isPresent = true
     console.log(
       `Save button clicked with nodes: ${newNetwork.nodes} and edges: ${newNetwork.links}`
     )
@@ -108,7 +110,7 @@
   }
 
   async function uploadNetworkToFirebaseStorage() {
-    progressBarText = "Saving network to the cloud..."
+    progressBarData.text = "Saving network to the cloud..."
     await uploadNetworkToStorage(
       newNetwork.metadata,
       nodeFiles[0],
@@ -122,7 +124,7 @@
                             \nNodes: ${newNetwork.nodes.length} \nEdges: ${newNetwork.links.length}`
         modalData.isOpen = true
         isUploadSuccessful = true
-        showProgress = false
+        progressBarData.isPresent = false
       })
       .catch((error) => {
         console.log(`Error uploading network: ${error}`)
@@ -206,9 +208,9 @@
       -->
           </div>
 
-          {#if showProgress}
+          {#if progressBarData.isPresent}
             <div class="progress_bar">
-              <ProgressBar helperText={progressBarText} />
+              <ProgressBar helperText={progressBarData.text} />
             </div>
           {:else}
             <div class="save_button">

@@ -10,16 +10,17 @@
     import { LoginUser } from "../../definitions/user"
     import { loginUser }  from "../../api/firebase"
     import { ModalData } from "../../definitions/modalData"
+    import { ProgressBarData } from "../../definitions/progressBarData"
     import { selectedMenuItem}  from "../../stores"
     import { MenuItem } from "../../definitions/menuItem"
   
     let modalData = new ModalData()
+    let progressBarData: ProgressBarData = new ProgressBarData(false, "Logging in...")
     let user: LoginUser = new LoginUser()
-    let showProgress: boolean = false
     let isSuccess: boolean = false
   
     const onLoginButtotnClicked = () => {
-      showProgress = true
+      progressBarData.isPresent = true
       loginUser(user)
         .then((user: LoginUser) => {
           isSuccess = true
@@ -46,7 +47,7 @@
       console.log(message)
       modalData.messageBody = message
       modalData.isOpen = true
-      showProgress = false
+      progressBarData.isPresent = false
     }
   </script>
   
@@ -73,7 +74,7 @@
         required
         bind:value={user.password}
       />
-      {#if !showProgress}
+      {#if !progressBarData.isPresent}
         <div class="login-button">
           <Button
             type="submit"
@@ -83,7 +84,7 @@
           >
         </div>
       {:else}
-        <ProgressBar helperText="Logging in..." />
+        <ProgressBar helperText={progressBarData.text} />
       {/if}
     </Form>
     <Modal

@@ -4,11 +4,19 @@
   import Plot from "./components/pages/Plot/Plot.svelte"
   import Register from "./components/pages/Register.svelte"
   import Login from "./components/pages/Login.svelte"
-  import { selectedMenuItem, userStore } from "./stores"
+  import { selectedMenuItem, userStore, networksList } from "./stores"
   import { getAuth } from "firebase/auth"
-
+  import { getNetworks } from "./api/firebase"
+  import { ProgressBarData } from "./definitions/progressBarData"
+  
+  let progressBarData: ProgressBarData = new ProgressBarData(false, "Fetching networks...")
   let isLoggedIn: boolean = false
-  $: isLoggedIn = $userStore !== undefined && getAuth().currentUser !== null
+  $: {
+    isLoggedIn = $userStore !== undefined && getAuth().currentUser !== null
+    if (isLoggedIn && $networksList.length === 0) {
+      getNetworks()
+    }
+  }
 </script>
 
 <ul id="menu">

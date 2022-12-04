@@ -11,16 +11,17 @@
   import * as EmailValidator from "email-validator"
   import { registerUser } from "../../api/firebase"
   import { ModalData } from "../../definitions/modalData"
+  import { ProgressBarData } from "../../definitions/progressBarData"
   import { selectedMenuItem}  from "../../stores"
   import { MenuItem } from "../../definitions/menuItem"
 
   let modalData = new ModalData()
+  let progressBarData: ProgressBarData = new ProgressBarData(false, "Registering user...")
   let user: LoginUser = new LoginUser()
   let isPasswordInvalid: boolean = false
   let isPasswordShort: boolean = false
   let doPasswordsMatch: boolean = false
   let isEmailInvalid: boolean = false
-  let showProgress: boolean = false
   $: doPasswordsMatch =
     user.password &&
     user.passwordConfirm &&
@@ -31,7 +32,7 @@
     user.email.length > 4 && !EmailValidator.validate(user.email)
 
   const onRegisterButtonClicked = () => {
-    showProgress = true
+    progressBarData.isPresent = true
     registerUser(user)
       .then(() => {
         onRegisterComplete("Success😎! You can now log in.")
@@ -63,7 +64,7 @@
     console.log(message)
     modalData.messageBody = message
     modalData.isOpen = true
-    showProgress = false
+    progressBarData.isPresent = false
   }
 </script>
 
@@ -104,7 +105,7 @@
       invalid={doPasswordsMatch}
       bind:value={user.passwordConfirm}
     />
-    {#if !showProgress}
+    {#if !progressBarData.isPresent}
       <div class="register-button">
         <Button
           type="submit"
@@ -116,7 +117,7 @@
         >
       </div>
     {:else}
-      <ProgressBar helperText="Registering user..." />
+      <ProgressBar helperText={progressBarData.text} />
     {/if}
   </Form>
   <Modal

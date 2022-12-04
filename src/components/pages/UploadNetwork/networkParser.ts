@@ -63,3 +63,13 @@ async function parseCSV(file: File): Promise<ParseResult> {
   })
 }
 
+export function blobToFile(theBlob: Blob, fileName:string): File {       
+  return new File(
+      [theBlob as any],
+      fileName, 
+      {
+          lastModified: new Date().getTime(),
+          type: theBlob.type 
+      }
+  )
+}

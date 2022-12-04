@@ -1,6 +1,13 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, type FirebaseApp } from "firebase/app"
-import { getFirestore, collection, setDoc, doc } from "firebase/firestore"
+import {
+  getFirestore,
+  collection,
+  setDoc,
+  doc,
+  query,
+  getDocs,
+} from "firebase/firestore"
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -11,15 +18,20 @@ import {
   getStorage,
   ref,
   uploadBytes,
+  getBytes,
   type StorageReference,
+  getBlob,
 } from "firebase/storage"
 import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
-import { userStore } from "../stores"
+import { userStore, networksList } from "../stores"
 import { get } from "svelte/store"
-import type { Metadata } from "../definitions/network"
+import { Network, type Metadata, Node, Link } from "../definitions/network"
 import { metadataConverter } from "./firebase_converters"
-
+import {
+  blobToFile,
+  parseNetwork,
+} from "../components/pages/UploadNetwork/networkParser"
 export const app: FirebaseApp = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
 
@@ -49,12 +61,20 @@ export async function registerUser(loginUser: LoginUser): Promise<void> {
   })
 }
 
+function getStorageRefs(networkId: string): any {
+  const storage = getStorage(app)
+  const networkPath = `Users/${get(userStore).uid}/Networks/${networkId}`
+  return {
+    nodeFileRef: ref(storage, `${networkPath}/nodes.csv`),
+    edgesFileRef: ref(storage, `${networkPath}/edges.csv`),
+  }
+}
+
 export async function loginUser(user: LoginUser): Promise<LoginUser> {
   return new Promise((resolve, reject) => {
     signInWithEmailAndPassword(getAuth(app), user.email, user.password)
       .then((userCredential) => {
         // Signed in
-        const signedInUser = userCredential.user
         userStore.set(userCredential.user)
         resolve(user)
       })
@@ -69,23 +89,12 @@ export async function uploadNetworkToStorage(
   nodesFile: File,
   edgesFile: File
 ): Promise<void> {
-  const storage = getStorage(app)
   return new Promise((resolve, reject) => {
-    const networkPath: string = `Users/${get(userStore).uid}/Networks/${
-      networkMetadata.id
-    }`
-    const nodesFileRef: StorageReference = ref(
-      storage,
-      `${networkPath}/nodes.csv`
-    )
-    const edgesFileRef: StorageReference = ref(
-      storage,
-      `${networkPath}/edges.csv`
-    )
-    uploadBytes(nodesFileRef, nodesFile)
+    const storagePaths = getStorageRefs(networkMetadata.id)
+    uploadBytes(storagePaths['nodeFileRef'], nodesFile)
       .then((nodesFileSnapshot) => {
         console.log(`Uploaded nodes file for network ${networkMetadata.id}`)
-        uploadBytes(edgesFileRef, edgesFile)
+        uploadBytes(storagePaths['edgesFileRef'], edgesFile)
           .then((edgesFileSnapshot) => {
             console.log(`Uploaded edges file for network ${networkMetadata.id}`)
             saveNetworkDocument(networkMetadata)
@@ -114,6 +123,65 @@ async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
     setDoc(doc(db, docPath), metadataConverter.toFirestore(networkMetadata))
       .then(() => {
         resolve()
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+export async function getNetworks() {
+  const networksQuery = query(
+    collection(
+      db,
+      `${Database.USERS}/${get(userStore).uid}/${Database.NETWORKS}`
+    )
+  )
+  await getDocs(networksQuery).then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      const metadata = metadataConverter.fromFirestore(doc, undefined)
+      getNetworkFromStorage(metadata).then((network) => {
+        networksList.set([...get(networksList), network])
+        console.log(metadata)
+      })
+    })
+  })
+}
+
+export async function getNetworkFromStorage(
+  metadata: Metadata
+): Promise<Network> {
+  return new Promise((resolve, reject) => {
+    let network: Network = new Network(metadata)
+    const storagePaths = getStorageRefs(metadata.id)
+    getBlob(storagePaths['nodeFileRef'])
+      .then((blob) => {
+        console.log(blob)
+        parseNetwork(blobToFile(blob, "nodes.csv"))
+          .then((parsedNodes) => {
+            network.nodes = <Node[]>(
+              JSON.parse(JSON.stringify(parsedNodes.data))
+            )
+            getBlob(storagePaths['edgesFileRef'])
+              .then((blob) => {
+                parseNetwork(blobToFile(blob, "edges.csv"))
+                  .then((parsedEdges) => {
+                    network.links = <Link[]>(
+                      JSON.parse(JSON.stringify(parsedEdges.data))
+                    )
+                    resolve(network)
+                  })
+                  .catch((error) => {
+                    reject(error)
+                  })
+              })
+              .catch((error) => {
+                reject(error)
+              })
+          })
+          .catch((error) => {
+            reject(error)
+          })
       })
       .catch((error) => {
         reject(error)
