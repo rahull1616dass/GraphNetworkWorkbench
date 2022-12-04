@@ -8,8 +8,11 @@
   import { getAuth } from "firebase/auth"
   import { getNetworks } from "./api/firebase"
   import { ProgressBarData } from "./definitions/progressBarData"
-  
-  let progressBarData: ProgressBarData = new ProgressBarData(false, "Fetching networks...")
+
+  let progressBarData: ProgressBarData = new ProgressBarData(
+    false,
+    "Fetching networks..."
+  )
   let isLoggedIn: boolean = false
   $: {
     isLoggedIn = $userStore !== undefined && getAuth().currentUser !== null
@@ -17,25 +20,44 @@
       getNetworks()
     }
   }
+
+  const performLogout = () => {
+    getAuth()
+      .signOut()
+      .then(() => {
+        console.log("User signed out")
+        isLoggedIn = false
+        $userStore = undefined
+        $networksList = []
+      })
+      .catch((error) => {
+        console.log(`Error while signing out: ${error}`)
+      })
+  }
 </script>
 
 <ul id="menu">
-  <li>
-    {#if !isLoggedIn}
+  {#if isLoggedIn}
+    <li>
+      <a href="/" on:click|preventDefault={performLogout}>Logout</a>
+    </li>
+  {:else}
+    <li>
       <a
         href="/"
         on:click|preventDefault={() => ($selectedMenuItem = MenuItem.LOGIN)}
         >Login</a
       >
-    {/if}
-  </li>
-  <li>
-    <a
-      href="/"
-      on:click|preventDefault={() => ($selectedMenuItem = MenuItem.REGISTER)}
-      >Register</a
-    >
-  </li>
+    </li>
+    <li>
+      <a
+        href="/"
+        on:click|preventDefault={() => ($selectedMenuItem = MenuItem.REGISTER)}
+        >Register</a
+      >
+    </li>
+  {/if}
+
   <li>
     <a
       href="/"
