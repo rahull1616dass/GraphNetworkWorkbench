@@ -19,9 +19,11 @@
     Modal,
     TextInput,
     FileUploader,
+    ProgressBar,
   } from "carbon-components-svelte"
   import { Palette } from "@untemps/svelte-palette"
   import cryptoRandomString from "crypto-random-string"
+  import { uploadNetworkToStorage } from "../../../api/firebase"
 
   let modalData: ModalData = new ModalData()
   /*
@@ -33,17 +35,17 @@
   // Note that `files` is of type `FileList`, not an Array:
   // https://developer.mozilla.org/en-US/docs/Web/API/FileList
 
-  
-  let idPlaceHolder = cryptoRandomString({length: 4, type: 'url-safe'})
-  $: idPlaceHolder = idPlaceHolder.replace (/^/,newNetwork.metadata.name);
+  let idPlaceHolder = cryptoRandomString({ length: 4, type: "url-safe" })
+  $: idPlaceHolder = idPlaceHolder.replace(/^/, newNetwork.metadata.name)
 
   // TODO OnClose callback doesn't work for now
   let nodeFiles: File[] = []
   let edgeFiles: File[] = []
   let newNetwork = new Network()
-  let isUploadComplete = false
 
-
+  let isUploadSuccessful = false
+  let showProgress: boolean = false
+  let progressBarText: string = "Uploading network..."
 
   $: if (edgeFiles.length > 0) {
     let edgeFile = edgeFiles[0]
@@ -94,17 +96,41 @@
       return [...networksList, newNetwork]
     })
 
-    //TODO Newline does not render in the modal currently.
-    modalData.messageBody = `Network successfully uploaded.\nName: ${newNetwork.metadata.name}
+    /*
+    One could also store the network in each user's Firestore document, and this would even
+    work well as it integrates directly with the network class that we defined.
+    However, a document has a size limit of 1MB: https://firebase.google.com/docs/firestore/quotas
+    While this should be enough for most networks, if we are going to have a prodcution-ready
+    application, it is better to store the networks in Firebase Storage, and only store the
+    metadata in Firestore. This way, we can have a much larger network size limit.
+    */
+    uploadNetworkToFirebaseStorage()
+  }
+
+  async function uploadNetworkToFirebaseStorage() {
+    progressBarText = "Saving network to the cloud..."
+    await uploadNetworkToStorage(
+      newNetwork.metadata,
+      nodeFiles[0],
+      edgeFiles[0]
+    )
+      .then((url) => {
+        console.log(`Network uploaded to ${url}`)
+        //TODO Newline does not render in the modal currently.
+        modalData.messageBody = `Network successfully uploaded.\nName: ${newNetwork.metadata.name}
                             \nDescription: ${newNetwork.metadata.description}
                             \nNodes: ${newNetwork.nodes.length} \nEdges: ${newNetwork.links.length}`
-    modalData.isOpen = true
-    isUploadComplete = true
-    console.log("x")
+        modalData.isOpen = true
+        isUploadSuccessful = true
+        showProgress = false
+      })
+      .catch((error) => {
+        console.log(`Error uploading network: ${error}`)
+      })
   }
 
   function onModalClose() {
-    if (isUploadComplete) {
+    if (isUploadSuccessful) {
       $selectedMenuItem = MenuItem.HOME
     }
   }
@@ -180,10 +206,15 @@
       -->
           </div>
 
-          <div class="save_button">
-            <Button on:click={onSaveButtonClicked}>Save Network</Button>
-          </div>
-
+          {#if showProgress}
+            <div class="progress_bar">
+              <ProgressBar helperText={progressBarText} />
+            </div>
+          {:else}
+            <div class="save_button">
+              <Button on:click={onSaveButtonClicked}>Save Network</Button>
+            </div>
+          {/if}
           {#if modalData.isOpen}
             <Modal
               passiveModal
