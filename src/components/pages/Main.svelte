@@ -5,10 +5,10 @@
   import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte"
   import { testStoreValue } from "../../stores"
   import { getAuth } from "firebase/auth"
-  import { userStore } from "../../stores"
+  import { authUserStore } from "../../stores"
 
   let isLoggedIn: boolean = false
-  $: isLoggedIn = $userStore !== undefined && getAuth().currentUser !== null
+  $: isLoggedIn = $authUserStore !== undefined && getAuth().currentUser !== null
 
   let isImportModalOpen: boolean = false
   let selectedImportType: ImportModalType = ImportModalType.NONE
@@ -43,7 +43,7 @@
     -->
   <div class="loggedInText">
     {#if isLoggedIn}
-      Logged In as {$userStore.email}
+      Logged In as {$authUserStore.email}
     {/if}
   </div>
   {#if selectedImportType === ImportModalType.NONE}

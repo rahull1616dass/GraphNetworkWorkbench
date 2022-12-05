@@ -3,6 +3,7 @@ import type { Writable, Readable } from "svelte/store"
 import type { Network } from "./definitions/network"
 import { MenuItem } from "./definitions/menuItem"
 import type { User } from "firebase/auth"
+import type { LoginUser } from "./definitions/user"
 
 export const selectedMenuItem: Writable<MenuItem> = writable(MenuItem.HOME)
 export const testStoreValue: Writable<string> = writable("test val")
@@ -20,4 +21,24 @@ export const paletteColors: Readable<string[]> = readable([
   "#bcbd22",
   "#17becf",
 ])
-export const userStore: Writable<User> = writable(undefined)
+
+/*
+  userStore holds the current User instance from Firebase Auth.
+  It is also used to check if the user is logged in.
+  loginUser holds the email and password of the user in localstorage so that the user does not 
+  have to login every time. If loginUser is present, the userStore is written accordingly and
+  the user is logged in automatically.
+*/
+export const authUserStore: Writable<User> = writable(undefined)
+export const loginUserStore: Writable<LoginUser> = writable(
+  localStorage.getItem("loginUser")
+    ? JSON.parse(localStorage.getItem("loginUser"))
+    : undefined
+)
+loginUserStore.subscribe((newLoginUser) => {
+  if (newLoginUser) {
+    localStorage.setItem("loginUser", JSON.stringify(newLoginUser))
+  } else {
+    localStorage.removeItem("loginUser")
+  }
+})

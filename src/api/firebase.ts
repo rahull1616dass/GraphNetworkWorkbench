@@ -24,7 +24,7 @@ import {
 } from "firebase/storage"
 import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
-import { userStore, networksList } from "../stores"
+import { authUserStore, loginUserStore, networksList } from "../stores"
 import { get } from "svelte/store"
 import { Network, type Metadata, Node, Link } from "../definitions/network"
 import { metadataConverter } from "./firebase_converters"
@@ -51,7 +51,8 @@ export async function registerUser(loginUser: LoginUser): Promise<void> {
         // Signed in
         loginUser.uid = userCredential.user.uid
         setUserDocument(loginUser).then(() => {
-          userStore.set(userCredential.user)
+          authUserStore.set(userCredential.user)
+          loginUserStore.set(loginUser)
           resolve()
         })
       })
@@ -63,20 +64,21 @@ export async function registerUser(loginUser: LoginUser): Promise<void> {
 
 function getStorageRefs(networkId: string): any {
   const storage = getStorage(app)
-  const networkPath = `Users/${get(userStore).uid}/Networks/${networkId}`
+  const networkPath = `Users/${get(authUserStore).uid}/Networks/${networkId}`
   return {
     nodeFileRef: ref(storage, `${networkPath}/nodes.csv`),
     edgesFileRef: ref(storage, `${networkPath}/edges.csv`),
   }
 }
 
-export async function loginUser(user: LoginUser): Promise<LoginUser> {
+export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
   return new Promise((resolve, reject) => {
-    signInWithEmailAndPassword(getAuth(app), user.email, user.password)
+    signInWithEmailAndPassword(getAuth(app), loginUser.email, loginUser.password)
       .then((userCredential) => {
         // Signed in
-        userStore.set(userCredential.user)
-        resolve(user)
+        authUserStore.set(userCredential.user)
+        loginUserStore.set(loginUser)
+        resolve(loginUser)
       })
       .catch((error) => {
         reject(error)
@@ -117,7 +119,7 @@ export async function uploadNetworkToStorage(
 
 async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
   return new Promise((resolve, reject) => {
-    const docPath = `${Database.USERS}/${get(userStore).uid}/${
+    const docPath = `${Database.USERS}/${get(authUserStore).uid}/${
       Database.NETWORKS
     }/${networkMetadata.id}`
     setDoc(doc(db, docPath), metadataConverter.toFirestore(networkMetadata))
@@ -134,7 +136,7 @@ export async function getNetworks() {
   const networksQuery = query(
     collection(
       db,
-      `${Database.USERS}/${get(userStore).uid}/${Database.NETWORKS}`
+      `${Database.USERS}/${get(authUserStore).uid}/${Database.NETWORKS}`
     )
   )
   await getDocs(networksQuery).then((querySnapshot) => {
