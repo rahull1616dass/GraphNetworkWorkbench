@@ -7,42 +7,38 @@ export default {
     "height": 500,
     "padding": 0,
     "autosize": "none",
+
     "signals": [
         { "name": "cx", "update": "width / 2" },
         { "name": "cy", "update": "height / 2" },
         {
-            "name": "nodeRadius",
-            "value": 10,
+            "name": "nodeRadius", "value": 8,
             "bind": { "input": "range", "min": 1, "max": 50, "step": 1 }
         },
         {
-            "name": "nodeCharge",
-            "value": -30,
+            "name": "nodeCharge", "value": -30,
             "bind": { "input": "range", "min": -100, "max": 10, "step": 1 }
         },
         {
-            "name": "linkDistance",
-            "value": 15,
+            "name": "linkDistance", "value": 30,
             "bind": { "input": "range", "min": 5, "max": 100, "step": 1 }
         },
-
-
-        { "name": "gravityX", "value": 0.1, "bind": { "input": "range", "min": 0, "max": 1 } },
-        { "name": "gravityY", "value": 0.1, "bind": { "input": "range", "min": 0, "max": 1 } },
-
-
-
-        { "name": "static", "value": false, "bind": { "input": "checkbox" } },
+        {
+            "name": "static", "value": true,
+            "bind": { "input": "checkbox" }
+        },
         {
             "description": "State variable for active node fix status.",
-            "name": "fix",
-            "value": false,
+            "name": "fix", "value": false,
             "on": [
                 {
                     "events": "symbol:mouseout[!event.buttons], window:mouseup",
                     "update": "false"
                 },
-                { "events": "symbol:mouseover", "update": "fix || true" },
+                {
+                    "events": "symbol:mouseover",
+                    "update": "fix || true"
+                },
                 {
                     "events": "[symbol:mousedown, window:mouseup] > window:mousemove!",
                     "update": "xy()",
@@ -52,40 +48,51 @@ export default {
         },
         {
             "description": "Graph node most recently interacted with.",
-            "name": "node",
-            "value": null,
+            "name": "node", "value": null,
             "on": [
-                { "events": "symbol:mouseover", "update": "fix === true ? item() : node" }
+                {
+                    "events": "symbol:mouseover",
+                    "update": "fix === true ? item() : node"
+                }
             ]
         },
         {
             "description": "Flag to restart Force simulation upon data changes.",
-            "name": "restart",
-            "value": false,
-            "on": [{ "events": { "signal": "fix" }, "update": "fix && fix.length" }]
+            "name": "restart", "value": false,
+            "on": [
+                { "events": { "signal": "fix" }, "update": "fix && fix.length" }
+            ]
         }
     ],
+
     "data": [
         {
-            "name": "node-data"
+            "name": "node-data",
+            "url": "miserables.json",
+            "format": { "type": "json", "property": "nodes" }
         },
         {
-            "name": "link-data"
+            "name": "link-data",
+            "url": "miserables.json",
+            "format": { "type": "json", "property": "links" }
         }
     ],
+
     "scales": [
         {
             "name": "color",
             "type": "ordinal",
             "domain": { "data": "node-data", "field": "group" },
-            "range": { "scheme": "category10" }
+            "range": { "scheme": "category20c" }
         }
     ],
+
     "marks": [
         {
             "name": "nodes",
             "type": "symbol",
             "zindex": 1,
+
             "from": { "data": "node-data" },
             "on": [
                 {
@@ -93,25 +100,23 @@ export default {
                     "modify": "node",
                     "values": "fix === true ? {fx: node.x, fy: node.y} : {fx: fix[0], fy: fix[1]}"
                 },
-                { "trigger": "!fix", "modify": "node", "values": "{fx: null, fy: null}" }
+                {
+                    "trigger": "!fix",
+                    "modify": "node", "values": "{fx: null, fy: null}"
+                }
             ],
+
             "encode": {
                 "enter": {
                     "fill": { "scale": "color", "field": "group" },
-                    "stroke": { "value": "white" },
-
-                    "xfocus": { "signal": "cx" },
-                    "yfocus": { "signal": "cy" }
-
-
+                    "stroke": { "value": "white" }
                 },
                 "update": {
                     "size": { "signal": "2 * nodeRadius * nodeRadius" },
                     "cursor": { "value": "pointer" }
-
-
                 }
             },
+
             "transform": [
                 {
                     "type": "force",
@@ -120,18 +125,9 @@ export default {
                     "static": { "signal": "static" },
                     "signal": "force",
                     "forces": [
-
                         { "force": "center", "x": { "signal": "cx" }, "y": { "signal": "cy" } },
-
-                        { "force": "x", "x": "xfocus", "strength": { "signal": "gravityX" } },
-
-                        { "force": "y", "y": "yfocus", "strength": { "signal": "gravityY" } },
-
-                        { "force": "collide", "radius": { "signal": "linkDistance" } },
-
-
+                        { "force": "collide", "radius": { "signal": "nodeRadius" } },
                         { "force": "nbody", "strength": { "signal": "nodeCharge" } },
-
                         { "force": "link", "links": "link-data", "distance": { "signal": "linkDistance" } }
                     ]
                 }
@@ -140,21 +136,23 @@ export default {
         {
             "type": "path",
             "from": { "data": "link-data" },
-            "interactive": false,
+            "interactive": true,
             "encode": {
-                "update": { "stroke": { "value": "#ccc" }, "strokeWidth": { "value": 0.5 } }
+                "update": {
+                    "stroke": { "value": "#ccc" },
+                    "strokeWidth": { "value": 0.5 }
+                }
             },
             "transform": [
                 {
                     "type": "linkpath",
                     "require": { "signal": "force" },
                     "shape": "line",
-                    "sourceX": "datum.source.x",
-                    "sourceY": "datum.source.y",
-                    "targetX": "datum.target.x",
-                    "targetY": "datum.target.y"
+                    "sourceX": "datum.source.x", "sourceY": "datum.source.y",
+                    "targetX": "datum.target.x", "targetY": "datum.target.y"
                 }
             ]
         }
     ]
-} as VisualizationSpec
+
+} as VisualizationSpec;
