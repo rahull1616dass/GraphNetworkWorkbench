@@ -5,11 +5,11 @@
   import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte"
   import { testStoreValue } from "../../stores"
   import { getAuth } from "firebase/auth"
-  import { authUserStore } from "../../stores"
+  import { authUserStore, selectedMenuItem } from "../../stores"
   import HomeVisSpec from "../../data/HomeVisSpec"
   import MiserablesData from "../../data/MiserablesVisSpec"
   import { default as vegaEmbed } from "vega-embed"
-
+  import { MenuItem } from "../../definitions/menuItem"
 
   let isLoggedIn: boolean = false
   $: isLoggedIn = $authUserStore !== undefined && getAuth().currentUser !== null
@@ -25,23 +25,34 @@
   <div class="loggedInText">
     {#if isLoggedIn}
       Logged In as {$authUserStore.email}
+      {#if selectedImportType === ImportModalType.NONE}
+        <button
+          class="buttons"
+          on:click={() => (isImportModalOpen = !isImportModalOpen)}
+          >Add Network</button
+        >
+        <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
+      {:else if selectedImportType === ImportModalType.FROM_WEB}
+        <FromWeb />
+      {:else if selectedImportType === ImportModalType.UPLOAD}
+        <UploadNetwork />
+      {/if}
+    {:else}
+      <div class="buttons">
+        <button on:click={() => ($selectedMenuItem = MenuItem.LOGIN)}
+          >Login</button
+        >
+        <button on:click={() => ($selectedMenuItem = MenuItem.REGISTER)}
+          >Register</button
+        >
+      </div>
     {/if}
   </div>
-
   <div class="viz" id="viz" />
-
-  {#if selectedImportType === ImportModalType.NONE}
-    <button class="btn_add_network" on:click={() => (isImportModalOpen = !isImportModalOpen)}>Add Network</button>
-    <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
-  {:else if selectedImportType === ImportModalType.FROM_WEB}
-    <FromWeb />
-  {:else if selectedImportType === ImportModalType.UPLOAD}
-    <UploadNetwork />
-  {/if}
 </main>
 
 <style lang="scss">
-  .btn_add_network {
+  .buttons {
     position: absolute;
     top: 50%;
     left: 50%;
