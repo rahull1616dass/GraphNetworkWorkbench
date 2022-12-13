@@ -2,6 +2,8 @@ export enum MenuItem {
     REGISTER,
     LOGIN,
     HOME,
-    WORKBENCH,
+    PLOT,
+    EXPERIMENTS,
+    REPORTS,
     PROFILE
 }

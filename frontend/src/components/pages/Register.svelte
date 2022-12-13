@@ -119,6 +119,13 @@
     {:else}
       <ProgressBar helperText={progressBarData.text} />
     {/if}
+    <div class="already_registered">
+      Already registered? <a
+        href="/"
+        on:click|preventDefault={() => ($selectedMenuItem = MenuItem.LOGIN)}
+        >Login</a
+      >
+    </div>
   </Form>
   <Modal
     passiveModal

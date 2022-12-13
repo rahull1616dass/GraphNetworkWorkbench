@@ -9,7 +9,7 @@ export const selectedMenuItem: Writable<MenuItem> = writable(MenuItem.HOME)
 export const testStoreValue: Writable<string> = writable("test val")
 export const netzschleuderNetworkNames: Writable<string[]> = writable([])
 export const networksList: Writable<Network[]> = writable([])
-export const selectedNetworkIndex: Writable<number> = writable(0)
+export const selectedNetworkIndex: Writable<number> = writable(undefined)
 export const paletteColors: Readable<string[]> = readable([
   "#1f77b4",
   "#ff7f0e",

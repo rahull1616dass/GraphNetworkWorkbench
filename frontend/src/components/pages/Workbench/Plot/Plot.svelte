@@ -8,7 +8,6 @@
   import { HoverData } from "../../../../definitions/hoverData"
   import NodeDetailModal from "./NodeDetailModal.svelte"
   import { Link, Node } from "../../../../definitions/network"
-  import NetworkListItem from "../../../common/NetworkListItem.svelte"
   import Hover from "./Hover.svelte"
   import statsIcon from "../../../../assets/stats.svg"
   import { HoverType } from "../../../../definitions/hoverType"
@@ -125,24 +124,6 @@
 </script>
 
 <main>
-  <!-- Define a left menu where each item is a NetworkListItem-->
-  <div class="networks_list">
-    <div class="networks_list_header">
-      <p>Networks</p>
-    </div>
-    <div class="networks_list_items">
-      {#each $networksList as network, index}
-        <NetworkListItem
-          {network}
-          {index}
-          selected={$selectedNetworkIndex == index}
-          on:selectItem={(event) => {
-            $selectedNetworkIndex = event.detail.selectedIndex
-          }}
-        />
-      {/each}
-    </div>
-  </div>
   <div class="content">
     {#if $networksList.length == 0}
       <div class="no_networks">
@@ -193,25 +174,6 @@
     right: 0;
     width: 50%;
     height: 20%;
-  }
-  .networks_list_header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 0.5rem;
-  }
-  .networks_list {
-    margin-top: 5.6%;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 20%;
-    background-color: #f5f5f5;
   }
   .stats {
     position: absolute;
