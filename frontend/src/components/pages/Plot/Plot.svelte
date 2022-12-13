@@ -11,8 +11,6 @@
   import NetworkListItem from "../../common/NetworkListItem.svelte"
   import Hover from "./Hover.svelte"
   import statsIcon from "../../../assets/stats.svg"
-  import * as vega from "vega"
-  import { initializeApp } from "firebase/app"
   import { HoverType } from "../../../definitions/hoverType"
 
   function loadNetwork() {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { MenuItem } from "./definitions/menuItem"
-  import Main from "./components/pages/Main.svelte"
+  import Home from "./components/pages/Home.svelte"
   import Plot from "./components/pages/Plot/Plot.svelte"
   import Register from "./components/pages/Register.svelte"
   import Login from "./components/pages/Login.svelte"
@@ -17,7 +17,7 @@
     getNetworks as getNetworksFromFirestore,
   } from "./api/firebase"
   import { ProgressBarData } from "./definitions/progressBarData"
-  import { Y } from "vega-lite/build/src/channel"
+
 
   let progressBarData: ProgressBarData = new ProgressBarData(true, "Loading...")
   let isLoggedIn: boolean = false
@@ -112,7 +112,7 @@
   </ul>
   <div class="root">
     {#if $selectedMenuItem === MenuItem.HOME}
-      <Main />
+      <Home />
     {:else if $selectedMenuItem === MenuItem.LOGIN}
       <Login />
     {:else if $selectedMenuItem === MenuItem.REGISTER}

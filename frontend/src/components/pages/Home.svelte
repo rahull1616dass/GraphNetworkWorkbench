@@ -6,56 +6,33 @@
   import { testStoreValue } from "../../stores"
   import { getAuth } from "firebase/auth"
   import { authUserStore } from "../../stores"
+  import HomeVisSpec from "../../data/HomeVisSpec"
+  import MiserablesData from "../../data/MiserablesVisSpec"
+  import { default as vegaEmbed } from "vega-embed"
+
 
   let isLoggedIn: boolean = false
   $: isLoggedIn = $authUserStore !== undefined && getAuth().currentUser !== null
 
   let isImportModalOpen: boolean = false
   let selectedImportType: ImportModalType = ImportModalType.NONE
+
+  vegaEmbed("#viz", HomeVisSpec, { actions: false })
 </script>
 
 <main>
-  <!--
-    <div>
-      <a href="https://vitejs.dev" target="_blank"> 
-        <img src="/vite.svg" class="logo" alt="Vite Logo" />
-      </a>
-      <a href="https://svelte.dev" target="_blank"> 
-        <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-      </a>
-    </div>
-    <h1>Vite + Svelte</h1>
-  
-    <div class="card">
-      <Counter />
-    </div>
-  
-    <p>
-      Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank">SvelteKit</a>, the official Svelte app framework powered by Vite! Test
-    </p>
-    <p>
-      Hello World!
-    </p>
-  
-    <p class="read-the-docs">
-      Click on the Vite and Svelte logos to learn more
-    </p>
-    -->
+  <h1>Welcome to Graph Learning Workbench</h1>
   <div class="loggedInText">
     {#if isLoggedIn}
       Logged In as {$authUserStore.email}
     {/if}
   </div>
+
+  <div class="viz" id="viz" />
+
   {#if selectedImportType === ImportModalType.NONE}
-    <button on:click={() => (isImportModalOpen = !isImportModalOpen)}
-      >Add Data</button
-    >
+    <button class="btn_add_network" on:click={() => (isImportModalOpen = !isImportModalOpen)}>Add Network</button>
     <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
-    <p>Selected import method is {selectedImportType}</p>
-    <p>Imported store value is = {$testStoreValue}</p>
-    <button on:click|preventDefault={() => ($testStoreValue += "!")}
-      >Change store value</button
-    >
   {:else if selectedImportType === ImportModalType.FROM_WEB}
     <FromWeb />
   {:else if selectedImportType === ImportModalType.UPLOAD}
@@ -63,7 +40,22 @@
   {/if}
 </main>
 
-<style>
+<style lang="scss">
+  .btn_add_network {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  .viz {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    opacity: 0.5;
+  }
+
   .loggedInText {
     color: red;
     margin: 10px;
