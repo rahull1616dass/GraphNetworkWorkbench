@@ -3,7 +3,7 @@
   import MiserablesData from "../../../data/MiserablesVisSpec"
   import VisSpec from "../../../data/VisSpec"
   import { default as vegaEmbed } from "vega-embed"
-  import { networksList } from "../../../stores"
+  import { networksList, selectedNetworkIndex } from "../../../stores"
   import { ModalData } from "../../../definitions/modalData"
   import { HoverData } from "../../../definitions/hoverData"
   import NodeDetailModal from "./NodeDetailModal.svelte"
@@ -15,9 +15,9 @@
 
   function loadNetwork() {
     if ($networksList && $networksList.length > 0) {
-      console.log("changing to ", selectedNetworkIndex)
-      VisSpec.data[0].values = $networksList[selectedNetworkIndex].nodes
-      VisSpec.data[1].values = $networksList[selectedNetworkIndex].links
+      console.log("changing to ", $selectedNetworkIndex)
+      VisSpec.data[0].values = $networksList[$selectedNetworkIndex].nodes
+      VisSpec.data[1].values = $networksList[$selectedNetworkIndex].links
       createVegaEmbed(VisSpec)
     } else createVegaEmbed(MiserablesData)
   }
@@ -106,9 +106,8 @@
   let modalData: ModalData = new ModalData()
   let hoverData: HoverData = undefined
 
-  let selectedNetworkIndex: number = 0
   // Anytime the selected network index from the menu changes, we need to update the vegaEmbed
-  $: selectedNetworkIndex, loadNetwork()
+  $: $selectedNetworkIndex, loadNetwork()
 
   // Props to pass to the modal anytime user clicks on a node from the vegaEmbed
   let modalProps: any = undefined
@@ -118,7 +117,7 @@
     console.log("updating node", event.detail.newNode)
     let newNode: Node = event.detail.newNode
     networksList.update((networksList) => {
-      networksList[selectedNetworkIndex].nodes[newNode.index] = newNode
+      networksList[$selectedNetworkIndex].nodes[newNode.index] = newNode
       return networksList
     })
     loadNetwork()
@@ -136,9 +135,9 @@
         <NetworkListItem
           {network}
           {index}
-          selected={selectedNetworkIndex == index}
+          selected={$selectedNetworkIndex == index}
           on:selectItem={(event) => {
-            selectedNetworkIndex = event.detail.selectedIndex
+            $selectedNetworkIndex = event.detail.selectedIndex
           }}
         />
       {/each}
@@ -158,13 +157,13 @@
           <h3>Network Stats</h3>
         </div>
         <div class="stats_content">
-          <p>Name: {$networksList[selectedNetworkIndex].metadata.name}</p>
+          <p>Name: {$networksList[$selectedNetworkIndex].metadata.name}</p>
           <p>
-            Description: {$networksList[selectedNetworkIndex].metadata
+            Description: {$networksList[$selectedNetworkIndex].metadata
               .description}
           </p>
-          <p>Nodes: {$networksList[selectedNetworkIndex].nodes.length}</p>
-          <p>Edges: {$networksList[selectedNetworkIndex].links.length}</p>
+          <p>Nodes: {$networksList[$selectedNetworkIndex].nodes.length}</p>
+          <p>Edges: {$networksList[$selectedNetworkIndex].links.length}</p>
         </div>
       </div>
     {/if}
