@@ -31,7 +31,7 @@ import { metadataConverter } from "./firebase_converters"
 import {
   blobToFile,
   parseNetwork,
-} from "../components/pages/UploadNetwork/networkParser"
+} from "../components/pages/AddNetwork/UploadNetwork/networkParser"
 export const app: FirebaseApp = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
 

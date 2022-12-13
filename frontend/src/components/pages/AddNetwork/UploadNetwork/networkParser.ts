@@ -1,4 +1,4 @@
-import { FileExtension } from "../../../definitions/fileExtension"
+import { FileExtension } from "../../../../definitions/fileExtension"
 import Papa from "papaparse"
 import type ParseResult from "papaparse"
 

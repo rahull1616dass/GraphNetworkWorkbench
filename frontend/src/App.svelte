@@ -1,7 +1,7 @@
 <script lang="ts">
   import { MenuItem } from "./definitions/menuItem"
   import Home from "./components/pages/Home.svelte"
-  import Plot from "./components/pages/Plot/Plot.svelte"
+  import Plot from "./components/pages/Workbench/Plot/Plot.svelte"
   import Register from "./components/pages/Register.svelte"
   import Login from "./components/pages/Login.svelte"
   import { ProgressBar } from "carbon-components-svelte"
@@ -105,8 +105,7 @@
     <li>
       <a
         href="/"
-        on:click|preventDefault={() => ($selectedMenuItem = MenuItem.PLOT)}
-        >Plot</a
+        on:click|preventDefault={() => ($selectedMenuItem = MenuItem.WORKBENCH)}>Workbench</a
       >
     </li>
   </ul>
@@ -117,7 +116,7 @@
       <Login />
     {:else if $selectedMenuItem === MenuItem.REGISTER}
       <Register />
-    {:else if $selectedMenuItem === MenuItem.PLOT}
+    {:else if $selectedMenuItem === MenuItem.WORKBENCH}
       <Plot />
     {/if}
   </div>

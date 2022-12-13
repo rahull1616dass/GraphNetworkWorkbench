@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { Endpoints } from "../../definitions/constants"
+  import { Endpoints } from "../../../definitions/constants"
   import { onMount } from "svelte"
-  import { netzschleuderNetworkNames } from "../../stores"
+  import { netzschleuderNetworkNames } from "../../../stores"
   import { SideNavItems } from "carbon-components-svelte"
-  import FetchableAccordionItem from "../common/FetchableAccordionItem.svelte"
+  import FetchableAccordionItem from "../../common/FetchableAccordionItem.svelte"
   import { Accordion } from "carbon-components-svelte"
-  import request from "../../api/request"
+  import request from "../../../api/request"
   import decompressResponse from 'decompress-response'
   import { parseReadableStream }  from "./UploadNetwork/networkParser"
   import { parse } from "vega"

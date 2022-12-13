@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { HoverData } from "../../../definitions/hoverData"
-  import { HoverType } from "../../../definitions/hoverType"
+  import type { HoverData } from "../../../../definitions/hoverData"
+  import { HoverType } from "../../../../definitions/hoverType"
   export let hoverData: HoverData = undefined
 </script>
 

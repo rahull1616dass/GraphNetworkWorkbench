@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Modal } from "carbon-components-svelte"
-    import { ImportModalType } from "../../definitions/importModalType"
+    import { ImportModalType } from "../../../definitions/importModalType"
     export let open: boolean = false
     export let selectedImportType: ImportModalType
 </script>

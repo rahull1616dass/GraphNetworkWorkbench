@@ -3,17 +3,17 @@
   import { XMLParser } from "fast-xml-parser"
   import { parseNetwork } from "./networkParser"
   import type ParseResult from "papaparse"
-  import type { Link, Metadata } from "../../../definitions/network"
-  import type { Node } from "../../../definitions/network"
-  import { Network } from "../../../definitions/network"
-  import { ModalData } from "../../../definitions/modalData"
-  import { MenuItem } from "../../../definitions/menuItem"
+  import type { Link, Metadata } from "../../../../definitions/network"
+  import type { Node } from "../../../../definitions/network"
+  import { Network } from "../../../../definitions/network"
+  import { ModalData } from "../../../../definitions/modalData"
+  import { MenuItem } from "../../../../definitions/menuItem"
   import {
     selectedMenuItem,
     networksList,
     paletteColors,
-  } from "../../../stores"
-  import { UploadedFileType } from "../../../definitions/uploadedFileType"
+  } from "../../../../stores"
+  import { UploadedFileType } from "../../../../definitions/uploadedFileType"
   import {
     Button,
     Modal,
@@ -23,8 +23,8 @@
   } from "carbon-components-svelte"
   import { Palette } from "@untemps/svelte-palette"
   import cryptoRandomString from "crypto-random-string"
-  import { uploadNetworkToStorage } from "../../../api/firebase"
-  import { ProgressBarData } from "../../../definitions/progressBarData"
+  import { uploadNetworkToStorage } from "../../../../api/firebase"
+  import { ProgressBarData } from "../../../../definitions/progressBarData"
 
   let modalData: ModalData = new ModalData()
   let progressBarData: ProgressBarData = new ProgressBarData()

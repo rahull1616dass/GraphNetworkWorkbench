@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Modal, Form, TextInput } from "carbon-components-svelte"
   import { createEventDispatcher } from "svelte"
-  import { Node } from "../../../definitions/network"
+  import { Node } from "../../../../definitions/network"
   export let modalProps: any = undefined
   export let open: boolean = false
   let node: Node = undefined

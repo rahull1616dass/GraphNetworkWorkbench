@@ -1,8 +1,8 @@
 <script lang="ts">
-  import ImportModal from "./ImportModal.svelte"
+  import ImportModal from "./AddNetwork/ImportModal.svelte"
   import { ImportModalType } from "../../definitions/importModalType"
-  import FromWeb from "./FromWeb.svelte"
-  import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte"
+  import FromWeb from "./AddNetwork/FromWeb.svelte"
+  import UploadNetwork from "./AddNetwork/UploadNetwork/UploadNetwork.svelte"
   import { testStoreValue } from "../../stores"
   import { getAuth } from "firebase/auth"
   import { authUserStore, selectedMenuItem } from "../../stores"

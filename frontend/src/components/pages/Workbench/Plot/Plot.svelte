@@ -1,17 +1,17 @@
 <script lang="ts">
   import { onMount } from "svelte"
-  import MiserablesData from "../../../data/MiserablesVisSpec"
-  import VisSpec from "../../../data/VisSpec"
+  import MiserablesData from "../../../../data/MiserablesVisSpec"
+  import VisSpec from "../../../../data/VisSpec"
   import { default as vegaEmbed } from "vega-embed"
-  import { networksList, selectedNetworkIndex } from "../../../stores"
-  import { ModalData } from "../../../definitions/modalData"
-  import { HoverData } from "../../../definitions/hoverData"
+  import { networksList, selectedNetworkIndex } from "../../../../stores"
+  import { ModalData } from "../../../../definitions/modalData"
+  import { HoverData } from "../../../../definitions/hoverData"
   import NodeDetailModal from "./NodeDetailModal.svelte"
-  import { Link, Node } from "../../../definitions/network"
-  import NetworkListItem from "../../common/NetworkListItem.svelte"
+  import { Link, Node } from "../../../../definitions/network"
+  import NetworkListItem from "../../../common/NetworkListItem.svelte"
   import Hover from "./Hover.svelte"
-  import statsIcon from "../../../assets/stats.svg"
-  import { HoverType } from "../../../definitions/hoverType"
+  import statsIcon from "../../../../assets/stats.svg"
+  import { HoverType } from "../../../../definitions/hoverType"
 
   function loadNetwork() {
     if ($networksList && $networksList.length > 0) {
