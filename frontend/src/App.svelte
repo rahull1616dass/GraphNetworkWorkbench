@@ -77,6 +77,10 @@
         $loginUserStore = undefined
         $networksList = []
         progressBarData.isPresent = false
+        isHoveringMyNetworks = false
+        isHoveringNetworksList = false
+        fetchedNetworksOnce = false
+        $selectedMenuItem = MenuItem.HOME
       })
       .catch((error) => {
         console.log(`Error while signing out: ${error}`)
