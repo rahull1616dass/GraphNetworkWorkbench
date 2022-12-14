@@ -7,6 +7,8 @@
   import Login from "./components/pages/Login.svelte"
   import Experiments from "./components/pages/Workbench/Experiments.svelte"
   import Reports from "./components/pages/Workbench/Reports.svelte"
+  import FromWeb from "./components/pages/AddNetwork/FromWeb.svelte"
+  import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte"
   import {
     selectedMenuItem,
     authUserStore,
@@ -20,12 +22,19 @@
     getNetworks as getNetworksFromFirestore,
   } from "./api/firebase"
   import { ProgressBarData } from "./definitions/progressBarData"
-  import { ProgressBar } from "carbon-components-svelte"
+  import { ProgressBar, Button } from "carbon-components-svelte"
   import { onMount } from "svelte"
+  import ImportModal from "./components/common/ImportModal.svelte"
+  import { ImportModalType }  from "./definitions/importModalType"
 
   /* ---- PAGE LOAD AND LOGIN ---- */
   let progressBarData: ProgressBarData = new ProgressBarData(true, "Loading...")
   let isLoggedIn: boolean = false
+
+  // For some reason, the getNetworksFromFirestore() function is called multiple times on page load.
+  // For now, this variable is used to prevent that. TODO: Find a better solution.
+  let fetchedNetworksOnce: boolean = false
+
   onMount(() => {
     /*
     If there is a loginUserStore already in the localstorage, try to login with that user from Firebase Auth.
@@ -48,6 +57,8 @@
     isLoggedIn = $authUserStore !== undefined && getAuth().currentUser !== null
     if (isLoggedIn && $networksList.length === 0) {
       progressBarData.text = "Fetching networks..."
+      if(fetchedNetworksOnce) return
+      fetchedNetworksOnce = true
       getNetworksFromFirestore()
         .then(() => (progressBarData.isPresent = false))
         .catch(() => (progressBarData.isPresent = false))
@@ -85,6 +96,13 @@
     isHoveringNetworksList = false
     $selectedMenuItem = MenuItem.PLOT
   }
+
+  /* ---- Import Modal ---- */
+  let isImportModalOpen: boolean = false
+  let selectedImportType: ImportModalType = ImportModalType.NONE
+
+
+  
 </script>
 
 {#if progressBarData.isPresent}
@@ -99,8 +117,8 @@
       </li>
       <li>
         <div
-          class:my_networks_open={isHoveringMyNetworks}
-          class:my_networks={!isHoveringMyNetworks}
+          class:menu_my_networks_open={isHoveringMyNetworks}
+          class:menu_my_networks={!isHoveringMyNetworks}
           on:mouseenter={() => (isHoveringMyNetworks = true)}
           on:mouseleave={() => /*(isHoveringMyNetworks = false)*/ null}
         >
@@ -155,8 +173,18 @@
     >
       <div class="networks_list_header">
         <p>Networks</p>
+        <Button
+          class="btn_networks_list_import"
+          on:click={() => {
+            isHoveringMyNetworks = false
+            isHoveringNetworksList = false
+            isImportModalOpen = true
+          }}
+          size="small"
+          on:click>Import Network</Button
+        >
       </div>
-      <div class="networks_list_items">
+      <div class="networks_list_items" style="--height: {$networksList.length * 120}px;">
         {#each $networksList as network, index}
           <NetworkListItem
             {network}
@@ -170,9 +198,17 @@
       </div>
     </div>
   {/if}
+  
+  <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
+  {#if selectedImportType === ImportModalType.FROM_WEB}
+    <FromWeb/>
+  {:else if selectedImportType === ImportModalType.UPLOAD}
+    <UploadNetwork/>
+  {/if}
+
 {/if}
 
-<style>
+<style lang="scss">
   .main_progress_bar {
     position: absolute;
     top: 50%;
@@ -184,7 +220,13 @@
     background-color: whitesmoke;
   }
 
-  .my_networks_open {
+  
+  ul#menu {
+    width: 100%;
+    display: inline-block;
+  }
+
+  .menu_my_networks {
     line-height: 40px;
     display: inline-block;
     width: 100%;
@@ -192,7 +234,7 @@
     height: 100%;
     background-color: #0f62fe;
   }
-  .my_networks {
+  .menu_my_networks_open {
     line-height: 40px;
     display: inline-block;
     width: 100%;
@@ -211,22 +253,38 @@
     border-top: none;
     z-index: 1;
   }
-
   .networks_list_header {
-    position: absolute;
+    position: relative;
     top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
+    height: 2.5rem;
+    background-color: grey;
+    color: white;
+    padding: 0 1rem;
     display: flex;
-    justify-content: center;
     align-items: center;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 0.5rem;
+    justify-content: space-between;
+
   }
 
-  ul#menu {
-    width: 100%;
-    display: inline-block;
+  .btn_networks_list_import {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
   }
+
+  .networks_list_items {
+    position: relative;
+    top: 2.5rem;
+    height: var(--height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+  }
+
 </style>

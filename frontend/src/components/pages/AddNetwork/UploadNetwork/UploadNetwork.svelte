@@ -25,6 +25,17 @@
   import cryptoRandomString from "crypto-random-string"
   import { uploadNetworkToStorage } from "../../../../api/firebase"
   import { ProgressBarData } from "../../../../definitions/progressBarData"
+  import { onMount } from "svelte"
+
+  onMount(() => {
+    /*
+    Once the user selects an import type from the modal, the selectedImportType is changed to 
+    something other than NONE.
+    At this point, the selectedMenuItem must be set to NONE so that the root div is not rendered
+    on top of the import pages
+    */
+    $selectedMenuItem = MenuItem.NONE
+  })
 
   let modalData: ModalData = new ModalData()
   let progressBarData: ProgressBarData = new ProgressBarData()

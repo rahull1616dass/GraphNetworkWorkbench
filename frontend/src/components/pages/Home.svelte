@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ImportModal from "./AddNetwork/ImportModal.svelte"
+  import ImportModal from "../common/ImportModal.svelte"
   import { ImportModalType } from "../../definitions/importModalType"
   import FromWeb from "./AddNetwork/FromWeb.svelte"
   import UploadNetwork from "./AddNetwork/UploadNetwork/UploadNetwork.svelte"

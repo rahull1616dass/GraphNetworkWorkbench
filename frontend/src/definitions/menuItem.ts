@@ -1,4 +1,5 @@
 export enum MenuItem {
+    NONE,
     REGISTER,
     LOGIN,
     HOME,

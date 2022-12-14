@@ -6,12 +6,20 @@
   import FetchableAccordionItem from "../../common/FetchableAccordionItem.svelte"
   import { Accordion } from "carbon-components-svelte"
   import request from "../../../api/request"
-  import decompressResponse from 'decompress-response'
-  import { parseReadableStream }  from "./UploadNetwork/networkParser"
+  import decompressResponse from "decompress-response"
+  import { parseReadableStream } from "./UploadNetwork/networkParser"
   import { parse } from "vega"
-
+  import { selectedMenuItem } from "../../../stores"
+  import { MenuItem } from "../../../definitions/menuItem"
 
   onMount(async () => {
+    /*
+    Once the user selects an import type from the modal, the selectedImportType is changed to 
+    something other than NONE.
+    At this point, the selectedMenuItem must be set to NONE so that the root div is not rendered
+    on top of the import pages
+    */
+    $selectedMenuItem = MenuItem.NONE
     console.log(`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCHELEUDER_NETS}`)
     //const response = await request(`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCHELEUDER_NETS}`)
     netzschleuderNetworkNames.set(

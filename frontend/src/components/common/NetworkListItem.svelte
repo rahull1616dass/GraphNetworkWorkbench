@@ -44,7 +44,7 @@
     transition: background-color 0.2s ease-in-out;
     margin: 10px;
     &.selected {
-      background-color: #e5e5e5;
+      background-color: lightcoral;
     }
   }
   
