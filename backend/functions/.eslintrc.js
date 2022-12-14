@@ -27,5 +27,7 @@ module.exports = {
   rules: {
     "quotes": ["error", "double"],
     "import/no-unresolved": 0,
+    "semi": "off",
+    "@typescript-eslint/semi": "off",
   },
 };

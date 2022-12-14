@@ -1,9 +1,16 @@
-import * as functions from "firebase-functions";
+/* eslint-disable max-len */
+import * as functions from "firebase-functions"
 
-// // Start writing functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// Create a const typescript object to store the collection names
+
+const DB = {
+  Users: "Users",
+  Networks: "Networks",
+  Tasks: "Tasks",
+}
+
+exports.onTaskCreated = functions.firestore
+    .document(`${DB.Users}/{userId}/${DB.Networks}/{networkId}/${DB.Tasks}/{taskId}`)
+    .onCreate((snap, context) => {
+      console.log("Task created", snap.data())
+    })
