@@ -42,9 +42,8 @@
         <button on:click={() => ($selectedMenuItem = MenuItem.LOGIN)}
           >Login</button
         >
-       <!-- <button on:click={() => ($selectedMenuItem = MenuItem.REGISTER)}
-          >Register</button-->
-        >
+        <!-- <button on:click={() => ($selectedMenuItem = MenuItem.REGISTER)}
+          >Register</button>-->
       </div>
     {/if}
   </div>

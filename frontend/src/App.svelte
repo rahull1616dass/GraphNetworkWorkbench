@@ -1,6 +1,7 @@
 <script lang="ts">
   import { MenuItem } from "./definitions/menuItem"
   import NetworkListItem from "./components/common/NetworkListItem.svelte"
+  import Home from "./components/pages/Home.svelte"
   import Plot from "./components/pages/Workbench/Plot/Plot.svelte"
   import Register from "./components/pages/Register.svelte"
   import Login from "./components/pages/Login.svelte"
@@ -11,7 +12,7 @@
     authUserStore,
     loginUserStore,
     networksList,
-    selectedNetworkIndex
+    selectedNetworkIndex,
   } from "./stores"
   import { getAuth } from "firebase/auth"
   import {
@@ -20,21 +21,25 @@
   } from "./api/firebase"
   import { ProgressBarData } from "./definitions/progressBarData"
   import { ProgressBar } from "carbon-components-svelte"
+  import { onMount } from "svelte"
 
+  /* ---- PAGE LOAD AND LOGIN ---- */
   let progressBarData: ProgressBarData = new ProgressBarData(true, "Loading...")
   let isLoggedIn: boolean = false
-  /*
+  onMount(() => {
+    /*
     If there is a loginUserStore already in the localstorage, try to login with that user from Firebase Auth.
     If Firebase Auth succeeds, the user is logged in and his networks are fetched.
     */
-  if ($loginUserStore) {
-    loginUser($loginUserStore)
-      .then((user) => checkForLoggedIn())
-      .catch((error) => {
-        console.log(error)
-        progressBarData.isPresent = false
-      })
-  } else progressBarData.isPresent = false
+    if ($loginUserStore) {
+      loginUser($loginUserStore)
+        .then((user) => checkForLoggedIn())
+        .catch((error) => {
+          console.log(error)
+          progressBarData.isPresent = false
+        })
+    } else progressBarData.isPresent = false
+  })
 
   // Should update after the user manually logins or registers
   $: $authUserStore, checkForLoggedIn()
@@ -68,7 +73,18 @@
       })
   }
 
-  let isMyNetworksMenuOpen: boolean = false
+  /* ---- My Networks ---- */
+  let isHoveringMyNetworks: boolean = false
+  let isHoveringNetworksList: boolean = false
+
+  $: $selectedNetworkIndex, selectNetwork()
+
+  function selectNetwork() {
+    if ($selectedNetworkIndex === undefined) return
+    isHoveringMyNetworks = false
+    isHoveringNetworksList = false
+    $selectedMenuItem = MenuItem.PLOT
+  }
 </script>
 
 {#if progressBarData.isPresent}
@@ -83,45 +99,60 @@
       </li>
       <li>
         <div
-          class:my_networks_open={isMyNetworksMenuOpen}
-          class:my_networks={!isMyNetworksMenuOpen}
-          on:mouseenter={() => {
-            console.log("enter")
-            isMyNetworksMenuOpen = true
-          }}
-          on:mouseleave={() => {
-            console.log("leave")
-            isMyNetworksMenuOpen = false
-          }}
+          class:my_networks_open={isHoveringMyNetworks}
+          class:my_networks={!isHoveringMyNetworks}
+          on:mouseenter={() => (isHoveringMyNetworks = true)}
+          on:mouseleave={() => /*(isHoveringMyNetworks = false)*/ null}
         >
           My Networks
         </div>
       </li>
-      <li>
-        <a
-          href="/"
-          on:click|preventDefault={() => ($selectedMenuItem = MenuItem.PLOT)}
-          >Visualize</a
-        >
-      </li>
-      <li>
-        <a
-          href="/"
-          on:click|preventDefault={() =>
-            ($selectedMenuItem = MenuItem.EXPERIMENTS)}>Experiments</a
-        >
-      </li>
-      <li>
-        <a
-          href="/"
-          on:click|preventDefault={() => ($selectedMenuItem = MenuItem.REPORTS)}
-          >Reports</a
-        >
-      </li>
+      {#if $selectedNetworkIndex !== undefined}
+        <li>
+          <a
+            href="/"
+            on:click|preventDefault={() => ($selectedMenuItem = MenuItem.PLOT)}
+            >Visualize</a
+          >
+        </li>
+        <li>
+          <a
+            href="/"
+            on:click|preventDefault={() =>
+              ($selectedMenuItem = MenuItem.EXPERIMENTS)}>Experiments</a
+          >
+        </li>
+        <li>
+          <a
+            href="/"
+            on:click|preventDefault={() =>
+              ($selectedMenuItem = MenuItem.REPORTS)}>Reports</a
+          >
+        </li>
+      {/if}
     </ul>
   {/if}
-  {#if isMyNetworksMenuOpen}
-    <div class="networks_list">
+  <div class="root">
+    {#if $selectedMenuItem === MenuItem.HOME}
+      <Home />
+    {:else if $selectedMenuItem === MenuItem.LOGIN}
+      <Login />
+    {:else if $selectedMenuItem === MenuItem.REGISTER}
+      <Register />
+    {:else if $selectedMenuItem === MenuItem.PLOT}
+      <Plot />
+    {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
+      <Experiments />
+    {:else if $selectedMenuItem === MenuItem.REPORTS}
+      <Reports />
+    {/if}
+  </div>
+  {#if isHoveringMyNetworks || isHoveringNetworksList}
+    <div
+      class="networks_list"
+      on:mouseenter={() => (isHoveringNetworksList = true)}
+      on:mouseleave={() => (isHoveringNetworksList = false)}
+    >
       <div class="networks_list_header">
         <p>Networks</p>
       </div>
@@ -139,19 +170,6 @@
       </div>
     </div>
   {/if}
-  <div class="root">
-    {#if $selectedMenuItem === MenuItem.LOGIN}
-      <Login />
-    {:else if $selectedMenuItem === MenuItem.REGISTER}
-      <Register />
-    {:else if $selectedMenuItem === MenuItem.PLOT}
-      <Plot />
-    {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
-      <Experiments />
-    {:else if $selectedMenuItem === MenuItem.REPORTS}
-      <Reports />
-    {/if}
-  </div>
 {/if}
 
 <style>
@@ -182,7 +200,23 @@
     height: 100%;
   }
 
+  .networks_list {
+    position: absolute;
+    top: 7%;
+    left: 20%;
+    width: 20%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-top: none;
+    z-index: 1;
+  }
+
   .networks_list_header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -190,18 +224,7 @@
     border-bottom: 1px solid #e0e0e0;
     padding: 0.5rem;
   }
-  .networks_list {
-    margin-top: 5.6%;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 20%;
-    background-color: #f5f5f5;
-  }
-  
+
   ul#menu {
     width: 100%;
     display: inline-block;
