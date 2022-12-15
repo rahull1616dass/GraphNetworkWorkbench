@@ -29,5 +29,11 @@ module.exports = {
     "import/no-unresolved": 0,
     "semi": "off",
     "@typescript-eslint/semi": "off",
+    "@typescript-eslint/line-break-style": "off",
+    "object-curly-spacing": "off",
+    "indent": "off",
+    "comma-dangle": "off",
+    "no-trailing-spaces": "off",
+    "eol-last": "off",
   },
 };
