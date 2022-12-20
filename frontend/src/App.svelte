@@ -10,6 +10,7 @@
   import FromWeb from "./components/pages/AddNetwork/FromWeb.svelte"
   import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte"
   import Header from "./components/common/Header.svelte"
+  import Footer from "./components/common/Footer.svelte"
   import {
     selectedMenuItem,
     authUserStore,
@@ -212,16 +213,17 @@
   {/if}
 
 {/if}
+<Footer />
 
 
 
 
 
-<style lang="scss">
+<style >
   .main_progress_bar {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 100%;
+    left: 100%;
     transform: translate(-50%, -50%);
   }
   .root {
@@ -236,7 +238,7 @@
   }
 
   .menu_my_networks {
-    line-height: 40px;
+    /*line-height: 40px;*/
     display: inline-block;
     width: 100%;
     color: white;
@@ -244,7 +246,7 @@
     background-color: #0f62fe;
   }
   .menu_my_networks_open {
-    line-height: 40px;
+    /*line-height: 40px;*/
     display: inline-block;
     width: 100%;
     color: white;
@@ -271,7 +273,7 @@
     height: 2.5rem;
     background-color: grey;
     color: white;
-    padding: 0 1rem;
+    padding: 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
