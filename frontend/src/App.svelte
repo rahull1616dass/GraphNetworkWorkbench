@@ -9,6 +9,7 @@
   import Reports from "./components/pages/Workbench/Reports.svelte"
   import FromWeb from "./components/pages/AddNetwork/FromWeb.svelte"
   import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte"
+  import Header from "./components/common/Header.svelte"
   import {
     selectedMenuItem,
     authUserStore,
@@ -106,9 +107,9 @@
   let selectedImportType: ImportModalType = ImportModalType.NONE
 
 
-  
-</script>
 
+</script>
+<Header />
 {#if progressBarData.isPresent}
   <div class="main_progress_bar">
     <ProgressBar helperText={progressBarData.text} />
@@ -211,6 +212,10 @@
   {/if}
 
 {/if}
+
+
+
+
 
 <style lang="scss">
   .main_progress_bar {
