@@ -13,13 +13,14 @@
 <style>
     header{
         background-color: #d8dadc;
-        padding: 10px;
+        padding: 1%;
     }
     h1{
         margin: 0;
         text-align: center;
     }
     img{
-        max-width: 1300px;
+        max-width: 100%;
+        height: 100%;
     }
 </style>
