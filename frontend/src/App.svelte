@@ -11,6 +11,7 @@
   import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte"
   import Header from "./components/common/Header.svelte"
   import Footer from "./components/common/Footer.svelte"
+  import Tabs from "./components/common/Tabs.svelte"
   import {
     selectedMenuItem,
     authUserStore,
@@ -90,6 +91,12 @@
       })
   }
 
+  /* ---- Tabs ---- */
+
+  let menuItems = ['Home', 'My Networks', 'Visualize', 'Experiments', 'Reports', 'Logout', 'Login'];
+  let activeMenuItem = 'Home';
+  const tabChange = (e) => activeMenuItem = e.detail;
+
   /* ---- My Networks ---- */
   let isHoveringMyNetworks: boolean = false
   let isHoveringNetworksList: boolean = false
@@ -110,7 +117,10 @@
 
 
 </script>
+
+
 <Header />
+
 {#if progressBarData.isPresent}
   <div class="main_progress_bar">
     <ProgressBar helperText={progressBarData.text} />
@@ -118,6 +128,27 @@
 {:else}
   {#if isLoggedIn}
     <ul id="menu">
+      <Tabs {activeMenuItem} {menuItems} on:tabChange={tabChange} />
+      {#if activeMenuItem === 'Home'}
+        <p>Home</p>
+      {:else if activeMenuItem === 'My Networks'}
+        <p>My Networks</p>
+      {:else if activeMenuItem === 'Visualize'}
+      <p>Visualize</p>
+      {:else if activeMenuItem === 'Experiments'}
+      <p>Experiments</p>
+      {:else if activeMenuItem === 'Reports'}
+      <p>Reports</p>
+      {:else if activeMenuItem === 'Logout'}
+      <p>Logout</p>
+  {/if}
+    </ul>
+  {/if}
+{/if}
+
+<Footer />
+
+      <!---
       <li>
         <a href="/" on:click|preventDefault={performLogout}>Logout</a>
       </li>
@@ -213,7 +244,9 @@
   {/if}
 
 {/if}
-<Footer />
+-->
+
+
 
 
 
