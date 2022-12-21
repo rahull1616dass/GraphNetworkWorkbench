@@ -58,7 +58,6 @@
     color: #063d79;
     font-weight: 500;
     animation: splash 1s normal forwards ease-in-out;
-    
     border: 10px solid #d8dadc;
     /*animation: mymove 5s bounce;*/
     padding-top: 2%;
@@ -82,6 +81,7 @@
 
   div {
     padding-top: 2%;
+
   }
   .loginButton {
     font-size: 120%;
@@ -98,6 +98,7 @@
     position: absolute;
     top: 73%;
     font-size: 150%;
+    z-index: 1;
     transform: translate(-50%, -50%);
   }
 
