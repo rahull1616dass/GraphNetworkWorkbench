@@ -93,9 +93,24 @@
 
   /* ---- Tabs ---- */
 
-  let menuItems = ['Home', 'My Networks', 'Visualize', 'Experiments', 'Reports', 'Logout', 'Login'];
-  let activeMenuItem = 'Home';
+  let menuItems = ['Home', 'My Networks', 'Visualize', 'Experiments', 'Reports', 'Profile']
+  let activeMenuItem = "Home";
   const tabChange = (e) => activeMenuItem = e.detail;
+
+  /*
+  let menuItemsList = Object.keys(MenuItem).filter((v) => isNaN(Number(v)))
+
+  function removeElementFromStringArray(element: string) {
+    menuItemsList.forEach((value,index)=>{
+        if(value==element) menuItemsList.splice(index,1)
+    });
+  }
+  removeElementFromStringArray("REGISTER")
+  removeElementFromStringArray("LOGIN")
+
+  let activeMenuItem = MenuItem.HOME;
+  */
+  
 
   /* ---- My Networks ---- */
   let isHoveringMyNetworks: boolean = false
@@ -126,11 +141,11 @@
     <ProgressBar helperText={progressBarData.text} />
   </div>
 {:else}
-  {#if isLoggedIn}
+    {#if isLoggedIn === true}
     <ul id="menu">
       <Tabs {activeMenuItem} {menuItems} on:tabChange={tabChange} />
       {#if activeMenuItem === 'Home'}
-        <p>Home</p>
+        <Home />
       {:else if activeMenuItem === 'My Networks'}
         <p>My Networks</p>
       {:else if activeMenuItem === 'Visualize'}
@@ -139,12 +154,21 @@
       <p>Experiments</p>
       {:else if activeMenuItem === 'Reports'}
       <p>Reports</p>
-      {:else if activeMenuItem === 'Logout'}
+      {:else if activeMenuItem === 'Profile'}
       <p>Logout</p>
-  {/if}
+      {/if}
     </ul>
-  {/if}
+    {:else if isLoggedIn === false}
+      {#if $selectedMenuItem === MenuItem.HOME}
+        <Home />
+      {:else if $selectedMenuItem === MenuItem.LOGIN}
+        <Login />
+      {:else if $selectedMenuItem === MenuItem.REGISTER}
+        <Register />
+      {/if}
+    {/if}
 {/if}
+
 
 <Footer />
 
@@ -252,7 +276,7 @@
 
 
 
-<style >
+<style lang="scss">
   .main_progress_bar {
     position: absolute;
     top: 100%;

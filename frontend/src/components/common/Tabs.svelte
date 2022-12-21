@@ -30,13 +30,15 @@
     }
     li{
         margin: 1% 5%;
-        font-size: 100%;
-        color: #52575b;
+        font-size: 120%;
+        font-weight: 600;
+        color: #555;
         cursor: pointer;
     }
     .active{
         color: #063d79;
-        border-bottom: 2px solid #063d79;
-        padding-bottom: 20%;
+        border-bottom: 5px solid #063d79;
+        padding-bottom: 10%;
+        
     }
 </style>
