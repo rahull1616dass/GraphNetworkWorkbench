@@ -139,7 +139,7 @@
     justify-content: center;
   }
   .login-button {
-    margin: 10px;
+    margin: auto;
     justify-content: center;
     padding-top: 5%;
     padding-bottom: 1%;
