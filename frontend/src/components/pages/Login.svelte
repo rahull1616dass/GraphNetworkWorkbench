@@ -55,7 +55,7 @@
 </script>
 
 <div class="login-form">
-  Login Form
+  <h>Login Form</h>
   <Form
     on:submit={(e) => {
       e.preventDefault()
@@ -90,7 +90,7 @@
       <ProgressBar helperText={progressBarData.text} />
     {/if}
     <div class="not_registered_yet">
-      Not registered yet? <a
+      <p>Not registered yet?</p> <a
         href="/"
         on:click|preventDefault={() => ($selectedMenuItem = MenuItem.REGISTER)}
         >Register</a
@@ -111,16 +111,37 @@
 </div>
 
 <style lang="scss">
+
+  a{
+    font-size: 100%;
+    padding-top: 5%;
+    padding-bottom: 5%;
+  }
+
+  p{
+    font-size: 100%;
+    padding-top: 5%;
+    padding-bottom: 1%;
+  }
+
+  h{
+    font-size: 200%;
+    
+  }
+
   .login-form {
-    padding: 10%;
-    width: 100%;
+    padding: 5%;
+    width: 40%;
+    margin-left: auto;
+    margin-right: auto;
     display: absolute;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
   }
   .login-button {
     margin: 10px;
     justify-content: center;
+    padding-top: 5%;
+    padding-bottom: 1%;
   }
 </style>
