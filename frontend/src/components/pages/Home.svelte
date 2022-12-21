@@ -24,10 +24,10 @@
   
   <div class="loggedInText">
     {#if isLoggedIn}
-      Logged In as {$authUserStore.email}
+      <!---Logged In as {$authUserStore.email}--->
       {#if selectedImportType === ImportModalType.NONE}
         <button
-          class="buttons"
+          class="addNetworkButton"
           on:click={() => (isImportModalOpen = !isImportModalOpen)}
           >Add Network</button
         >
@@ -39,7 +39,7 @@
       {/if}
     {:else}
     <h1>Welcome to Graph Learning Workbench</h1>
-      <div class="buttons">
+      <div class="loginButton">
         <button on:click={() => ($selectedMenuItem = MenuItem.LOGIN)}
           >Login</button
         >
@@ -83,11 +83,21 @@
   div {
     padding-top: 2%;
   }
-  .buttons {
+  .loginButton {
+    font-size: 120%;
     position: absolute;
-    top: 50%;
+    top: 76%;
     left: 50%;
     z-index: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  .addNetworkButton {
+    background-color: #f7f7f8;
+    color: #063d79;
+    position: absolute;
+    top: 73%;
+    font-size: 150%;
     transform: translate(-50%, -50%);
   }
 
@@ -95,7 +105,7 @@
     width: 100%;
     height: 100%;
     position: relative;
-    opacity: 0.5;
+    opacity: 0.7;
   }
 
   .loggedInText {
