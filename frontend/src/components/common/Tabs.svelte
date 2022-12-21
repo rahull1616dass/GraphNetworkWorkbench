@@ -32,7 +32,7 @@
         margin: 1% 5%;
         font-size: 120%;
         font-weight: 600;
-        color: #555;
+        color: #aaa;
         cursor: pointer;
     }
     .active{

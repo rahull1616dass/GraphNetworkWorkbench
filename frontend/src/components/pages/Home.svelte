@@ -21,7 +21,7 @@
 </script>
 
 <main>
-  <h1>Welcome to Graph Learning Workbench</h1>
+  
   <div class="loggedInText">
     {#if isLoggedIn}
       Logged In as {$authUserStore.email}
@@ -38,6 +38,7 @@
         <UploadNetwork />
       {/if}
     {:else}
+    <h1>Welcome to Graph Learning Workbench</h1>
       <div class="buttons">
         <button on:click={() => ($selectedMenuItem = MenuItem.LOGIN)}
           >Login</button
@@ -51,6 +52,37 @@
 </main>
 
 <style lang="scss">
+  h1{
+    width: 100%;
+    height: 100%;
+    color: #063d79;
+    font-weight: 500;
+    animation: splash 1s normal forwards ease-in-out;
+    
+    border: 10px solid #d8dadc;
+    /*animation: mymove 5s bounce;*/
+    padding-top: 2%;
+    padding-bottom: 2%;
+    
+  }
+
+  @keyframes splash {
+    from {
+        opacity: 0;
+        transform: scale(0, 0);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1, 1.1);
+    }
+    to {
+        transform: scale(1, 1);
+    }
+  }
+
+  div {
+    padding-top: 2%;
+  }
   .buttons {
     position: absolute;
     top: 50%;
@@ -67,7 +99,7 @@
   }
 
   .loggedInText {
-    color: red;
+    color: #aaa;
     margin: 10px;
   }
 </style>

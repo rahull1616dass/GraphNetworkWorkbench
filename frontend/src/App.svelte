@@ -155,7 +155,7 @@
       {:else if activeMenuItem === 'Reports'}
       <p>Reports</p>
       {:else if activeMenuItem === 'Profile'}
-      <p>Logout</p>
+      <a href="/" on:click|preventDefault={performLogout}>Logout</a>
       {/if}
     </ul>
     {:else if isLoggedIn === false}
