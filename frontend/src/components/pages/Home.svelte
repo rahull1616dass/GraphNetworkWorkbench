@@ -42,8 +42,8 @@
     {:else}
     <h1>Welcome to Graph Learning Workbench</h1>
       <div class="loginButton">
-        <button on:click={() => ($selectedMenuItem = MenuItem.LOGIN)}
-          >Login</button
+        <CustomButton type={"secondary"} on:click={() => ($selectedMenuItem = MenuItem.LOGIN)}
+          >Login</CustomButton
         >
         <!-- <button on:click={() => ($selectedMenuItem = MenuItem.REGISTER)}
           >Register</button>-->
@@ -87,9 +87,9 @@
   }
   .loginButton {
     font-size: 120%;
-    position: absolute;
-    top: 76%;
-    left: 50%;
+    position: flex;
+    margin-top: 4%;
+    margin-left: 50%;
     z-index: 1;
     transform: translate(-50%, -50%);
   }

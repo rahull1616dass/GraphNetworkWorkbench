@@ -2,9 +2,10 @@
     export let type = 'primary';
     export let flat = false;
     export let inverse = false;
+    export let disabled = false;
   </script>
   
-  <button class:flat={flat} class:inverse={inverse} class={type} on:click>
+  <button class:flat={flat} class:inverse={inverse} class={type} class:disabled={disabled} on:click>
     <slot></slot>
   </button>
   
@@ -46,5 +47,15 @@
         color: red;
         background: white;
         border: 2px solid red;
+    }
+    .primary.disabled {
+        pointer-events: none;
+        background-color: whitesmoke;
+        color: lightgrey
+    }
+    .secondary.disabled {
+        pointer-events: none;
+        background-color: whitesmoke;
+        color: lightgrey
     }
   </style>

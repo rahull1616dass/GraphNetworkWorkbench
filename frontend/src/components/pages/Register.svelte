@@ -14,6 +14,7 @@
   import { ProgressBarData } from "../../definitions/progressBarData"
   import { selectedMenuItem}  from "../../stores"
   import { MenuItem } from "../../definitions/menuItem"
+  import CustomButton from "../common/CustomButton.svelte"
 
   let modalData = new ModalData()
   let progressBarData: ProgressBarData = new ProgressBarData(false, "Registering user...")
@@ -67,9 +68,9 @@
     progressBarData.isPresent = false
   }
 </script>
-
+<div class="register-title"><h>Register Form</h></div>
 <div class="register-form">
-  <h>Register Form</h>
+  
   <Form
     on:submit={(e) => {
       e.preventDefault()
@@ -107,13 +108,12 @@
     />
     {#if !progressBarData.isPresent}
       <div class="register-button">
-        <Button
-          type="submit"
-          kind="primary"
-          disabled={user.email.length < 5 ||
+        <CustomButton
+          type="secondary"
+          disabled= {user.email.length < 5 ||
             isPasswordInvalid ||
             isEmailInvalid}
-          on:click={onRegisterButtonClicked}>Register</Button
+          on:click={onRegisterButtonClicked}>Register</CustomButton
         >
       </div>
     {:else}
@@ -133,7 +133,7 @@
     modalHeading={modalData.messageHeader}
     on:close={() => {
       modalData.isOpen = false
-      $selectedMenuItem = MenuItem.HOME
+      $selectedMenuItem = MenuItem.REGISTER
     }}>{modalData.messageBody}</Modal
   >
 </div>
@@ -154,11 +154,16 @@
 
   h{
     font-size: 200%;
-    
+  }
+
+  .register-title {
+    padding: 5%;
+    color: #063d79;
+    font-weight: 500;
   }
 
   .register-form {
-    padding: 5%;
+    padding: 1%;
     width: 40%;
     margin-left: auto;
     margin-right: auto;
@@ -169,8 +174,8 @@
   .register-button {
     margin: auto;
     justify-content: center;
-    align-items: center;
-    padding-top: 5%;
+    padding-top: 15%;
     padding-bottom: 1%;
+    font-size: 120%;
   }
 </style>

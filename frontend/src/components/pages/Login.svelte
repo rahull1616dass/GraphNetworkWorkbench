@@ -13,6 +13,7 @@
   import { ProgressBarData } from "../../definitions/progressBarData"
   import { selectedMenuItem } from "../../stores"
   import { MenuItem } from "../../definitions/menuItem"
+  import CustomButton from "../common/CustomButton.svelte"
 
   let modalData = new ModalData()
   let progressBarData: ProgressBarData = new ProgressBarData(
@@ -54,8 +55,9 @@
   }
 </script>
 
+
+<div class="login-title"><h>Login Form</h></div>
 <div class="login-form">
-  <h>Login Form</h>
   <Form
     on:submit={(e) => {
       e.preventDefault()
@@ -79,11 +81,9 @@
     />
     {#if !progressBarData.isPresent}
       <div class="login-button">
-        <Button
-          type="submit"
-          kind="primary"
-          disabled={user.email.length === 0 || user.password.length === 0}
-          on:click={onLoginButtotnClicked}>Login</Button
+        <CustomButton
+          type={"secondary"}
+          on:click={onLoginButtotnClicked}>Login</CustomButton
         >
       </div>
     {:else}
@@ -129,19 +129,27 @@
     
   }
 
-  .login-form {
+  .login-title {
     padding: 5%;
+    color: #063d79;
+    font-weight: 500;
+  }
+
+  .login-form {
+    padding: 1%;
     width: 40%;
     margin-left: auto;
     margin-right: auto;
     display: absolute;
     align-items: center;
     justify-content: center;
+    
   }
   .login-button {
     margin: auto;
     justify-content: center;
-    padding-top: 5%;
+    padding-top: 15%;
     padding-bottom: 1%;
+    font-size: 120%;
   }
 </style>
