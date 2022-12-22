@@ -1,5 +1,6 @@
 <script lang="ts">
   import ImportModal from "../common/ImportModal.svelte"
+  import CustomButton from "../common/CustomButton.svelte"
   import { ImportModalType } from "../../definitions/importModalType"
   import FromWeb from "./AddNetwork/FromWeb.svelte"
   import UploadNetwork from "./AddNetwork/UploadNetwork/UploadNetwork.svelte"
@@ -26,12 +27,13 @@
     {#if isLoggedIn}
       <!---Logged In as {$authUserStore.email}--->
       {#if selectedImportType === ImportModalType.NONE}
-        <button
-          class="addNetworkButton"
+        <div> <ImportModal bind:selectedImportType bind:open={isImportModalOpen} /> </div>
+      
+        <div class="addNetworkButton">
+        <CustomButton type={"secondary"} inverse={false}
           on:click={() => (isImportModalOpen = !isImportModalOpen)}
-          >Add Network</button
-        >
-        <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
+          >Add Network</CustomButton>
+        </div>
       {:else if selectedImportType === ImportModalType.FROM_WEB}
         <FromWeb />
       {:else if selectedImportType === ImportModalType.UPLOAD}
@@ -93,10 +95,10 @@
   }
 
   .addNetworkButton {
-    background-color: #f7f7f8;
-    color: #063d79;
-    position: absolute;
-    top: 73%;
+    /*background-color: #f7f7f8;*/
+    /*color: #063d79;*/
+    position: flex;
+    margin-left: 50%;
     font-size: 150%;
     z-index: 1;
     transform: translate(-50%, -50%);
