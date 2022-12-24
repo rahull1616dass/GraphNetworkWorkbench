@@ -27,6 +27,7 @@
         justify-content: center;
         padding: 0%;
         list-style-type: none;
+        
     }
     li{
         margin: 1% 5%;

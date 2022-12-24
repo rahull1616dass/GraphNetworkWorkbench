@@ -27,12 +27,16 @@
     {#if isLoggedIn}
       <!---Logged In as {$authUserStore.email}--->
       {#if selectedImportType === ImportModalType.NONE}
+        <div class="viz" id="viz" />
         <div> <ImportModal bind:selectedImportType bind:open={isImportModalOpen} /> </div>
-      
+        
         <div class="addNetworkButton">
         <CustomButton type={"secondary"} inverse={false}
           on:click={() => (isImportModalOpen = !isImportModalOpen)}
           >Add Network</CustomButton>
+
+          
+
         </div>
       {:else if selectedImportType === ImportModalType.FROM_WEB}
         <FromWeb />
@@ -41,16 +45,17 @@
       {/if}
     {:else}
     <h1>Welcome to Graph Learning Workbench</h1>
+      <div class="viz" id="viz" />
       <div class="loginButton">
         <CustomButton type={"secondary"} on:click={() => ($selectedMenuItem = MenuItem.LOGIN)}
-          >Login</CustomButton
-        >
+          >Login</CustomButton>
+          
         <!-- <button on:click={() => ($selectedMenuItem = MenuItem.REGISTER)}
           >Register</button>-->
       </div>
     {/if}
   </div>
-  <div class="viz" id="viz" />
+  <!--- <div class="viz" id="viz" /> -->
 </main>
 
 <style lang="scss">
