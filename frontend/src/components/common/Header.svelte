@@ -1,11 +1,16 @@
 <script lang="ts">
     import wue_banner from "../../assets/wue_banner.svg"
+    import { selectedMenuItem } from "../../stores"
+    import { MenuItem } from "../../definitions/menuItem"
 </script>
 
 
 <header>
     <h1>
-        <img src={wue_banner} class="wue_banner" alt="wue_banner">
+        <a href="/" on:click|preventDefault={() => ($selectedMenuItem = MenuItem.HOME)}>
+            <img  src={wue_banner} class="wue_banner" alt="wue_banner" >
+        </a>
+        
     </h1>
 
 </header>
