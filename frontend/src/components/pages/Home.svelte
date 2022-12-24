@@ -86,7 +86,7 @@
 
   }
   .loginButton {
-    font-size: 120%;
+    font-size: 150%;
     position: flex;
     margin-top: 4%;
     margin-left: 50%;

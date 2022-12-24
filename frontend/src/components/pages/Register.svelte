@@ -26,9 +26,9 @@
   $: doPasswordsMatch =
     user.password &&
     user.passwordConfirm &&
-    user.password !== user.passwordConfirm
+    user.password === user.passwordConfirm
   $: isPasswordShort = user.password && user.password.length < 8
-  $: isPasswordInvalid = isPasswordShort || doPasswordsMatch
+  $: isPasswordInvalid = isPasswordShort || !doPasswordsMatch
   $: isEmailInvalid =
     user.email.length > 4 && !EmailValidator.validate(user.email)
 
@@ -103,7 +103,7 @@
       type="password"
       required
       invalidText="Passwords do not match"
-      invalid={doPasswordsMatch}
+      invalid={!isPasswordInvalid && !doPasswordsMatch}
       bind:value={user.passwordConfirm}
     />
     {#if !progressBarData.isPresent}

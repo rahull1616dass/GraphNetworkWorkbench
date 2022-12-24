@@ -4,7 +4,7 @@ export default {
   $schema: "https://vega.github.io/schema/vega/v5.json",
   description:
     "A node-link diagram with force-directed layout, depicting character co-occurrence in the novel Les Misérables.",
-  width: 700,
+  width: 1700,
   height: 500,
   padding: 0,
   autosize: "none",

@@ -83,6 +83,7 @@
       <div class="login-button">
         <CustomButton
           type={"secondary"}
+          disabled={user.email.length === 0 || user.password.length === 0}
           on:click={onLoginButtotnClicked}>Login</CustomButton
         >
       </div>
