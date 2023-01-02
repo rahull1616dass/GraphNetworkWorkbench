@@ -4,14 +4,16 @@ import * as functions from "firebase-functions"
 
 /*
  * import fetch from "node-fetch"
- * For some reason, seems fetch does not work for Firebase Cloud Functions.
  * See: https://stackoverflow.com/a/58734908/11330757
  * Hence using axios instead.
+ * Also FormData is now a part of the native Node.js API as of v18 (https://stackoverflow.com/a/73325542/11330757)
+ * But Firebase Cloud Function only supports up to v16 -.- 
  */
+//const FormData = require("form-data")
 import axios from "axios"
 import * as admin from "firebase-admin"
 
-const app = admin.initializeApp()
+admin.initializeApp()
 
 const NETWORK_FILE_TYPE = {
   NODES: "nodes",
@@ -24,19 +26,14 @@ const DB = {
   Tasks: "Tasks",
 }
 
-function blobToFile(theBlob: Blob, fileName: string): File {
-  return new File([theBlob as any], fileName, {
-    lastModified: new Date().getTime(),
-    type: theBlob.type,
-  })
-}
-
+/*
 function bufferToFile(buffer: Buffer, fileName: string): File {
   return new File([buffer as any], fileName, {
     lastModified: new Date().getTime(),
     type: "text/csv",
   })
 }
+*/
 
 // Relevant: https://firebase.google.com/docs/storage/extend-with-functions
 export async function getNetworksFromStorage(
@@ -54,26 +51,15 @@ export async function getNetworksFromStorage(
     )
     bucket
       .file(`${NETWORK_PATH}/${NODES_FILE_NAME}`)
-      .exists()
-      .then((exists) => {
-        console.log(`Nodes exist: ${exists}`)
-      })
-    bucket
-      .file(`${NETWORK_PATH}/${EDGES_FILE_NAME}`)
-      .exists()
-      .then((exists) => {
-        console.log(`Edges exist: ${exists}`)
-      })
-    bucket
-      .file(`${NETWORK_PATH}/${NODES_FILE_NAME}`)
       .download()
       .then((nodeFile) => {
         networkFiles.set(
           NETWORK_FILE_TYPE.NODES,
-          bufferToFile(nodeFile[0], NODES_FILE_NAME)
+          //bufferToFile(nodeFile[0], NODES_FILE_NAME)
+          JSON.parse(JSON.stringify(nodeFile)) // Temporary shitty solution
         )
         console.log(
-          `Got ${NODES_FILE_NAME} from storage, size: ${nodeFile[0].length}`
+          `Got ${NODES_FILE_NAME} from storage, size: ${nodeFile.length}`
         )
         bucket
           .file(`${NETWORK_PATH}/${EDGES_FILE_NAME}`)
@@ -81,10 +67,11 @@ export async function getNetworksFromStorage(
           .then((edgeFile) => {
             networkFiles.set(
               NETWORK_FILE_TYPE.EDGES,
-              bufferToFile(edgeFile[0], EDGES_FILE_NAME)
+              //bufferToFile(edgeFile[0], EDGES_FILE_NAME)
+              JSON.parse(JSON.stringify(edgeFile))
             )
             console.log(
-              `Got ${EDGES_FILE_NAME} from storage, size: ${edgeFile[0].length}`
+              `Got ${EDGES_FILE_NAME} from storage, size: ${edgeFile.length}`
             )
             resolve(networkFiles)
           })
@@ -112,19 +99,26 @@ exports.onTaskCreated = functions.firestore
         context.params.userId,
         context.params.networkId
       )
-      const formData = new FormData()
-      formData.append(
+      const requestData = {
+        nodes: networkFiles.get(NETWORK_FILE_TYPE.NODES),
+        edges: networkFiles.get(NETWORK_FILE_TYPE.EDGES),
+        task: snap.data(),
+      }
+      console.log("Request data", requestData)
+      /*const f = new FormData()
+      f.append(
         NETWORK_FILE_TYPE.NODES,
         networkFiles.get(NETWORK_FILE_TYPE.NODES)!
       )
-      formData.append(
+      f.append(
         NETWORK_FILE_TYPE.EDGES,
         networkFiles.get(NETWORK_FILE_TYPE.EDGES)!
       )
-      formData.append("task", JSON.stringify(snap.data()))
-
+      f.append("task", JSON.stringify(snap.data()))
+      console.log("Form data", f)
+      */
       // Create an axios get request to the ML service with the task data and content-type as application/json
-      const taskResult = await axios.post(ML_SERVICE_URL, formData, {
+      const taskResult = await axios.post(ML_SERVICE_URL, requestData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
 
