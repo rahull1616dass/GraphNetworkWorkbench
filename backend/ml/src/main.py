@@ -1,28 +1,31 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from fields import Fields
 from task_type import TaskType
 
 app = Flask(__name__)
 
-def response(status: int, data: dict = None) -> dict:
+def response(status: int, data: dict = None) -> Response:
     return jsonify( {"status": status, **data})
 
-def parse_request(request) -> dict:
+def parse_request(request) -> Response:
     if request.form() is None:
         return response(400, {"error": "No task type found"})
     match request.form().get(Fields.TASK_TYPE):
-        case TaskType.NODE_PREDICTION: 
+        case TaskType.NODE_CLASSIFICATION: 
             return response(200, {"message": "Node prediction"})
-        case TaskType.GRAPH_PREDICTION: 
+        case TaskType.GRAPH_CLASSIFICATION: 
             return response(200, {"message": "Graph prediction"})
-
+        case _:
+            return response(400, {"error": "Invalid task type"})
+        
 
 @app.route("/", methods=["GET", "POST"])
-def index() -> dict:
+def index() -> Response:
     if request.method == "POST":
         try:
+            print(request.json())
             return parse_request(request)
         except Exception as e:
             return response(400, {"error": str(e)})

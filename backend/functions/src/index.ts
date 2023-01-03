@@ -19,7 +19,7 @@ const NETWORK_FILE_TYPE = {
   NODES: "nodes",
   EDGES: "edges",
 }
-const ML_SERVICE_URL = "https://get-prediction-i5wplx5u5a-nw.a.run.app"
+const ML_SERVICE_URL = "https://get-prediction-i5wplx5u5a-oa.a.run.app"
 const DB = {
   Users: "Users",
   Networks: "Networks",
@@ -119,7 +119,8 @@ exports.onTaskCreated = functions.firestore
       */
       // Create an axios get request to the ML service with the task data and content-type as application/json
       const taskResult = await axios.post(ML_SERVICE_URL, requestData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        //headers: { "Content-Type": "multipart/form-data" },
+        headers: { "Content-Type": "application/json" },
       })
 
       console.timeEnd("ML Service call")
