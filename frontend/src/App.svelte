@@ -5,6 +5,7 @@
   import Plot from "./components/pages/Workbench/Plot/Plot.svelte"
   import Register from "./components/pages/Register.svelte"
   import Login from "./components/pages/Login.svelte"
+  import Profile from "./components/pages/Profile.svelte"
   import Experiments from "./components/pages/Workbench/Experiments.svelte"
   import Reports from "./components/pages/Workbench/Reports.svelte"
   import FromWeb from "./components/pages/AddNetwork/FromWeb.svelte"
@@ -68,28 +69,28 @@
     }
   }
 
-  const performLogout = () => {
-    progressBarData.text = "Logging out..."
-    progressBarData.isPresent = true
-    getAuth()
-      .signOut()
-      .then(() => {
-        console.log("User signed out")
-        isLoggedIn = false
-        $authUserStore = undefined
-        $loginUserStore = undefined
-        $networksList = []
-        progressBarData.isPresent = false
-        isHoveringMyNetworks = false
-        isHoveringNetworksList = false
-        fetchedNetworksOnce = false
-        $selectedMenuItem = MenuItem.HOME
-      })
-      .catch((error) => {
-        console.log(`Error while signing out: ${error}`)
-        progressBarData.isPresent = false
-      })
-  }
+  // const performLogout = () => {
+  //   progressBarData.text = "Logging out..."
+  //   progressBarData.isPresent = true
+  //   getAuth()
+  //     .signOut()
+  //     .then(() => {
+  //       console.log("User signed out")
+  //       isLoggedIn = false
+  //       $authUserStore = undefined
+  //       $loginUserStore = undefined
+  //       $networksList = []
+  //       progressBarData.isPresent = false
+  //       isHoveringMyNetworks = false
+  //       isHoveringNetworksList = false
+  //       fetchedNetworksOnce = false
+  //       $selectedMenuItem = MenuItem.HOME
+  //     })
+  //     .catch((error) => {
+  //       console.log(`Error while signing out: ${error}`)
+  //       progressBarData.isPresent = false
+  //     })
+  // }
 
   /* ---- Tabs ---- */
 
@@ -155,7 +156,7 @@
       {:else if activeMenuItem === 'Reports'}
       <p>Reports</p>
       {:else if activeMenuItem === 'Profile'}
-      <a href="/" on:click|preventDefault={performLogout}>Logout</a>
+      <Profile />
       {/if}
     </ul>
     {:else if isLoggedIn === false}
