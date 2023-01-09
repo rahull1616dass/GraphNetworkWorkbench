@@ -16,3 +16,6 @@ def train(model, optimizer, data, device):
         loss = loss_fn(out[data.train_mask], data.y[data.train_mask])
         loss.backward()
         optimizer.step()
+
+def classify(nodes, edges): pass
+    
