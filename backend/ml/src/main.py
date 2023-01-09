@@ -1,5 +1,4 @@
 import os
-
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 from flask import Flask, request, jsonify
 from flask import Response as FlaskResponse
@@ -8,9 +7,9 @@ from requests import get as http_get
 from requests import Response as RequestsResponse
 from fields import Fields
 from task_type import TaskType
+from pandas import DataFrame, read_csv
 
 app = Flask(__name__)
-
 
 def response(status: int, data: dict) -> FlaskResponse:
     data |= {"status": status}
@@ -18,9 +17,16 @@ def response(status: int, data: dict) -> FlaskResponse:
     return jsonify(data)
 
 
-def get_file(file_url: str) -> RequestsResponse:
-    return http_get(file_url, stream=True, headers={"Content-Type": "text/csv"})
-
+def get_data_frame(file_url: str) -> DataFrame:
+    file_response: RequestsResponse = http_get(file_url, stream=True, headers={"Content-Type": "text/csv"})
+    if file_response.status_code != 200:
+        raise Exception(f"""
+                              Error downloading file at {file_url}
+                              Reason: {file_response.reason}
+                              Text: {file_response.text}
+                              """  
+                              )
+    return read_csv(file_response.raw)
 
 def download_network_files(request) -> FlaskResponse:
     if request.get(Fields.NODES_FILE_URL.value) is None:
@@ -28,32 +34,10 @@ def download_network_files(request) -> FlaskResponse:
     elif request.get(Fields.EDGES_FILE_URL.value) is None:
         return response(400, {"error": "No edges file url found"})
 
-    nodesFileResponse: RequestsResponse = get_file(
-        request.get(Fields.NODES_FILE_URL.value)
-    )
-    if nodesFileResponse.status_code != 200:
-        return response(
-            400,
-            {
-                "error": f"""
-                              Error downloading nodesFile at {request.get(Fields.NODES_FILE_URL.value)}
-                              Reason: {nodesFileResponse.reason}
-                              """
-            },
-        )
-
-    edgesFileResponse = get_file(request.get(Fields.EDGES_FILE_URL.value))
-    if edgesFileResponse.status_code != 200:
-        return response(
-            400,
-            {
-                "error": f"""
-                              Error downloading nodesFile at {request.get(Fields.EDGES_FILE_URL.value)}
-                              Reason: {edgesFileResponse.reason}
-                              """
-            },
-        )
-    
+    nodes_df: DataFrame = get_data_frame(request.get(Fields.NODES_FILE_URL.value))
+    edges_df: DataFrame = get_data_frame(request.get(Fields.EDGES_FILE_URL.value))
+    print(nodes_df)
+    print(edges_df)
     return FlaskResponse()
 
 def parse_request(request: FlaskRequest) -> FlaskResponse:
@@ -62,8 +46,7 @@ def parse_request(request: FlaskRequest) -> FlaskResponse:
 
     match request.json.get(Fields.TASK_TYPE.value):
         case TaskType.NODE_CLASSIFICATION.value:
-            download_network_files(request.json)
-            return response(200, {"message": "Node prediction"})
+            return download_network_files(request.json)
         case TaskType.GRAPH_CLASSIFICATION.value:
             return response(200, {"message": "Graph prediction"})
         case _:

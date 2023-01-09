@@ -44,7 +44,7 @@ export async function getNetworksFromStorage(
     const fileReadOptions: GetSignedUrlConfig = {
       version: "v4",
       action: "read",
-      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+      expires: Date.now() + 60 * 60 * 1000, // 1 hour. TODO: In production, set this to a lower time.
       contentType: "text/csv",
     }
     const bucket = admin.storage().bucket()
@@ -80,21 +80,19 @@ exports.onTaskCreated = functions.firestore
     `${DB.Users}/{userId}/${DB.Networks}/{networkId}/${DB.Tasks}/{taskId}`
   )
   .onCreate(async (snap, context) => {
-    console.log("Task created", snap.data())
+    console.log(`Starting task ${context.params.taskId} with task: ${snap.data().taskType}`)
     console.time("ML Service call")
     try {
       const networkFiles = await getNetworksFromStorage(
         context.params.userId,
         context.params.networkId
       )
-      
       const requestData = {
         nodesFileUrl: networkFiles.get(NETWORK_FILE_TYPE.NODES),
         edgesFileUrl: networkFiles.get(NETWORK_FILE_TYPE.EDGES),
         task: snap.data(),
       }
       console.log("Request data", requestData)
-      // Create an axios get request to the ML service with the task data and content-type as application/json
       const taskResult = await axios.post(ML_SERVICE_URL, requestData, {
         headers: { "Content-Type": "application/json" },
       })
