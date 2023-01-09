@@ -1,5 +1,6 @@
 <script lang="ts">
  import CustomButton from "../common/CustomButton.svelte"
+ import ImageButton from "../common/ImageButton.svelte"
  import { ProgressBarData } from "../../definitions/progressBarData"
  import { getAuth } from "firebase/auth"
  import {
@@ -11,13 +12,15 @@
     } from "../../stores"
  import { MenuItem } from "../../definitions/menuItem"
  import Home from "../pages/Home.svelte"
+    import { debug } from "svelte/internal";
  let progressBarData: ProgressBarData = new ProgressBarData(true, "Loading Profile...")
 
  let user = localStorage.getItem("loginUser")
     ? JSON.parse(localStorage.getItem("loginUser"))
     : undefined
-
-    
+ let username = user.email.split("@")[0]
+ let profileImage
+ let InputE1     
  export const performLogout = () => {
     progressBarData.text = "Logging out..."
     progressBarData.isPresent = true
@@ -38,6 +41,19 @@
         progressBarData.isPresent = false
       })
   }
+
+
+  const handleProfileEdit = (event) => {
+    const file = event.target.files[0];
+
+    profileImage = URL.createObjectURL(file);
+  }
+
+  const onClickProfileEdit =() =>{
+    console.log("Clicking");
+    
+    InputE1.click()
+  }
 </script>
 
 
@@ -45,11 +61,21 @@
     /* Some basic styles to make the page look presentable */
     h1 {
       font-size: 2em;
+      object-fit: cover;
+      object-position: center;
     }
   
     p {
       font-size: 1.2em;
     }
+
+    img {
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    object-position: center;
+  }
   </style>
 
 
@@ -57,9 +83,18 @@
 
   <div>
     
-    <h1>{user.email}</h1>
-
+    <h1>Hello: {username}</h1>
+    {#if profileImage}
+        <img src={profileImage}/>
+    {:else}
+        <img src= "https://eu.ui-avatars.com/api/?name={username}&size=250"/>
+    {/if}
+    <input type="file" accept="image/*" style="display:none" on:change={handleProfileEdit} bind:this={InputE1} />
+    <ImageButton
+        defaultImageSource='https://cdn-icons-png.flaticon.com/32/1828/1828270.png'
+        on:click ={onClickProfileEdit}></ImageButton>
     <CustomButton
           type={"secondary"}
           on:click={ performLogout }>Logout</CustomButton>
+    
   </div>

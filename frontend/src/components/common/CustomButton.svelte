@@ -5,7 +5,10 @@
     export let disabled = false;
   </script>
   
-  <button class:flat={flat} class:inverse={inverse} class={type} class:disabled={disabled} on:click>
+  <button class:flat={flat} 
+          class:inverse={inverse} 
+          class={type} 
+          class:disabled={disabled} on:click>
     <slot></slot>
   </button>
   
