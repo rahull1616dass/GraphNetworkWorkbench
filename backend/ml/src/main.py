@@ -28,7 +28,7 @@ def get_data_frame(file_url: str) -> DataFrame:
                               )
     return read_csv(file_response.raw)
 
-def download_network_files(request) -> FlaskResponse:
+async def download_network_files(request) -> FlaskResponse:
     if request.get(Fields.NODES_FILE_URL.value) is None:
         return response(400, {"error": "No nodes file url found"})
     elif request.get(Fields.EDGES_FILE_URL.value) is None:
@@ -36,29 +36,26 @@ def download_network_files(request) -> FlaskResponse:
 
     nodes_df: DataFrame = get_data_frame(request.get(Fields.NODES_FILE_URL.value))
     edges_df: DataFrame = get_data_frame(request.get(Fields.EDGES_FILE_URL.value))
-    print(nodes_df)
-    print(edges_df)
     return FlaskResponse()
 
-def parse_request(request: FlaskRequest) -> FlaskResponse:
+async def parse_request(request: FlaskRequest) -> FlaskResponse:
     if request.json is None:
         return response(400, {"error": "No task type found"})
 
     match request.json.get(Fields.TASK_TYPE.value):
         case TaskType.NODE_CLASSIFICATION.value:
-            return download_network_files(request.json)
+            await download_network_files(request.json)
         case TaskType.GRAPH_CLASSIFICATION.value:
             return response(200, {"message": "Graph prediction"})
-        case _:
-            return response(400, {"error": "Invalid task type"})
+    return response(400, {"error": "Invalid task type"})
 
 
 @app.route("/", methods=["GET", "POST"])
-def index() -> FlaskResponse:
+async def index() -> FlaskResponse:
     if request.method == "POST":
         try:
             print(request.json)
-            return parse_request(request)
+            return await parse_request(request)
         except Exception as e:
             print(e)
             return response(400, {"error": str(e)})

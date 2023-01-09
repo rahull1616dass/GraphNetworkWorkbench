@@ -5,11 +5,13 @@ import { GetSignedUrlResponse, GetSignedUrlConfig } from "@google-cloud/storage"
 /*
  * import fetch from "node-fetch"
  * See: https://stackoverflow.com/a/58734908/11330757
+ * Also request-promise package that the above link recommends is deprecated, lol
  * Hence using axios instead.
+ * 
  * Also FormData is now a part of the native Node.js API as of v18 (https://stackoverflow.com/a/73325542/11330757)
  * But Firebase Cloud Function only supports up to v16 -.-
+ * UPDATE: Using FormData is not necessary anymore, since the ML service can now handle the file URLs directly.
  */
-
 import axios from "axios"
 import * as admin from "firebase-admin"
 
@@ -48,8 +50,8 @@ export async function getNetworksFromStorage(
       contentType: "text/csv",
     }
     const bucket = admin.storage().bucket()
-    const NETWORK_PATH = `Users/${userId}/Networks/${networkId}`
     const networkFiles = new Map<string, string>()
+    const NETWORK_PATH = `Users/${userId}/Networks/${networkId}`
     const NODES_FILE_NAME = `${NETWORK_FILE_TYPE.NODES}.csv`
     const EDGES_FILE_NAME = `${NETWORK_FILE_TYPE.EDGES}.csv`
     console.log(
@@ -59,8 +61,6 @@ export async function getNetworksFromStorage(
       .file(`${NETWORK_PATH}/${NODES_FILE_NAME}`)
       .getSignedUrl(fileReadOptions)
       .then((nodeFileUrl: GetSignedUrlResponse) => {
-        console.log(`file: ${nodeFileUrl}`)
-        console.log(`file[0]: ${nodeFileUrl[0]}`)
         networkFiles.set(NETWORK_FILE_TYPE.NODES, nodeFileUrl[0])
         bucket
           .file(`${NETWORK_PATH}/${EDGES_FILE_NAME}`)
@@ -96,7 +96,6 @@ exports.onTaskCreated = functions.firestore
       const taskResult = await axios.post(ML_SERVICE_URL, requestData, {
         headers: { "Content-Type": "application/json" },
       })
-
       console.timeEnd("ML Service call")
       console.log("ML Service response", taskResult.data)
     } catch (err) {
