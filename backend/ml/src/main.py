@@ -8,6 +8,7 @@ from requests import Response as RequestsResponse
 from fields import Fields
 from task_type import TaskType
 from pandas import DataFrame, read_csv
+from node_classifier import NodeClassifier
 
 app = Flask(__name__)
 
