@@ -135,7 +135,7 @@
     color: #063d79;
     font-weight: 500;
   }
-
+  
   .login-form {
     padding: 1%;
     width: 40%;
