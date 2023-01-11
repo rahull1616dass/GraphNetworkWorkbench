@@ -88,8 +88,8 @@ def index() -> FlaskResponse:
             print(request.json)
             request_json_snake_case = {}
             # For each key in the request, convert it to snake case
-            for k in request.json.keys():
-                request_json_snake_case[convert(k)] = request.json[k]
+            for k in request.json.keys(): # type: ignore
+                request_json_snake_case[convert(k)] = request.json[k] # type: ignore
             return parse_request(MLRequest(**request_json_snake_case))
         except Exception as e:
             print(e)
