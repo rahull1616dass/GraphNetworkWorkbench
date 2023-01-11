@@ -13,9 +13,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-  --wue-blue: #063d79;
-  --light-black-blue: #4a4a56;
-  --light-gray: #adadad;
+  --wueblue: #063d79;
+  --lightblack: #4a4a56;
+  --lightgray: #adadad;
 }
 
 a {
@@ -111,5 +111,6 @@ li a {
 li a:hover {
     background-color: whitesmoke;
 }
-
-
+hr {
+  background-color: var(--lightgray);
+}

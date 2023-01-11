@@ -18,8 +18,6 @@ import {
   getStorage,
   ref,
   uploadBytes,
-  getBytes,
-  type StorageReference,
   getBlob,
 } from "firebase/storage"
 import firebaseConfig from "../../firebase_config"

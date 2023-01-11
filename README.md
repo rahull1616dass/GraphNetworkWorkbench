@@ -11,5 +11,21 @@ An interactive user interface/webpage with following minimal functionalities:
     - Train/test  GNN 
     - Visualise learned representations
     - Compare predictions for different models/hyperparameter values
-    - Interactive manipulation of node or edge features 
+    - Interactive manipulation of node or edge features
 
+# Working with Anaconda
+
+The backend with all the PyTorch/PyTorch Geometric modules installed is available as a conda environment out of the box. To use it, run:
+```bash
+conda env create --file backend/backend_env.yml
+```
+
+The environment with the modules it uses can be exported via:
+```bash
+conda env export --no-builds > environment.yml
+```
+
+To create the environment from the exported file, run:
+```bash
+conda env create -f environment.yml
+```

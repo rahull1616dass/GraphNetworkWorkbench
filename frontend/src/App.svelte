@@ -12,6 +12,8 @@
   import Header from "./components/common/Header.svelte"
   import Footer from "./components/common/Footer.svelte"
   import Tabs from "./components/common/Tabs.svelte"
+  import CustomModal from "./components/common/CustomModal.svelte"
+  import Networks from "./components/pages/Workbench/Networks.svelte"
   import {
     selectedMenuItem,
     authUserStore,
@@ -118,6 +120,7 @@
   let isImportModalOpen: boolean = false
   let selectedImportType: ImportModalType = ImportModalType.NONE
 
+  let showModal = false
 </script>
 
 {#if progressBarData.isPresent}
@@ -131,13 +134,13 @@
       {#if $selectedMenuItem === MenuItem.HOME}
         <Home />
       {:else if $selectedMenuItem === MenuItem.NETWORKS}
-        <p>My Networks</p>
+      <Networks/>
       {:else if $selectedMenuItem === MenuItem.PLOT}
       <Plot />
       {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
-      <p>Experiments</p>
+      <Experiments/>
       {:else if $selectedMenuItem === MenuItem.REPORTS}
-      <p>Reports</p>
+      <Reports/>
       {:else if $selectedMenuItem === MenuItem.PROFILE}
       <a href="/" on:click|preventDefault={performLogout}>Logout</a>
       {:else if $selectedMenuItem === MenuItem.FROM_WEB}
@@ -343,5 +346,6 @@
     bottom: 0;
     overflow-y: auto;
   }
+  
 
 </style>
