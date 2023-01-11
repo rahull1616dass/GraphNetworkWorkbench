@@ -42,10 +42,13 @@ def download_network_files(request) -> FlaskResponse:
     nodes: DataFrame = get_data_frame(request.get(Fields.NODES_FILE_URL.value), create_index=False)
     edges: DataFrame = get_data_frame(request.get(Fields.EDGES_FILE_URL.value), create_index=False)
     node_classifier = NodeClassifier(NodeClassifier.from_dataframe(nodes, edges), epochs=100)
-    node_classifier.train()
+    losses: list[float] = node_classifier.train()
     predictions: list[int] = node_classifier.predict()
     accuracy: float = node_classifier.evaluate()
-    return response(200, {"message": "Files downloaded"})
+    return response(200, {"message": "Classification complete.",
+                          "losses": losses,
+                          "predictions": predictions,
+                          "accuracy": accuracy})
 
 def parse_request(request: FlaskRequest) -> FlaskResponse:
     if request.json is None:
