@@ -56,9 +56,6 @@ class NodeClassifier:
         y: np.ndarray = nodes["groups"].to_numpy()
         train_mask: torch.Tensor = NodeClassifier.generate_train_mask(y.shape[0], train_percentage)
         
-        edge_sources: torch.Tensor = torch.Tensor(edges["source"].to_numpy())
-        edge_targets: torch.Tensor = torch.Tensor(edges["target"].to_numpy())
-        edges_tensor: torch.Tensor = torch.Tensor(edges.to_numpy())
         return TorchGeoData(
             x=torch.from_numpy(np.eye(nodes.shape[0])).to(torch.float32),
             y=torch.from_numpy(nodes["groups"].to_numpy()),
