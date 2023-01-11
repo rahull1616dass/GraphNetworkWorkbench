@@ -18,7 +18,9 @@
 <style>
     header{
         background-color: #d8dadc;
+        margin:0%;
         padding: 1%;
+        
     }
     h1{
         margin: 0;

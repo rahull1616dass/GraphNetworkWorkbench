@@ -134,7 +134,7 @@
 </script>
 
 
-<Header />
+
 
 {#if progressBarData.isPresent}
   <div class="main_progress_bar">
