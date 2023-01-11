@@ -2,17 +2,14 @@
   "compilerOptions": {
     "module": "commonjs",
     "noImplicitReturns": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
     "target": "es2017"
   },
-  "parserOptions": {
-    "project": "tsconfig.json",
-    "tsconfigRootDir": "__dirname"
-  },
-
   "compileOnSave": true,
-  "include": ["src", "backend"]
+  "include": [
+    "src"
+  ]
 }
