@@ -133,13 +133,17 @@
       {:else if $selectedMenuItem === MenuItem.NETWORKS}
         <p>My Networks</p>
       {:else if $selectedMenuItem === MenuItem.PLOT}
-      <p>Visualize</p>
+      <Plot />
       {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
       <p>Experiments</p>
       {:else if $selectedMenuItem === MenuItem.REPORTS}
       <p>Reports</p>
       {:else if $selectedMenuItem === MenuItem.PROFILE}
       <a href="/" on:click|preventDefault={performLogout}>Logout</a>
+      {:else if $selectedMenuItem === MenuItem.FROM_WEB}
+      <FromWeb />
+      {:else if $selectedMenuItem === MenuItem.FROM_PC}
+      <UploadNetwork />
       {/if}
     </ul>
     {:else if isLoggedIn === false}

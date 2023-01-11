@@ -36,8 +36,6 @@
           on:click={() => (isImportModalOpen = !isImportModalOpen)}
           >Add Network</CustomButton>
 
-          
-
         </div>
       {:else if selectedImportType === ImportModalType.FROM_WEB}
         <FromWeb />
