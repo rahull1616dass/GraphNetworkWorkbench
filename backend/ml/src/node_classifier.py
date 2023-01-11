@@ -10,16 +10,15 @@ from math import ceil
 @dataclass
 class NodeClassifier:
     data: TorchGeoData
-    epochs: int
     
     def __post_init__(self): pass
     
-    def train(self) -> list[float]:
+    def train(self, epochs: int = 100) -> list[float]:
         self.model = SingleLayerGCN(self.data.x.shape[0], len(np.unique(self.data.y)))
         optimizer: Adam = Adam(self.model.parameters(), lr=0.01, weight_decay=5e-4)
 
         self.losses: list[float] = []
-        for _ in range(self.epochs):
+        for _ in range(epochs):
             self.model.train()
             optimizer.zero_grad()
             out = self.model(self.data.x, self.data.edge_index)
