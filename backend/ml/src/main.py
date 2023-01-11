@@ -10,6 +10,7 @@ from task_type import TaskType
 from pandas import DataFrame, read_csv
 from node_classifier import NodeClassifier
 import numpy as np
+from torch_geometric.data import Data as TorchGeoData
 
 app = Flask(__name__)
 
@@ -19,7 +20,7 @@ def response(status: int, data: dict) -> FlaskResponse:
     return jsonify(data)
 
 
-def get_data_frame(file_url: str) -> DataFrame:
+def get_data_frame(file_url: str, create_index: bool = True) -> DataFrame:
     file_response: RequestsResponse = http_get(file_url, stream=True, headers={"Content-Type": "text/csv"})
     print(file_response.status_code)
     if file_response.status_code != 200:
@@ -29,6 +30,7 @@ def get_data_frame(file_url: str) -> DataFrame:
                               Text: {file_response.text}
                               """  
                               )
+    # Parse the csv in file_response.raw with np.genfromtxt
     return read_csv(file_response.raw)
 
 def download_network_files(request) -> FlaskResponse:
@@ -36,10 +38,13 @@ def download_network_files(request) -> FlaskResponse:
         return response(400, {"error": "No nodes file url found"})
     elif request.get(Fields.EDGES_FILE_URL.value) is None:
         return response(400, {"error": "No edges file url found"})
-    print("eht")
-    nodes: DataFrame = get_data_frame(request.get(Fields.NODES_FILE_URL.value))
-    edges: DataFrame = get_data_frame(request.get(Fields.EDGES_FILE_URL.value))
-    NodeClassifier.from_dataframe(nodes, edges)
+    
+    nodes: DataFrame = get_data_frame(request.get(Fields.NODES_FILE_URL.value), create_index=False)
+    edges: DataFrame = get_data_frame(request.get(Fields.EDGES_FILE_URL.value), create_index=False)
+    node_classifier = NodeClassifier(NodeClassifier.from_dataframe(nodes, edges), epochs=100)
+    node_classifier.train()
+    predictions: list[int] = node_classifier.predict()
+    accuracy: float = node_classifier.evaluate()
     return response(200, {"message": "Files downloaded"})
 
 def parse_request(request: FlaskRequest) -> FlaskResponse:

@@ -46,7 +46,7 @@ export async function getNetworksFromStorage(
     const fileReadOptions: GetSignedUrlConfig = {
       version: "v4",
       action: "read",
-      expires: Date.now() + 60 * 60 * 1000, // 1 hour. TODO: In production, set this to a lower time.
+      expires: Date.now() + (6 * 60 * 60 * 1000), // 6 hours. TODO: In production, set this to a lower time.
       contentType: "text/csv",
     }
     const bucket = admin.storage().bucket()
