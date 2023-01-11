@@ -93,24 +93,13 @@
 
   /* ---- Tabs ---- */
 
-  let menuItems = ['Home', 'My Networks', 'Visualize', 'Experiments', 'Reports', 'Profile']
-  let activeMenuItem = "Home";
-  const tabChange = (e) => activeMenuItem = e.detail;
-
-  /*
-  let menuItemsList = Object.keys(MenuItem).filter((v) => isNaN(Number(v)))
-
-  function removeElementFromStringArray(element: string) {
-    menuItemsList.forEach((value,index)=>{
-        if(value==element) menuItemsList.splice(index,1)
-    });
-  }
-  removeElementFromStringArray("REGISTER")
-  removeElementFromStringArray("LOGIN")
-
-  let activeMenuItem = MenuItem.HOME;
-  */
   
+  let activeMenuItem = MenuItem.HOME;
+  const tabChange = (e) => 
+  {
+    $selectedMenuItem = e.detail;
+  }
+
 
   /* ---- My Networks ---- */
   let isHoveringMyNetworks: boolean = false
@@ -129,12 +118,7 @@
   let isImportModalOpen: boolean = false
   let selectedImportType: ImportModalType = ImportModalType.NONE
 
-
-
 </script>
-
-
-
 
 {#if progressBarData.isPresent}
   <div class="main_progress_bar">
@@ -142,23 +126,24 @@
   </div>
 {:else}
     {#if isLoggedIn === true}
-    <ul id="menu">
-      <Tabs {activeMenuItem} {menuItems} on:tabChange={tabChange} />
-      {#if activeMenuItem === 'Home'}
+    <ul id="menuLogin">
+      <Tabs />
+      {#if $selectedMenuItem === MenuItem.HOME}
         <Home />
-      {:else if activeMenuItem === 'My Networks'}
+      {:else if $selectedMenuItem === MenuItem.NETWORKS}
         <p>My Networks</p>
-      {:else if activeMenuItem === 'Visualize'}
+      {:else if $selectedMenuItem === MenuItem.PLOT}
       <p>Visualize</p>
-      {:else if activeMenuItem === 'Experiments'}
+      {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
       <p>Experiments</p>
-      {:else if activeMenuItem === 'Reports'}
+      {:else if $selectedMenuItem === MenuItem.REPORTS}
       <p>Reports</p>
-      {:else if activeMenuItem === 'Profile'}
+      {:else if $selectedMenuItem === MenuItem.PROFILE}
       <a href="/" on:click|preventDefault={performLogout}>Logout</a>
       {/if}
     </ul>
     {:else if isLoggedIn === false}
+      <Tabs />
       {#if $selectedMenuItem === MenuItem.HOME}
         <Home />
       {:else if $selectedMenuItem === MenuItem.LOGIN}

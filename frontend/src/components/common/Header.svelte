@@ -2,6 +2,12 @@
     import wue_banner from "../../assets/wue_banner.svg"
     import { selectedMenuItem } from "../../stores"
     import { MenuItem } from "../../definitions/menuItem"
+    import Tabs from "../common/Tabs.svelte"
+
+    let menuItems = ['Home', 'My Networks', 'Visualize', 'Experiments', 'Reports', 'Profile']
+    let activeMenuItem = "Home";
+    const tabChange = (e) => activeMenuItem = e.detail;
+    
 </script>
 
 
@@ -10,6 +16,7 @@
         <a href="/" on:click|preventDefault={() => ($selectedMenuItem = MenuItem.HOME)}>
             <img  src={wue_banner} class="wue_banner" alt="wue_banner" >
         </a>
+        <Tabs {activeMenuItem} {menuItems} on:tabChange={tabChange} />
         
     </h1>
 
@@ -18,9 +25,7 @@
 <style>
     header{
         background-color: #d8dadc;
-        margin:0%;
         padding: 1%;
-        
     }
     h1{
         margin: 0;

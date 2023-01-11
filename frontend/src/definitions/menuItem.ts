@@ -1,9 +1,11 @@
 export enum MenuItem {
-    REGISTER,
-    LOGIN,
-    HOME,
-    PLOT,
-    EXPERIMENTS,
-    REPORTS,
-    PROFILE
+    REGISTER = 'Register',
+    LOGIN = 'Login',
+    HOME = 'Home',
+    NETWORKS = 'Networks',
+    PLOT = 'Visualize',
+    EXPERIMENTS = 'Experiments',
+    REPORTS = 'Reports',
+    PROFILE = 'Profile',
+    NONE = 'None'
 }

@@ -11,6 +11,7 @@
   import MiserablesData from "../../data/MiserablesVisSpec"
   import { default as vegaEmbed } from "vega-embed"
   import { MenuItem } from "../../definitions/menuItem"
+  import logo from "../../assets/logo.svg"
 
   let isLoggedIn: boolean = false
   $: isLoggedIn = $authUserStore !== undefined && getAuth().currentUser !== null
@@ -44,15 +45,19 @@
         <UploadNetwork />
       {/if}
     {:else}
-    <h1>Welcome to Graph Learning Workbench</h1>
+    <!--<li class="image"> <img src={logo} class="logo" alt="logo" > </li>
+    <li class="loginButton"><CustomButton type={"secondary"} on:click={() => ($selectedMenuItem = MenuItem.LOGIN)}
+      >Login</CustomButton></li>
+    <li class="registerButton"><CustomButton type={"secondary"} inverse={true} on:click={() => ($selectedMenuItem = MenuItem.REGISTER)}
+      >Sign-up</CustomButton></li>
+      -->
+      <h1> Welcome to the WUE Graph Learning Workbench </h1>
       <div class="viz" id="viz" />
-      <div class="loginButton">
-        <CustomButton type={"secondary"} on:click={() => ($selectedMenuItem = MenuItem.LOGIN)}
-          >Login</CustomButton>
+        
           
         <!-- <button on:click={() => ($selectedMenuItem = MenuItem.REGISTER)}
           >Register</button>-->
-      </div>
+      
     {/if}
   </div>
   <!--- <div class="viz" id="viz" /> -->
@@ -65,13 +70,13 @@
     color: #063d79;
     font-weight: 500;
     animation: splash 1s normal forwards ease-in-out;
-    border: 10px solid #d8dadc;
+    border: 10px solid whitesmoke;
     /*animation: mymove 5s bounce;*/
     padding-top: 2%;
     padding-bottom: 2%;
     
   }
-
+  /*
   @keyframes splash {
     from {
         opacity: 0;
@@ -85,6 +90,7 @@
         transform: scale(1, 1);
     }
   }
+  */
 
   div {
     padding-top: 2%;
