@@ -4,7 +4,8 @@ import torch.nn.functional as F
 from torch.optim import Adam
 from torch_geometric.data import Data
 from dataclasses import dataclass
-
+import numpy as np
+from pandas import DataFrame
 @dataclass
 class NodeClassifier:
     data: Data
@@ -38,3 +39,7 @@ class NodeClassifier:
         accuracy = correct / self.data.test_mask.sum().item()
         print('Accuracy: {:.4f}'.format(accuracy))
         return accuracy
+    
+    @staticmethod
+    def from_dataframe(nodes: DataFrame, edges: DataFrame) -> Data:
+        return Data()
