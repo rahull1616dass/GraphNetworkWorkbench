@@ -1,22 +1,4 @@
-FROM jupyter/datascience-notebook:lab-3.5.2
+FROM lsx-harbor.informatik.uni-wuerzburg.de/common-containers/jupyter/pytorch-notebook-gpu:latest
 
-USER root
-RUN apt update && apt upgrade -y
-RUN apt install build-essential -y
-USER $NB_UID
-
-RUN conda install \
-    numpy \
-    pandas \
-    scikit-learn \
-    plotly
-
-RUN conda install -c pytorch -c nvidia \
-    pytorch  \
-    torchvision  \
-    torchaudio  \
-    pytorch-cuda=11.6
-
-RUN conda install -c conda-forge torch-scatter
-RUN conda install -c ostrokach-forge torch-sparse
+RUN conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.6 -c pytorch -c conda-forge
 RUN conda install pyg -c pyg
