@@ -11,6 +11,8 @@ from node_classifier import NodeClassifier
 from ml_result import MLResult
 from ml_request import MLRequest
 from snakecase import convert
+import utils
+from torch_geometric.data import Data as TorchGeoData
 
 app = Flask(__name__)
 
@@ -38,20 +40,21 @@ def get_data_frame(file_url: str, create_index: bool = True) -> DataFrame:
     return read_csv(file_response.raw)
 
 
-def download_network_files(request: MLRequest) -> FlaskResponse:
+def download_network_files(request: MLRequest) -> dict[str, DataFrame]:
     if request.nodes_file_url is None:
-        return response(400, {"error": "No nodes file url found"})
+        raise Exception("No nodes file url found")
     elif request.edges_file_url is None:
-        return response(400, {"error": "No edges file url found"})
+        raise Exception("No edges file url found")
     
-    node_classifier = NodeClassifier(
-        NodeClassifier.from_dataframe(
-            get_data_frame(request.nodes_file_url, create_index=False ),
-            get_data_frame(request.edges_file_url, create_index=False),
-            request.train_percentage,
-        )
-    )
+    return {
+        'nodes': get_data_frame(request.nodes_file_url, create_index=False ),
+        'edges': get_data_frame(request.edges_file_url, create_index=False),
+    }
 
+
+def node_classification(request: MLRequest, tgData: TorchGeoData) -> FlaskResponse:
+    node_classifier = NodeClassifier(tgData)
+    
     # Need to set them first before creating the MLResult dataclass
     # since train,predict,evaluate has to happen in a consecutive manner
     losses: list[float] = node_classifier.train(request.epochs)
@@ -67,17 +70,23 @@ def download_network_files(request: MLRequest) -> FlaskResponse:
             accuracy=accuracy,
         ).__dict__,
     )
+    
+  
+def edge_classification(request: MLRequest, tgData: TorchGeoData) -> FlaskResponse:
+    return response(200, {"message": "Edge Classification not implemented yet"})
 
 
 def parse_request(request: MLRequest) -> FlaskResponse:
     if request.task_type is None:
         return response(400, {"error": "No task type found"})
-
+    
+    files: dict[str, DataFrame] = download_network_files(request)
+    tgData: TorchGeoData = utils.from_dataframe(files['nodes'], files['edges'])
     match request.task_type:
         case TaskType.NODE_CLASSIFICATION.value:
-            return download_network_files(request)
-        case TaskType.GRAPH_CLASSIFICATION.value:
-            return response(200, {"message": "Graph prediction"})
+            return node_classification(request, tgData)
+        case TaskType.EDGE_CLASSIFICATION.value:
+            return edge_classification(request, tgData)
     return response(400, {"error": "Invalid task type"})
 
 
