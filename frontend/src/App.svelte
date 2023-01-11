@@ -71,39 +71,6 @@
     }
   }
 
-  // const performLogout = () => {
-  //   progressBarData.text = "Logging out..."
-  //   progressBarData.isPresent = true
-  //   getAuth()
-  //     .signOut()
-  //     .then(() => {
-  //       console.log("User signed out")
-  //       isLoggedIn = false
-  //       $authUserStore = undefined
-  //       $loginUserStore = undefined
-  //       $networksList = []
-  //       progressBarData.isPresent = false
-  //       isHoveringMyNetworks = false
-  //       isHoveringNetworksList = false
-  //       fetchedNetworksOnce = false
-  //       $selectedMenuItem = MenuItem.HOME
-  //     })
-  //     .catch((error) => {
-  //       console.log(`Error while signing out: ${error}`)
-  //       progressBarData.isPresent = false
-  //     })
-  // }
-
-  /* ---- Tabs ---- */
-
-  
-  let activeMenuItem = MenuItem.HOME;
-  const tabChange = (e) => 
-  {
-    $selectedMenuItem = e.detail;
-  }
-
-
   /* ---- My Networks ---- */
   let isHoveringMyNetworks: boolean = false
   let isHoveringNetworksList: boolean = false
@@ -262,10 +229,6 @@
 
 {/if}
 -->
-
-
-
-
 
 
 
