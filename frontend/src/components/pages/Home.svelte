@@ -12,6 +12,7 @@
   import { default as vegaEmbed } from "vega-embed"
   import { MenuItem } from "../../definitions/menuItem"
   import logo from "../../assets/logo.svg"
+  import CustomModal from "../common/CustomModal.svelte"
 
   let isLoggedIn: boolean = false
   $: isLoggedIn = $authUserStore !== undefined && getAuth().currentUser !== null
@@ -30,12 +31,12 @@
       {#if selectedImportType === ImportModalType.NONE}
         <div class="viz" id="viz" />
         <div> <ImportModal bind:selectedImportType bind:open={isImportModalOpen} /> </div>
+        <!-- <div> <ImportModal bind:open={isImportModalOpen}/> </div> -->
         
         <div class="addNetworkButton">
         <CustomButton type={"secondary"} inverse={false}
           on:click={() => (isImportModalOpen = !isImportModalOpen)}
           >Add Network</CustomButton>
-
         </div>
       {:else if selectedImportType === ImportModalType.FROM_WEB}
         <FromWeb />
