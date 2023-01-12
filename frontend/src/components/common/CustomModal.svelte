@@ -52,7 +52,8 @@
 		padding: 2em;
 		border-radius: 0.2em;
 		background: white;
-    color: --wueblue;
+		z-index: 1;
+    	
 	}
 	.svg-icon {
 		position: absolute;
@@ -61,7 +62,6 @@
 		width: 2.5em;
 		height: 2.5em;
 		cursor: pointer;
-		color: var(--customred);
 	}
 
   </style>

@@ -31,13 +31,7 @@
         From PC
       </CustomButton>
 
-      <!-- <CustomButton type={"delete"} on:click={close}>close modal</CustomButton> -->
-
-
     </div>
-
-    
-    
 
   </CustomModal>
 
