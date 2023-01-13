@@ -74,8 +74,8 @@
                 // @ts-ignore
                 event.clientY
               )
-            } else {
-              hoverData = new HoverData(
+             } else {
+               hoverData = new HoverData(
                 HoverType.NODE,
                 undefined,
                 new Node(
@@ -89,7 +89,7 @@
                 event.clientX,
                 // @ts-ignore
                 event.clientY
-              )
+               )
             }
           }
         })
@@ -107,7 +107,7 @@
   let hoverData: HoverData = undefined
 
   // Anytime the selected network index from the menu changes, we need to update the vegaEmbed
-  //$: $selectedNetworkIndex, loadNetwork()
+  $: $selectedNetworkIndex, loadNetwork()
 
   // Props to pass to the modal anytime user clicks on a node from the vegaEmbed
   let modalProps: any = undefined
@@ -127,16 +127,19 @@
   let placeholder: string = "Please select a network from the list"
 
   function selected (index: number) {
-          $selectedNetworkIndex = index
-          loadNetwork()
-          return
-        }
+    if (typeof index !== "number") {
+      return
+    }
+    $selectedNetworkIndex = index
+    loadNetwork()
+    return
+  }
 </script>
 
 
 <div class="dropdown">
 
-  <select class="selectDropdown" bind:value={index} on:click={() => selected(index)} >
+  <select class="selectDropdown" bind:value={index} on:click={() => selected(index)}>
     {#if placeholder}
     <option >{placeholder}</option>
     {/if}
