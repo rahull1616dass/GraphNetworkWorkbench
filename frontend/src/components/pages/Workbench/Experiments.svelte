@@ -60,7 +60,7 @@
     hello
 </div>
 
-<!-- <div class="networks_list_items" style="--height: {$networksList.length * 120}px;">
+<div class="networks_list_items" style="--height: {$networksList.length * 120}px;">
     {#each $networksList as network, index}
       <NetworkListItem
         {network}
@@ -71,7 +71,7 @@
         }}
       />
     {/each}
-  </div> -->
+  </div>
 
 
 <style lang="scss">
