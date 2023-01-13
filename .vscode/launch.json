@@ -6,19 +6,12 @@
     "python.pythonPath": "C:\\Users\\PC\\anaconda3\\envs\\gestures\\python.exe",
     "configurations": [
         {
-            "name": "Launch Chrome",
-            "request": "launch",
             "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against localhost",
             "url": "http://localhost:5173",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${cwd}/frontend/src"
         },
-    {
-        "name": "Attach to Chrome",
-        "port": 5173,
-        "request": "attach",
-        "type": "chrome",
-        "webRoot": "${workspaceFolder}"
-    },
         {
             "name": "Python: Current File",
             "type": "python",

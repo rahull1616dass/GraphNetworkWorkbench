@@ -15,6 +15,9 @@
 
   function loadNetwork() {
     if ($networksList && $networksList.length > 0) {
+      // If there is a network to talk about at all in the list, then 
+      // we can set the selected network index to 0
+      $selectedNetworkIndex = 0
       console.log("changing to ", $selectedNetworkIndex)
       VisSpec.data[0].values = $networksList[$selectedNetworkIndex].nodes
       VisSpec.data[1].values = $networksList[$selectedNetworkIndex].links

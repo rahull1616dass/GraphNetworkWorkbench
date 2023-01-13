@@ -7,6 +7,7 @@ import {
   doc,
   query,
   getDocs,
+  initializeFirestore,
 } from "firebase/firestore"
 import {
   getAuth,
@@ -31,7 +32,9 @@ import {
   parseNetwork,
 } from "../components/pages/AddNetwork/UploadNetwork/networkParser"
 export const app: FirebaseApp = initializeApp(firebaseConfig)
-export const db = getFirestore(app)
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true, // this line
+})
 
 const enum Database {
   USERS = "Users",
