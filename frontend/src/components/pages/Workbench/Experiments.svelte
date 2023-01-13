@@ -45,33 +45,16 @@
     
 </select>
 
-<!-- <p>
-	Selected {JSON.stringify(index)} -----
-    {$selectedNetworkIndex} -----
-     {JSON.stringify($networksList)} 
-    
-</p> -->
 
 </div>
 
 <hr/>
 
 <div>
-    hello
+
 </div>
 
-<div class="networks_list_items" style="--height: {$networksList.length * 120}px;">
-    {#each $networksList as network, index}
-      <NetworkListItem
-        {network}
-        {index}
-        selected={$selectedNetworkIndex == index}
-        on:selectItem={(event) => {
-          $selectedNetworkIndex = event.detail.selectedIndex
-        }}
-      />
-    {/each}
-  </div>
+
 
 
 <style lang="scss">
@@ -85,14 +68,11 @@
         cursor: pointer;
         transition: background-color 0.2s ease-in-out;
         margin: 10px;
-        &.selected {
-            background-color: #e5e5e5;
-        }
     }
     .dropdown {
         position: flex;
         width: 50%;
-        background-color: var(--wueblue);
+        background-color: whitesmoke;
         margin-left: 25%;
         margin-top: 1%;
     }

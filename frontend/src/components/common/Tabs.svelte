@@ -69,8 +69,9 @@
     
     .active{
         /*color: #bf0a30;*/
-        color: var(--customred);
+        color: var(--wueblue);
         padding-bottom: 20%;
+        font-weight: 800;
         
     }
     img{

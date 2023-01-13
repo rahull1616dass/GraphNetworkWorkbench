@@ -36,6 +36,7 @@
 <style lang="scss">
   .root {
     display: flex;
+    width: 80%;
     background-color: #f5f5f5;
     border-radius: 5px;
     padding: 10px;
@@ -44,7 +45,8 @@
     transition: background-color 0.2s ease-in-out;
     margin: 10px;
     &.selected {
-      background-color: lightcoral;
+      background-color: var(--wueblue);
+      color: white;
     }
   }
   
