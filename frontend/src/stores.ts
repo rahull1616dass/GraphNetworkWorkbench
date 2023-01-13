@@ -10,6 +10,15 @@ export const testStoreValue: Writable<string> = writable("test val")
 export const netzschleuderNetworkNames: Writable<string[]> = writable([])
 export const networksList: Writable<Network[]> = writable([])
 export const selectedNetworkIndex: Writable<number> = writable(undefined)
+
+// If there is a network to talk about at all in the list, then
+// we can set the selected network index to 0
+networksList.subscribe((newNetworksList) => {
+  if(newNetworksList.length > 0) {
+    selectedNetworkIndex.set(0)
+  }
+})
+
 export const paletteColors: Readable<string[]> = readable([
   "#1f77b4",
   "#ff7f0e",

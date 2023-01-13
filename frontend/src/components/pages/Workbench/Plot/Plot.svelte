@@ -15,9 +15,6 @@
 
   function loadNetwork() {
     if ($networksList && $networksList.length > 0) {
-      // If there is a network to talk about at all in the list, then 
-      // we can set the selected network index to 0
-      $selectedNetworkIndex = 0
       console.log("changing to ", $selectedNetworkIndex)
       VisSpec.data[0].values = $networksList[$selectedNetworkIndex].nodes
       VisSpec.data[1].values = $networksList[$selectedNetworkIndex].links
@@ -110,7 +107,7 @@
   let hoverData: HoverData = undefined
 
   // Anytime the selected network index from the menu changes, we need to update the vegaEmbed
-  $: $selectedNetworkIndex, loadNetwork()
+  //$: $selectedNetworkIndex, loadNetwork()
 
   // Props to pass to the modal anytime user clicks on a node from the vegaEmbed
   let modalProps: any = undefined
