@@ -3,13 +3,29 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
+    "python.pythonPath": "C:\\Users\\PC\\anaconda3\\envs\\gestures\\python.exe",
     "configurations": [
         {
-            "type": "chrome",
+            "name": "Launch Chrome",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
+            "type": "chrome",
             "url": "http://localhost:5173",
-            "webRoot": "${workspaceFolder}/frontend"
+            "webRoot": "${workspaceFolder}"
+        },
+    {
+        "name": "Attach to Chrome",
+        "port": 5173,
+        "request": "attach",
+        "type": "chrome",
+        "webRoot": "${workspaceFolder}"
+    },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }

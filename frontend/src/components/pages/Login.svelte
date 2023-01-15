@@ -3,7 +3,6 @@
     Form,
     TextInput,
     PasswordInput,
-    Button,
     Modal,
     ProgressBar,
   } from "carbon-components-svelte"
@@ -29,6 +28,7 @@
       .then((user: LoginUser) => {
         isSuccess = true
         onLoginComplete("Success😎! You are logged in.")
+        $selectedMenuItem = MenuItem.HOME
       })
       .catch((error: any) => {
         let errorMessage: string
@@ -135,7 +135,7 @@
     color: #063d79;
     font-weight: 500;
   }
-
+  
   .login-form {
     padding: 1%;
     width: 40%;

@@ -13,6 +13,8 @@
   import Header from "./components/common/Header.svelte"
   import Footer from "./components/common/Footer.svelte"
   import Tabs from "./components/common/Tabs.svelte"
+  import CustomModal from "./components/common/CustomModal.svelte"
+  import Networks from "./components/pages/Workbench/Networks.svelte"
   import {
     selectedMenuItem,
     authUserStore,
@@ -69,50 +71,6 @@
     }
   }
 
-  // const performLogout = () => {
-  //   progressBarData.text = "Logging out..."
-  //   progressBarData.isPresent = true
-  //   getAuth()
-  //     .signOut()
-  //     .then(() => {
-  //       console.log("User signed out")
-  //       isLoggedIn = false
-  //       $authUserStore = undefined
-  //       $loginUserStore = undefined
-  //       $networksList = []
-  //       progressBarData.isPresent = false
-  //       isHoveringMyNetworks = false
-  //       isHoveringNetworksList = false
-  //       fetchedNetworksOnce = false
-  //       $selectedMenuItem = MenuItem.HOME
-  //     })
-  //     .catch((error) => {
-  //       console.log(`Error while signing out: ${error}`)
-  //       progressBarData.isPresent = false
-  //     })
-  // }
-
-  /* ---- Tabs ---- */
-
-  let menuItems = ['Home', 'My Networks', 'Visualize', 'Experiments', 'Reports', 'Profile']
-  let activeMenuItem = "Home";
-  const tabChange = (e) => activeMenuItem = e.detail;
-
-  /*
-  let menuItemsList = Object.keys(MenuItem).filter((v) => isNaN(Number(v)))
-
-  function removeElementFromStringArray(element: string) {
-    menuItemsList.forEach((value,index)=>{
-        if(value==element) menuItemsList.splice(index,1)
-    });
-  }
-  removeElementFromStringArray("REGISTER")
-  removeElementFromStringArray("LOGIN")
-
-  let activeMenuItem = MenuItem.HOME;
-  */
-  
-
   /* ---- My Networks ---- */
   let isHoveringMyNetworks: boolean = false
   let isHoveringNetworksList: boolean = false
@@ -130,12 +88,8 @@
   let isImportModalOpen: boolean = false
   let selectedImportType: ImportModalType = ImportModalType.NONE
 
-
-
+  let showModal = false
 </script>
-
-
-<Header />
 
 {#if progressBarData.isPresent}
   <div class="main_progress_bar">
@@ -143,23 +97,28 @@
   </div>
 {:else}
     {#if isLoggedIn === true}
-    <ul id="menu">
-      <Tabs {activeMenuItem} {menuItems} on:tabChange={tabChange} />
-      {#if activeMenuItem === 'Home'}
+    <ul id="menuLogin">
+      <Tabs />
+      {#if $selectedMenuItem === MenuItem.HOME}
         <Home />
-      {:else if activeMenuItem === 'My Networks'}
-        <p>My Networks</p>
-      {:else if activeMenuItem === 'Visualize'}
-      <p>Visualize</p>
-      {:else if activeMenuItem === 'Experiments'}
-      <p>Experiments</p>
-      {:else if activeMenuItem === 'Reports'}
-      <p>Reports</p>
-      {:else if activeMenuItem === 'Profile'}
+      {:else if $selectedMenuItem === MenuItem.NETWORKS}
+      <Networks/>
+      {:else if $selectedMenuItem === MenuItem.PLOT}
+      <Plot />
+      {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
+      <Experiments/>
+      {:else if $selectedMenuItem === MenuItem.REPORTS}
+      <Reports/>
+      {:else if $selectedMenuItem === MenuItem.PROFILE}
       <Profile />
+      {:else if $selectedMenuItem === MenuItem.FROM_WEB}
+      <FromWeb />
+      {:else if $selectedMenuItem === MenuItem.FROM_PC}
+      <UploadNetwork />
       {/if}
     </ul>
     {:else if isLoggedIn === false}
+      <Tabs />
       {#if $selectedMenuItem === MenuItem.HOME}
         <Home />
       {:else if $selectedMenuItem === MenuItem.LOGIN}
@@ -273,10 +232,6 @@
 
 
 
-
-
-
-
 <style lang="scss">
   .main_progress_bar {
     position: absolute;
@@ -355,5 +310,6 @@
     bottom: 0;
     overflow-y: auto;
   }
+  
 
 </style>

@@ -19,7 +19,7 @@
     At this point, the selectedMenuItem must be set to NONE so that the root div is not rendered
     on top of the import pages
     */
-    $selectedMenuItem = MenuItem.NONE
+    $selectedMenuItem = MenuItem.FROM_WEB
     console.log(`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCHELEUDER_NETS}`)
     //const response = await request(`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCHELEUDER_NETS}`)
     netzschleuderNetworkNames.set(
