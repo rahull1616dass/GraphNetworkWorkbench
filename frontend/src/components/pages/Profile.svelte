@@ -14,6 +14,8 @@
  import { MenuItem } from "../../definitions/menuItem"
  import Home from "../pages/Home.svelte"
     import { debug } from "svelte/internal";
+import { UploadProfileImage } from "../../api/firebase"
+
  let progressBarData: ProgressBarData = new ProgressBarData(true, "Loading Profile...")
 
  let user = localStorage.getItem("loginUser")
@@ -45,10 +47,12 @@
   }
 
 
-  const handleProfileEdit = (event) => {
+  async function handleProfileEdit(event) {
     const file = event.target.files[0];
-
-    profileImage = URL.createObjectURL(file);
+    await UploadProfileImage(file).then(()=>{
+      profileImage = URL.createObjectURL(file);
+    }
+    )
   }
 
   const onClickProfileEdit =() =>{

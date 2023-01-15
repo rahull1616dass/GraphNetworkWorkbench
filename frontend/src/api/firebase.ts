@@ -72,6 +72,14 @@ function getStorageRefs(networkId: string): any {
   }
 }
 
+function getImageStorageRefs(image: string): any {
+  const storage = getStorage(app)
+  const imagePath = `Users/${get(authUserStore).uid}/Networks/Images`
+  return {
+    imageFileRef: ref(storage, `${imagePath}/${image}.png`),
+  }
+}
+
 export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
   return new Promise((resolve, reject) => {
     signInWithEmailAndPassword(getAuth(app), loginUser.email, loginUser.password)
@@ -85,6 +93,25 @@ export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
         reject(error)
       })
   })
+}
+
+export async function UploadProfileImage(imageFile: File):Promise<void>
+{
+  return new Promise((resolve, reject)=> {
+
+  const storagePath = getImageStorageRefs('profile')
+  uploadBytes(storagePath['imageFileRef'], imageFile)
+  .then(() => {
+    console.log(`Uploaded image file to firebase`)
+    resolve()
+  }
+  )
+  .catch((error) => {
+    console.log(`Image upload error: ${error}`)
+    reject()
+  }
+  )
+})
 }
 
 export async function uploadNetworkToStorage(
