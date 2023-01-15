@@ -1,6 +1,7 @@
 <script>
 
 export let defaultImageSource;
+export let position = 'relative'
 
 </script>
 
@@ -11,6 +12,9 @@ export let defaultImageSource;
 
 <style lang="scss">
     button {
+      position: absolute; 
+      top: 30px;
+      right: 530px;
       border: none;
       color: transparent;
       padding: 0px;

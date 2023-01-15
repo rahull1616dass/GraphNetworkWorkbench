@@ -76,14 +76,21 @@
     object-fit: cover;
     object-position: center;
   }
+
+  .ProfileImage{
+    position: relative;
+    justify-content: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
   </style>
-
-
-
 
   <div>
     
     <h1>Hello: {username}</h1>
+
+  </div>
+  <div class="ProfileImage">
     {#if profileImage}
         <img src={profileImage}/>
     {:else}
@@ -92,7 +99,10 @@
     <input type="file" accept="image/*" style="display:none" on:change={handleProfileEdit} bind:this={InputE1} />
     <ImageButton
         defaultImageSource='https://cdn-icons-png.flaticon.com/32/1828/1828270.png'
+        position='absolute'
         on:click ={onClickProfileEdit}></ImageButton>
+    </div>
+    <div>
     <CustomButton
           type={"secondary"}
           on:click={ performLogout }>Logout</CustomButton>
