@@ -9,6 +9,7 @@
     loginUserStore,
     networksList,
     selectedNetworkIndex,
+    fetchedNetworkOnce
     } from "../../stores"
  import { MenuItem } from "../../definitions/menuItem"
  import Home from "../pages/Home.svelte"
@@ -35,6 +36,7 @@
         $networksList = []
         progressBarData.isPresent = false
         $selectedMenuItem = MenuItem.HOME
+        $fetchedNetworkOnce = false
       })
       .catch((error) => {
         console.log(`Error while signing out: ${error}`)

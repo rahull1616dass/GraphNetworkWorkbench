@@ -25,40 +25,40 @@
       box-shadow: none;
     }
     .primary{
-      background: #d8dadc;
-      color: #063d79;
+      background: whitesmoke;
+      color: white;
     }
     .secondary{
-      background: #063d79;
+      background: var(--wueblue);
       color: white;
     }
     .delete{
-        background: red;
+        background: var(--customred);
         color: white;
     }
     .primary.inverse{
-      color: #063d79;
-      background: #d8dadc;
-      border: 2px solid #063d79;
+      color: var(--wueblue);
+      background: whitesmoke;
+      border: 2px solid var(--wueblue);
     }
     .secondary.inverse{
-      color: #063d79;
+      color: var(--wueblue);
       background: white;
-      border: 2px solid #063d79;
+      border: 2px solid var(--wueblue);
     }
     .delete.inverse{
-        color: red;
+        color: var(--customred);
         background: white;
-        border: 2px solid red;
+        border: 2px solid var(--customred);
     }
     .primary.disabled {
         pointer-events: none;
         background-color: whitesmoke;
-        color: lightgrey
+        color: var(--lightgray)
     }
     .secondary.disabled {
         pointer-events: none;
         background-color: whitesmoke;
-        color: lightgrey
+        color: var(--lightgray)
     }
   </style>

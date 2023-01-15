@@ -21,6 +21,7 @@
     loginUserStore,
     networksList,
     selectedNetworkIndex,
+    fetchedNetworkOnce
   } from "./stores"
   import { getAuth } from "firebase/auth"
   import {
@@ -39,7 +40,7 @@
 
   // For some reason, the getNetworksFromFirestore() function is called multiple times on page load.
   // For now, this variable is used to prevent that. TODO: Find a better solution.
-  let fetchedNetworksOnce: boolean = false
+
 
   onMount(() => {
     /*
@@ -60,11 +61,11 @@
   $: $authUserStore, checkForLoggedIn()
 
   function checkForLoggedIn() {
-    isLoggedIn = $authUserStore !== undefined && getAuth().currentUser !== null
+    isLoggedIn = $authUserStore !== undefined //&& getAuth().currentUser !== null
     if (isLoggedIn && $networksList.length === 0) {
       progressBarData.text = "Fetching networks..."
-      if(fetchedNetworksOnce) return
-      fetchedNetworksOnce = true
+      if($fetchedNetworkOnce) return
+      $fetchedNetworkOnce = true
       getNetworksFromFirestore()
         .then(() => (progressBarData.isPresent = false))
         .catch(() => (progressBarData.isPresent = false))

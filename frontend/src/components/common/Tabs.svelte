@@ -69,7 +69,7 @@
     
     .active{
         /*color: #bf0a30;*/
-        color: #ed2939;
+        color: var(--customred);
         padding-bottom: 20%;
         
     }

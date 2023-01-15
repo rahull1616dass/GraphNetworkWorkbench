@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts">loadNetwork
   import { onMount } from "svelte"
   import MiserablesData from "../../../../data/MiserablesVisSpec"
   import VisSpec from "../../../../data/VisSpec"
@@ -107,7 +107,7 @@
   let hoverData: HoverData = undefined
 
   // Anytime the selected network index from the menu changes, we need to update the vegaEmbed
-  $: $selectedNetworkIndex, loadNetwork()
+  //$: $selectedNetworkIndex, loadNetwork()
 
   // Props to pass to the modal anytime user clicks on a node from the vegaEmbed
   let modalProps: any = undefined
@@ -149,7 +149,7 @@
         </div>
       </div>
     {/if}
-
+  </div>
     <div id="viz" />
     {#if modalData.isOpen}
       <NodeDetailModal
@@ -159,21 +159,22 @@
         on:updateNode={updateNode}
       />
     {/if}
-  </div>
+  
   <Hover {hoverData} />
 </main>
 
 <style lang="scss">
   .content {
-    border: 1px solid #e5e5e5;
-    border-radius: 5px;
+    /*border: 1px solid #e5e5e5;
+    border-radius: 5px;*/
     background-color: white;
-    margin-left: 20%;
+    //margin-left: 20%;
+    margin: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     right: 0;
-    width: 50%;
+    width: 80%;
     height: 20%;
   }
   .stats {
@@ -206,5 +207,9 @@
   .stats_icon {
     width: 1rem;
     height: 1rem;
+  }
+  .viz {
+    width: 100%;
+    height: 100%;
   }
 </style>

@@ -16,6 +16,7 @@
   --wueblue: #063d79;
   --lightblack: #4a4a56;
   --lightgray: #adadad;
+  --customred: #ed2939;
 }
 
 a {
@@ -112,5 +113,5 @@ li a:hover {
     background-color: whitesmoke;
 }
 hr {
-  background-color: var(--lightgray);
+  background-color: whitesmoke;
 }
