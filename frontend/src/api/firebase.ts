@@ -23,7 +23,7 @@ import {
 } from "firebase/storage"
 import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
-import { authUserStore, loginUserStore, networksList } from "../stores"
+import { authUserStore, loginUserStore, networksList, fetchedProfilePicture } from "../stores"
 import { get } from "svelte/store"
 import { Network, type Metadata, Node, Link } from "../definitions/network"
 import { metadataConverter } from "./firebase_converters"
@@ -39,6 +39,7 @@ export const db = initializeFirestore(app, {
 const enum Database {
   USERS = "Users",
   NETWORKS = "Networks",
+  IMAGES = "Images"
 }
 
 export async function registerUser(loginUser: LoginUser): Promise<void> {
@@ -74,7 +75,7 @@ function getStorageRefs(networkId: string): any {
 
 function getImageStorageRefs(image: string): any {
   const storage = getStorage(app)
-  const imagePath = `Users/${get(authUserStore).uid}/Networks/Images`
+  const imagePath = `Users/${get(authUserStore).uid}/Images`
   return {
     imageFileRef: ref(storage, `${imagePath}/${image}.png`),
   }
@@ -160,6 +161,19 @@ async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
   })
 }
 
+export async function getProfileImage() {
+  
+  const storagePaths = getImageStorageRefs('profile')
+  getBlob(storagePaths).then((image) => {
+    fetchedProfilePicture.set(blobToFile(image, "profileImage.png"))
+  })
+  .catch((error) => 
+  {
+    console.log("No file of profilePics")
+  }
+  )
+}
+
 export async function getNetworks() {
   const networksQuery = query(
     collection(
@@ -177,6 +191,7 @@ export async function getNetworks() {
     })
   })
 }
+
 
 export async function getNetworkFromStorage(
   metadata: Metadata

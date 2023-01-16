@@ -15,6 +15,8 @@
  import Home from "../pages/Home.svelte"
     import { debug } from "svelte/internal";
 import { UploadProfileImage } from "../../api/firebase"
+import { fetchedProfilePicture } from "../../stores"
+import { onMount } from "svelte"
 
  let progressBarData: ProgressBarData = new ProgressBarData(true, "Loading Profile...")
 
@@ -60,6 +62,15 @@ import { UploadProfileImage } from "../../api/firebase"
     
     InputE1.click()
   }
+
+  onMount(() => {
+    fetchedProfilePicture.subscribe((image) => {
+    
+      profileImage = URL.createObjectURL(image);
+    
+    })
+
+  })
 </script>
 
 

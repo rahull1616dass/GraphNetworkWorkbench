@@ -27,6 +27,7 @@
   import {
     loginUser,
     getNetworks as getNetworksFromFirestore,
+    getProfileImage
   } from "./api/firebase"
   import { ProgressBarData } from "./definitions/progressBarData"
   import { ProgressBar, Button } from "carbon-components-svelte"
@@ -69,6 +70,7 @@
       getNetworksFromFirestore()
         .then(() => (progressBarData.isPresent = false))
         .catch(() => (progressBarData.isPresent = false))
+      getProfileImage()
     }
   }
 
