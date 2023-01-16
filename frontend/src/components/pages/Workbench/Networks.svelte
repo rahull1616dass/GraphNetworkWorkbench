@@ -1,6 +1,19 @@
 <script lang="ts">
-    import { networksList, selectedNetworkIndex } from "../../../stores";
+    import { networksList, selectedNetworkIndex, selectedMenuItem } from "../../../stores";
     import NetworkListItem from "../../common/NetworkListItem.svelte";
+    import { MenuItem } from "../../../definitions/menuItem";
+
+    $: selectNetwork()
+    let tabchange
+    let index = undefined
+
+    console.log("TAB CHANGE: ", tabchange)
+
+    function selectNetwork() {
+      if (tabchange === undefined) return
+      $selectedMenuItem = MenuItem.PLOT
+    }
+
   </script>
   
   <div class="explanation-title"> 
@@ -17,6 +30,7 @@
           selected={$selectedNetworkIndex == index}
           on:selectItem={(event) => {
             $selectedNetworkIndex = event.detail.selectedIndex
+            tabchange = event.detail.selectedIndex
           }}
         />
       {/each}

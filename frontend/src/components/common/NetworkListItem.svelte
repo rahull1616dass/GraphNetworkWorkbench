@@ -8,6 +8,8 @@
   export let network: Network = undefined
   export let index: number = undefined
   export let selected: boolean = false
+
+
 </script>
 
 <div
