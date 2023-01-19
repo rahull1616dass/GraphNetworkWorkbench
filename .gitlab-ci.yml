@@ -1,0 +1,21 @@
+stages:
+  - deploy
+
+image: pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
+
+make_experiments:
+  stage: deploy
+  variables:
+    PYTHONUNBUFFERED: 1
+    PYTHONDONTWRITEBYTECODE: 1
+    PIP_NO_CACHE_DIR: "off"
+    PIP_DISABLE_PIP_VERSION_CHECK: 1
+    PIP_DEFAULT_TIMEOUT: 100
+  before_script:
+    - apt-get update && apt-get upgrade -y
+    - conda update pip
+    - conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
+    - conda install pyg -c pyg
+    - pip install flask snakecase
+  script:
+    - echo "CI/CD is setup"
