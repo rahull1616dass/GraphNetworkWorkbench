@@ -84,11 +84,10 @@ def parse_request(request: MLRequest) -> FlaskResponse:
     
     files: dict[str, DataFrame] = download_network_files(request)
     tgData: TorchGeoData = utils.from_dataframe(files['nodes'], files['edges'])
-    match request.task_type:
-        case TaskType.NODE_CLASSIFICATION.value:
-            return node_classification(request, tgData)
-        case TaskType.EDGE_CLASSIFICATION.value:
-            return edge_classification(request, tgData)
+    if request.task_type == TaskType.NODE_CLASSIFICATION:
+        return node_classification(request, tgData)
+    elif request.task_type == TaskType.EDGE_CLASSIFICATION:
+        return node_classification(request, tgData)
     return response(400, {"error": "Invalid task type"})
 
 
