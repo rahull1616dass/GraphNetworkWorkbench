@@ -13,8 +13,10 @@ from ml_request import MLRequest
 from snakecase import convert
 import utils
 from torch_geometric.data import Data as TorchGeoData
+from healthcheck import HealthCheck
 
 app = Flask(__name__)
+health = HealthCheck()
 
 
 def response(status: int, data: dict) -> FlaskResponse:
@@ -104,6 +106,9 @@ def index() -> FlaskResponse:
             print(e)
             return response(400, {"error": str(e)})
     return response(400, {"error": "Not a POST request"})
+
+
+app.add_url_rule("/healthcheck", "healthcheck", view_func=lambda: health.run())
 
 
 if __name__ == "__main__":

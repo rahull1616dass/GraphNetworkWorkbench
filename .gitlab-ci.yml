@@ -20,6 +20,6 @@ make_experiments:
     - conda update pip
     - conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
     - conda install pyg -c pyg
-    - pip install flask snakecase
+    - pip install flask snakecase py-healthcheck
   script:
     - echo "CI/CD is setup"
