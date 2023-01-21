@@ -65,8 +65,8 @@ import { onMount } from "svelte"
 
   onMount(() => {
     fetchedProfilePicture.subscribe((image) => {
-    
-      profileImage = URL.createObjectURL(image);
+      if(image!=null)
+        profileImage = URL.createObjectURL(image);
     
     })
 
@@ -76,11 +76,14 @@ import { onMount } from "svelte"
 
 <style lang="scss">
     /* Some basic styles to make the page look presentable */
-    h1 {
-      font-size: 2em;
-      object-fit: cover;
-      object-position: center;
-    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: nowrap;
+      flex-direction: row;
+      width: 100%;
+  }
   
     p {
       font-size: 1.2em;
@@ -96,13 +99,13 @@ import { onMount } from "svelte"
 
   .ProfileImage{
     position: relative;
-    justify-content: center;
     padding-top: 20px;
     padding-bottom: 20px;
+    padding-left: 5%;
   }
   </style>
 
-  <div>
+  <div class="header">
     
     <h1>Hello: {username}</h1>
 
@@ -116,7 +119,6 @@ import { onMount } from "svelte"
     <input type="file" accept="image/*" style="display:none" on:change={handleProfileEdit} bind:this={InputE1} />
     <ImageButton
         defaultImageSource='https://cdn-icons-png.flaticon.com/32/1828/1828270.png'
-        position='absolute'
         on:click ={onClickProfileEdit}></ImageButton>
     </div>
     <div>

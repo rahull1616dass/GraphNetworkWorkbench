@@ -164,7 +164,8 @@ async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
 export async function getProfileImage() {
   
   const storagePaths = getImageStorageRefs('profile')
-  getBlob(storagePaths).then((image) => {
+  console.log(storagePaths)
+  getBlob(storagePaths['imageFileRef']).then((image) => {
     fetchedProfilePicture.set(blobToFile(image, "profileImage.png"))
   })
   .catch((error) => 
