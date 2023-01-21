@@ -5,7 +5,7 @@ default:
 stages:
   - deploy
 
-image: pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
+image: pytorch/pytorch:latest
 
 make_experiments:
   stage: deploy
@@ -15,11 +15,5 @@ make_experiments:
     PIP_NO_CACHE_DIR: "off"
     PIP_DISABLE_PIP_VERSION_CHECK: 1
     PIP_DEFAULT_TIMEOUT: 100
-  before_script:
-    - apt-get update && apt-get upgrade -y
-    - conda update pip
-    - conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
-    - conda install pyg -c pyg
-    - pip install flask snakecase py-healthcheck gunicorn
   script:
-    - cd backend/ml/src && gunicorn  --bind 0.0.0.0:9000 main:app --daemon
+    - echo "CI/CD is replaced to the docker-compose"
