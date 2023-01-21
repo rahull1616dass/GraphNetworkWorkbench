@@ -21,5 +21,6 @@ xtai_lab3_deploy:
     - conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
     - conda install pyg -c pyg
     - pip install flask snakecase py-healthcheck gunicorn
+    - python --version
   script:
     - cd backend/ml/src && gunicorn  --bind 0.0.0.0:9000 main:app --daemon
