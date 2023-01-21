@@ -54,6 +54,9 @@
         justify-content: right;
         padding: 0%;
         list-style-type: none;
+        flex-wrap: wrap;
+        align-content: center;
+        flex-direction: row-reverse;
         
     }
     .menuItem{

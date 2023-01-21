@@ -101,7 +101,7 @@ import { onMount } from "svelte"
     position: relative;
     padding-top: 20px;
     padding-bottom: 20px;
-    padding-left: 5%;
+    padding-left: 2%;
   }
   </style>
 
