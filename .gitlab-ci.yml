@@ -22,5 +22,6 @@ xtai_lab3_deploy:
     - conda install pyg -c pyg
     - pip install flask snakecase py-healthcheck gunicorn
     - python --version
+    - python -c "import torch; print(torch.version.cuda); device = torch.device('cuda'); print(torch.tensor([0]).to(device))"
   script:
     - cd backend/ml/src && gunicorn  --bind 0.0.0.0:9000 main:app --daemon
