@@ -5,7 +5,7 @@ default:
 stages:
   - deploy
 
-image: pytorch/pytorch:latest
+image: pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
 
 xtai_lab3_deploy:
   stage: deploy
