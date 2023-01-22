@@ -51,7 +51,13 @@
       .then((result) => {
         result.view.addEventListener("click", function (event, item) {
           console.log("CLICK", item)
-          modalProps = item.datum
+          detailedNode = new Node(
+            item.datum.name,
+            undefined,
+            item.datum.group,
+            item.datum.index,
+            undefined
+          )
           modalData.isOpen = true
         })
         result.view.addEventListener("mouseover", function (event, item) {
@@ -109,8 +115,7 @@
   // Anytime the selected network index from the menu changes, we need to update the vegaEmbed
   //$: $selectedNetworkIndex, loadNetwork()
 
-  // Props to pass to the modal anytime user clicks on a node from the vegaEmbed
-  let modalProps: any = undefined
+  let detailedNode: Node = undefined
 
   // Anytime the user updates a node in the modal, update the network
   function updateNode(event: CustomEvent) {
@@ -154,7 +159,7 @@
     {#if modalData.isOpen}
       <NodeDetailModal
         bind:open={modalData.isOpen}
-        {modalProps}
+        detailedNode={detailedNode}
         on:closeModal={() => (modalData.isOpen = false)}
         on:updateNode={updateNode}
       />

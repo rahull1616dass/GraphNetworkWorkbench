@@ -5,26 +5,11 @@
   import CustomModal from "../../../common/CustomModal.svelte";
   import CustomButton from "../../../common/CustomButton.svelte";
 
-  export let modalProps: any = undefined
   export let open: boolean = false
-  let node: Node = undefined
+  export let detailedNode: Node = undefined
   let textInputs = new Node()
   const dispatch = createEventDispatcher()
 
-  // Log the result when modalProps is updated
-  $: {
-    if (modalProps != undefined) {
-      console.log("modalProps", modalProps)
-      node = new Node(
-        modalProps.name,
-        modalProps.id,
-        modalProps.group,
-        modalProps.index,
-        modalProps.pos
-      )
-      console.log("node", node)
-    }
-  }
 </script>
 
 <!-- <main>
@@ -64,20 +49,20 @@
   {/if}
 </main> -->
 
-{#if node != undefined}
+{#if detailedNode != undefined}
   <CustomModal on:close="{() => open = false}">
     <h4 slot="header">
       Node Details
     </h4>
     <div slot="body">
       <Form>
-        {#each Object.keys(node) as key}
+        {#each Object.keys(detailedNode) as key}
           <TextInput
             labelText={key}
-            value={node[key]}
+            value={detailedNode[key]}
             on:input={(e) => {
               console.log("input: ", e)
-              textInputs[key] = e.detail
+              detailedNode[key] = e.detail
             }}
             type="text"
             id={key}
@@ -88,6 +73,7 @@
 
     <div slot="footer">
       <CustomButton type={"secondary"} inverse={false} on:click={() => {
+        dispatch("updateNode", { newNode: detailedNode })
         open = false
       }}>
         Update Node
