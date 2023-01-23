@@ -17,4 +17,5 @@ docker_image:
     - echo -e "Host login6 \n\t Hostname login6.informatik.uni-wuerzburg.de \n\t StrictHostKeyChecking no \n\t User ${VINGILOT_USER} \n\t IdentityFile ~/.ssh/uni_wuerzburg_cluster" > ~/.ssh/config
     - echo -e "Host vingilot \n\t Hostname vingilot.informatik.uni-wuerzburg.de \n\t StrictHostKeyChecking no \n\t User ${VINGILOT_USER} \n\t ProxyCommand ssh login6 nc %h %p \n\t IdentityFile ~/.ssh/uni_wuerzburg_cluster" >> ~/.ssh/config
     - chmod 600 ~/.ssh/config
-    - ssh vingilot -t "ls -al"
+    - ssh vingilot -t "mkdir -p xtai_lab3"
+    - scp -r backend/ml vingilot:./xtai_lab3
