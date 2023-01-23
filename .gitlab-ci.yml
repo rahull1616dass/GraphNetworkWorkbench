@@ -1,6 +1,6 @@
 default:
   tags:
-    - docker
+    - ssh
 
 stages:
   - build
@@ -8,6 +8,8 @@ stages:
 docker_image:
   stage: build
   script:
-    - cd backend/ml && docker build -t $BACKEND_IMAGE_TAG .
-    - docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_REGISTRY_PASSSWORD $TARGET_DOCKER_REGISTRY
-    - docker push -t $BACKEND_IMAGE_TAG
+    - mkdir -p ~/.ssh
+    - echo $VINGILOT_PRIVATE_KEY > ~/.ssh/uni_wuerzburg_cluster
+    - echo -e "Host login6 \n\tHostname login6.informatik.uni-wuerzburg.de \n\tUser $VINGILOT_USER \n\tIdentityFile ~/.ssh/uni_weurzburg_cluster" > ~/.ssh/config
+    - echo -e "Host vingilot \n\tHostname vingilot.informatik.uni-wuerzburg.de \n\tUser $VINGILOT_USER \n\tProxyCommand ssh login6 nc %h %p \n\tIdentityFile ~/.ssh/uni_weurzburg_cluster" >> ~/.ssh/config
+    - ssh vingilot -t 'cat /etc/os-release'
