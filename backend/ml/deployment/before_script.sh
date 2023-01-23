@@ -9,4 +9,4 @@ echo -e "Host vingilot \n\t Hostname vingilot.informatik.uni-wuerzburg.de \n\t S
 chmod 600 ~/.ssh/config
 ssh vingilot -t "mkdirs -p ~/xtai_lab3/deployment; cd ~/xtai_lab3/deployment && if test -f ./kubernates.yaml; then kubectl -n ${VINGILOT_USER} delete -f ./kubernates.yaml; fi"
 scp backend/ml/deployment/Dockerfile /backend/ml/deployment/kubernates.yaml vingilot:./xtai_lab3/deployment
-scp -r backend/ml/src vingilot:~xtai_lab3
+scp -r backend/ml/src vingilot:~xtai_lab3/application

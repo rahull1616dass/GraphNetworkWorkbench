@@ -8,5 +8,4 @@ stages:
 docker_image:
   stage: build
   script:
-    - apt update && apt install tree -y && tree
     - bash ./backend/ml/deployment/before_script.sh
