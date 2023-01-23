@@ -8,4 +8,5 @@ stages:
 docker_image:
   stage: build
   script:
+    - ls
     - bash ./backend/ml/deployment/before_script.sh
