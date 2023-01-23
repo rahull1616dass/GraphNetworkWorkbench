@@ -3,25 +3,11 @@ default:
     - python
 
 stages:
-  - deploy
+  - build
 
-image: pytorch/pytorch:latest
-
-xtai_lab3_deploy:
-  stage: deploy
-  variables:
-    PYTHONUNBUFFERED: 1
-    PYTHONDONTWRITEBYTECODE: 1
-    PIP_NO_CACHE_DIR: "off"
-    PIP_DISABLE_PIP_VERSION_CHECK: 1
-    PIP_DEFAULT_TIMEOUT: 100
-  before_script:
-    - apt-get update && apt-get upgrade -y
-    - conda update pip
-    - conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
-    - conda install pyg -c pyg
-    - pip install flask snakecase py-healthcheck gunicorn
-    - python --version
-    - python -c "import torch; print(torch.version.cuda); device = torch.device('cuda'); print(torch.tensor([0]).to(device))"
-  script:
-    - cd backend/ml/src && gunicorn  --bind 0.0.0.0:9000 main:app --daemon
+docker_image:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script: cd backend/ml && docker build -t $UNI_DOCKER_REGISTRY .
