@@ -1,5 +1,6 @@
 export enum modelType{
-    GCN,
-    DeepWalk,
-    GIN
+    GCN = "GCN",
+    DeepWalk = "DeepWalk",
+    GIN = "GIN",
+    NONE = "NONE"
 }

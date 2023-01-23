@@ -1,4 +1,5 @@
 export enum taskType{
     LINK_PREDICTION,
-    NODE_CLASSIFICATION
+    NODE_CLASSIFICATION,
+    NONE
 }
