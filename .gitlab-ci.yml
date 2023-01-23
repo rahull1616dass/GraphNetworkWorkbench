@@ -7,4 +7,7 @@ stages:
 
 docker_image:
   stage: build
-  script: cd backend/ml && docker build -t $UNI_DOCKER_REGISTRY .
+  script:
+    - cd backend/ml && docker build -t $BACKEND_IMAGE_TAG .
+    - docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_REGISTRY_PASSSWORD $TARGET_DOCKER_REGISTRY
+    - docker push -t $BACKEND_IMAGE_TAG
