@@ -1,13 +1,67 @@
 <script lang="ts">
-  import { modelType } from "../../../definitions/modelType";
+  import { Dropdown, ProgressBar } from "carbon-components-svelte"
+  import { ProgressBarData } from "../../../definitions/progressBarData"
+  import { Task } from "../../../definitions/task"
+  import { TaskType } from "../../../definitions/taskType"
+  import { setExperimentTask, getExperimentTasks } from "../../../api/firebase"
+  import CustomButton from "../../common/CustomButton.svelte"
+  import { MLModelType } from "../../../definitions/mlModelType";
   import { networksList, selectedNetworkIndex, selectedModelType } from "../../../stores";
 
   export let networkIndex: number = undefined
   let placeholderNetwork: string = "Please select a network from the list"
   let placeholderModel: string = "Please select a model from the list"
 
-  let modelTypes: modelType[] = [modelType.GCN, modelType.DeepWalk, modelType.GIN]
+  // These values should be set by UI Elements later on
+  let trainPercentage: number = 0.8
+  let epochs: number = 10
 
+  let progressBarData: ProgressBarData = new ProgressBarData(
+    false,
+    "Training..."
+  )
+
+  async function createTask() {
+    const taskToBeCreated = new Task(
+      undefined, // This will be set by the backend
+      TaskType.NODE_CLASSIFICATION,
+      trainPercentage,
+      epochs
+    )
+    const networkId = $networksList[$selectedNetworkIndex].metadata.id
+    await getExperimentTasks(networkId)
+      .then((tasks) => {
+        console.log("Tasks", tasks)
+        tasks.forEach((task) => {
+          if (task.equals(taskToBeCreated)) {
+            console.log("Task already exists")
+            return
+          }
+        })
+        setTaskDocument(networkId, taskToBeCreated)
+      })
+      .catch((error) => {
+        console.log("Error getting tasks list", error)
+      })
+  }
+  let modelTypes: MLModelType[] = [MLModelType.GCN, MLModelType.DeepWalk, MLModelType.GIN]
+
+  async function setTaskDocument(
+    networkId: string,
+    taskToBeCreated: Task
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      setExperimentTask(networkId, taskToBeCreated)
+        .then((task) => {
+          console.log("Task created", task)
+          resolve()
+        })
+        .catch((error) => {
+          console.log("Error creating task", error)
+          reject()
+        })
+    })
+  }
 </script>
 
 
@@ -52,13 +106,15 @@
 
 </div>
 
+<hr />
 
+<div>hello</div>
 
-<div>
-
-</div>
-
-
+{#if progressBarData.isPresent}
+  <ProgressBar helperText={progressBarData.text} />
+{:else}
+  <CustomButton inverse={false} on:click={() => createTask()}>Create Task</CustomButton>
+{/if}
 
 
 <style lang="scss">
@@ -138,9 +194,7 @@
         background-color: whitesmoke;
     }
 
-    option:hover {
+  option:hover {
     background-color: yellow;
-    }
-
-    
+  }
 </style>
