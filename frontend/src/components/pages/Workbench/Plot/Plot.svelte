@@ -27,8 +27,8 @@
   import UploadNetwork from "../../AddNetwork/UploadNetwork/UploadNetwork.svelte"
   import { ProgressBar } from "carbon-components-svelte"
   import { ProgressBarData } from "../../../../definitions/progressBarData"
-  //import JSON from "json-strictify" 
-  import cloneDeep from 'lodash.clonedeep'
+  //import JSON from "json-strictify"
+  import cloneDeep from "lodash.clonedeep"
 
   function loadNetwork(isNodeUpdate: boolean) {
     if (isNodeUpdate) {
@@ -41,7 +41,7 @@
         Same goes for JSON.stringify and JSON.parse which throws circular reference error.
         Hence the usage of lodash.clonedeep
         */
-        currentNetwork = cloneDeep($networksList[$selectedNetworkIndex]) 
+        currentNetwork = cloneDeep($networksList[$selectedNetworkIndex])
         loadNetworkValues(currentNetwork)
       } else createVegaEmbed(MiserablesData)
     }
@@ -80,7 +80,7 @@
   function createVegaEmbed(embeddedNetwork: any) {
     vegaEmbed("#viz", embeddedNetwork, { actions: false })
       .then((result) => {
-        result.view.addEventListener("click", function (event, item) {
+        result.view.addEventListener("click", function (_, item) {
           console.log("CLICK", item)
           if (!isEditMode) {
             editModeRequiredModalData.isOpen = true
@@ -93,6 +93,7 @@
             item.datum.index,
             undefined
           )
+          hoverData = undefined
           nodeDetailModalData.isOpen = true
         })
         result.view.addEventListener("mouseover", function (event, item) {
@@ -134,6 +135,10 @@
             }
           }
         })
+        result.view.addEventListener("mouseout", function (_, item) {
+        console.log("MOUSEOUT", item)
+        hoverData = undefined
+      })
       })
       .catch((error) => console.log(error))
   }
@@ -282,7 +287,9 @@
     />
   {/if}
 
-  <Hover {hoverData} />
+  {#if hoverData !== undefined}
+    <Hover {hoverData} />
+  {/if}
 </main>
 
 <style lang="scss">
