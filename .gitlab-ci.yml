@@ -1,6 +1,6 @@
 default:
   tags:
-    - python
+    - docker
 
 stages:
   - build
