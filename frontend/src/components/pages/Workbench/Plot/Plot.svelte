@@ -235,7 +235,8 @@
             link.value
           ).equals(updatedItem as Link)
         ) {
-          currentNetwork.links[index] = link
+          // @ts-ignore
+          currentNetwork.links[index].value = updatedItem.value
         }
       })
     }
@@ -313,7 +314,6 @@
       bind:open={nodeDetailModalData.isOpen}
       on:closeModal={() => (nodeDetailModalData.isOpen = false)}
       {detailedItem}
-      existingNodes={currentNetwork.nodes}
       on:updateItem={updateItem}
     />
   {/if}

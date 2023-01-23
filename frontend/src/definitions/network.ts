@@ -23,9 +23,9 @@ export class Link{
     ){}
 
     public equals(other: Link): boolean{
+        // Cruically, the value need not be equal for the links to be equal
         return this.source === other.source &&
-            this.target === other.target &&
-            this.value === other.value
+            this.target === other.target
     }
 }
 
