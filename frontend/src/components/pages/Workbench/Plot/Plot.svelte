@@ -48,8 +48,42 @@
   }
 
   function loadNetworkValues(network: Network) {
-    VisSpec.data[0].values = network.nodes
-    VisSpec.data[1].values = network.links
+    /*
+    There was a nasty bug with the previous network's data still being visible in the new network,
+    whenever the network was updated (for instance the links would stay in their previous positions
+    thus not being connected to any of its nodes which already changed positions). 
+    This was because the visualization related data was not being reset. Tried several things to fix this, including
+    using vega's own functions such as view.data() and view.change() with changeSet but none of them worked.
+    Hence this slightly hacky solution. 
+    Once vegaEmbed generates a visualization, it attaches some extra data to the network object
+    such as the position of the nodes and links.
+    This data is not present in the network object when the network is first loaded.
+    Therefore by checking if one of the properties is present, we can determine if the network has been generated before.
+    This resets the previous data and allows them to be re-generated according to the updated data.
+    */
+    // @ts-ignore
+    if (network.links[0].source.datum !== undefined) {
+      VisSpec.data[0].values = network.nodes.map((node) => {
+        return {
+          name: node.name,
+          group: node.group,
+          index: node.index,
+        }
+      })
+      VisSpec.data[1].values = network.links.map((link) => {
+        return {
+          // @ts-ignore
+          source: link.source.index,
+          // @ts-ignore
+          target: link.target.index,
+          value: link.value,
+        }
+      })
+    } else {
+      VisSpec.data[0].values = network.nodes
+      VisSpec.data[1].values = network.links
+    }
+
     createVegaEmbed(VisSpec)
   }
 
@@ -80,6 +114,7 @@
   function createVegaEmbed(embeddedNetwork: any) {
     vegaEmbed("#viz", embeddedNetwork, { actions: false })
       .then((result) => {
+        viz = result.view
         result.view.addEventListener("click", function (_, item) {
           console.log("CLICK", item)
           if (!isEditMode) {
@@ -191,6 +226,7 @@
     loadNetwork(false)
   })
 
+  let viz = undefined
   let currentNetwork: Network = undefined // Will be set in onMount()
   let nodeDetailModalData: ModalData = new ModalData()
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
@@ -230,7 +266,7 @@
           new Link(
             // @ts-ignore
             link.source.datum.name,
-            // @ts-ignore 
+            // @ts-ignore
             link.target.datum.name,
             link.value
           ).equals(updatedItem as Link)
