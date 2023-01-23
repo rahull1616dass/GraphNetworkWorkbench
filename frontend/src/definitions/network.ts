@@ -21,6 +21,12 @@ export class Link{
         readonly target: string = undefined,
         readonly value: number = undefined
     ){}
+
+    public equals(other: Link): boolean{
+        return this.source === other.source &&
+            this.target === other.target &&
+            this.value === other.value
+    }
 }
 
 export class Node{

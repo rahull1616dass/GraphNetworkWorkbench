@@ -11,7 +11,7 @@
   } from "../../../../stores"
   import { ModalData } from "../../../../definitions/modalData"
   import { HoverData } from "../../../../definitions/hoverData"
-  import NodeDetailModal from "./NodeDetailModal.svelte"
+  import PlotDetailModal from "./PlotDetailModal.svelte"
   import { Link, Node } from "../../../../definitions/network"
   import Hover from "./Hover.svelte"
   import statsIcon from "../../../../assets/stats.svg"
@@ -86,13 +86,22 @@
             editModeRequiredModalData.isOpen = true
             return
           }
-          detailedNode = new Node(
-            item.datum.name,
-            undefined,
-            item.datum.group,
-            item.datum.index,
-            undefined
-          )
+          // @ts-ignore
+          if (item.path !== undefined) {
+            detailedItem = new Link(
+              item.datum.source.datum.name,
+              item.datum.target.datum.name,
+              item.datum.value
+            )
+          } else {
+            detailedItem = new Node(
+              item.datum.name,
+              undefined,
+              item.datum.group,
+              item.datum.index,
+              undefined
+            )
+          }
           hoverData = undefined
           nodeDetailModalData.isOpen = true
         })
@@ -136,9 +145,9 @@
           }
         })
         result.view.addEventListener("mouseout", function (_, item) {
-        console.log("MOUSEOUT", item)
-        hoverData = undefined
-      })
+          console.log("MOUSEOUT", item)
+          hoverData = undefined
+        })
       })
       .catch((error) => console.log(error))
   }
@@ -195,8 +204,8 @@
     undefined,
     "Edit Mode Required",
     `
-  You need to be in edit mode to edit nodes. Please toggle the edit
-  mode button. Then you can click on nodes to edit their attributes.
+  You need to be in edit mode to edit nodes or edges. Please toggle the edit
+  mode button. Then you can click on specific nodes or edges to edit their attributes.
   Once complete, click the save button to save your changes.
   `,
     false
@@ -206,14 +215,30 @@
     "Updating the network..."
   )
   let hoverData: HoverData = undefined
-  let detailedNode: Node = undefined
+  let detailedItem: Node | Link = undefined
   let isEditMode: boolean = false
 
-  // Anytime the user updates a node in the modal, update the network
-  function updateNode(event: CustomEvent) {
-    console.log("updating node", event.detail.newNode)
-    let newNode: Node = event.detail.newNode
-    currentNetwork.nodes[newNode.index] = newNode
+  // Anytime the user updates a node or a link in the modal, update the network
+  function updateItem(event: CustomEvent) {
+    let updatedItem: Node | Link = event.detail.updatedItem
+    console.log("updating item", updatedItem)
+    if (updatedItem instanceof Node) {
+      currentNetwork.nodes[updatedItem.index] = updatedItem as Node
+    } else if (updatedItem instanceof Link) {
+      currentNetwork.links.forEach((link, index) => {
+        if (
+          new Link(
+            // @ts-ignore
+            link.source.datum.name,
+            // @ts-ignore 
+            link.target.datum.name,
+            link.value
+          ).equals(updatedItem as Link)
+        ) {
+          currentNetwork.links[index] = link
+        }
+      })
+    }
     loadNetwork(true)
   }
 </script>
@@ -279,11 +304,17 @@
   </div>
   <div id="viz" />
   {#if nodeDetailModalData.isOpen}
-    <NodeDetailModal
+    <!--
+    The assumption is that the names of the nodes will not change. Also it is not possible to
+    add/remove nodes in the edit mode. For this, the user has to change the network itself via
+    uploading a new nodes file.
+      -->
+    <PlotDetailModal
       bind:open={nodeDetailModalData.isOpen}
-      {detailedNode}
       on:closeModal={() => (nodeDetailModalData.isOpen = false)}
-      on:updateNode={updateNode}
+      {detailedItem}
+      existingNodes={currentNetwork.nodes}
+      on:updateItem={updateItem}
     />
   {/if}
 
