@@ -62,7 +62,7 @@
             value={detailedNode[key]}
             on:input={(e) => {
               console.log("input: ", e)
-              detailedNode[key] = e.detail
+              detailedNode[key] = isNaN(Number(e.detail)) ? e.detail : Number(e.detail)
             }}
             type="text"
             id={key}

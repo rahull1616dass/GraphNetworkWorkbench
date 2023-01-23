@@ -17,9 +17,9 @@ export class Metadata{
 }
 export class Link{
     constructor(
-        readonly source: string,
-        readonly target: string,
-        readonly value: number
+        readonly source: string = undefined,
+        readonly target: string = undefined,
+        readonly value: number = undefined
     ){}
 }
 

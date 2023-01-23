@@ -1,9 +1,14 @@
-<script lang="ts">loadNetwork
+<script lang="ts">
+  loadNetwork
   import { onMount } from "svelte"
   import MiserablesData from "../../../../data/MiserablesVisSpec"
   import VisSpec from "../../../../data/VisSpec"
   import { default as vegaEmbed } from "vega-embed"
-  import { networksList, selectedNetworkIndex, selectedMenuItem } from "../../../../stores"
+  import {
+    networksList,
+    selectedNetworkIndex,
+    selectedMenuItem,
+  } from "../../../../stores"
   import { ModalData } from "../../../../definitions/modalData"
   import { HoverData } from "../../../../definitions/hoverData"
   import NodeDetailModal from "./NodeDetailModal.svelte"
@@ -12,14 +17,65 @@
   import statsIcon from "../../../../assets/stats.svg"
   import { HoverType } from "../../../../definitions/hoverType"
   import { MenuItem } from "../../../../definitions/menuItem"
+  import { Toggle, Modal } from "carbon-components-svelte"
+  import CustomModal from "../../../common/CustomModal.svelte"
+  import CustomButton from "../../../common/CustomButton.svelte"
+  import { toCSVFile } from "../../AddNetwork/UploadNetwork/networkParser"
+  import { uploadNetworkToStorage } from "../../../../api/firebase"
+  import type { Network } from "../../../../definitions/network"
+  import { UploadedFileType } from "../../../../definitions/uploadedFileType"
+  import UploadNetwork from "../../AddNetwork/UploadNetwork/UploadNetwork.svelte"
+  import { ProgressBar } from "carbon-components-svelte"
+  import { ProgressBarData } from "../../../../definitions/progressBarData"
+  //import JSON from "json-strictify"
+  
+  function simpleStringify (object){
+    // stringify an object, avoiding circular structures
+    // https://stackoverflow.com/a/31557814
+    var simpleObject = {};
+    for (var prop in object ){
+        if (!object.hasOwnProperty(prop)){
+            continue;
+        }
+        if (typeof(object[prop]) == 'object'){
+            continue;
+        }
+        if (typeof(object[prop]) == 'function'){
+            continue;
+        }
+        simpleObject[prop] = object[prop];
+    }
+    return JSON.stringify(simpleObject); // returns cleaned up JSON
+};
 
-  function loadNetwork() {
-    if ($networksList && $networksList.length > 0) {
-      console.log("changing to ", $selectedNetworkIndex)
-      VisSpec.data[0].values = $networksList[$selectedNetworkIndex].nodes
-      VisSpec.data[1].values = $networksList[$selectedNetworkIndex].links
-      createVegaEmbed(VisSpec)
-    } else createVegaEmbed(MiserablesData)
+  function loadNetwork(isNodeUpdate: boolean) {
+    if (isNodeUpdate) {
+      loadNetworkValues(currentNetwork)
+    } else {
+      if ($networksList && $networksList.length > 0) {
+        console.log("changing to ", $selectedNetworkIndex)
+        /*
+        Note: Using the json-strictify package to deep clone the object rather than 
+        using JSON.parse(JSON.stringify()) because the latter may throw the following error:
+        Uncaught TypeError TypeError: Converting circular structure to JSON
+        --> starting at object with constructor 'GroupItem'
+        |     property 'mark' -> object with constructor 'Object'
+        |     property 'items' -> object with constructor 'Array'
+        --- index 0 closes the circle
+        See for more discussion regarding this: https://stackoverflow.com/a/4816258
+        */
+        currentNetwork = JSON.parse(
+          simpleStringify($networksList[$selectedNetworkIndex])
+        ) // Deep cloning
+        loadNetworkValues(currentNetwork)
+      } else createVegaEmbed(MiserablesData)
+    }
+  }
+
+  function loadNetworkValues(network: Network) {
+    VisSpec.data[0].values = network.nodes
+    VisSpec.data[1].values = network.links
+    createVegaEmbed(VisSpec)
   }
 
   function createNewVega() {
@@ -51,6 +107,10 @@
       .then((result) => {
         result.view.addEventListener("click", function (event, item) {
           console.log("CLICK", item)
+          if (!isEditMode) {
+            editModeRequiredModalData.isOpen = true
+            return
+          }
           detailedNode = new Node(
             item.datum.name,
             undefined,
@@ -58,12 +118,12 @@
             item.datum.index,
             undefined
           )
-          modalData.isOpen = true
+          nodeDetailModalData.isOpen = true
         })
         result.view.addEventListener("mouseover", function (event, item) {
           console.log("MOUSEOVER", item)
           if (item != undefined && item.datum != undefined) {
-             // @ts-ignore
+            // @ts-ignore
             if (item != undefined && item.path != undefined) {
               // @ts-ignore
               console.log(item.path)
@@ -103,68 +163,150 @@
       .catch((error) => console.log(error))
   }
 
+  async function updateNetworkInFirebaseStorage() {
+    const nodeFile = toCSVFile(
+      UploadedFileType.NODE_FILE,
+      Object.keys(new Node()),
+      currentNetwork.nodes
+    )
+    const edgeFile = toCSVFile(
+      UploadedFileType.EDGE_FILE,
+      Object.keys(new Link()),
+      currentNetwork.links.map((link) => {
+        return {
+          // @ts-ignore
+          source: link.source.index,
+          // @ts-ignore
+          target: link.target.index,
+          value: link.value,
+        }
+      })
+    )
+    await uploadNetworkToStorage(currentNetwork.metadata, nodeFile, edgeFile)
+      .then(() => {
+        console.log("Uploaded network to storage")
+        $networksList[$selectedNetworkIndex] = currentNetwork
+        loadNetwork(true)
+        progressBarData.isPresent = false
+      })
+      .catch((error) => {
+        progressBarData.isPresent = false
+        console.log("Error uploading network to storage", error)
+        uploadingNetworkErrorModalData.isOpen = true
+      })
+  }
+
   // Run an onMount function to initialize the plot
   onMount(() => {
     // Anytime the networksList store value is updated, update the network
-    loadNetwork()
+    loadNetwork(false)
   })
 
-  let modalData: ModalData = new ModalData()
+  let currentNetwork: Network = undefined // Will be set in onMount()
+  let nodeDetailModalData: ModalData = new ModalData()
+  let uploadingNetworkErrorModalData: ModalData = new ModalData(
+    undefined,
+    "Error Uploading Network",
+    `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
+    false
+  )
+
+  let editModeRequiredModalData: ModalData = new ModalData(
+    undefined,
+    "Edit Mode Required",
+    `
+  You need to be in edit mode to edit nodes. Please toggle the edit
+  mode button. Then you can click on nodes to edit their attributes.
+  Once complete, click the save button to save your changes.
+  `,
+    false
+  )
+  let progressBarData: ProgressBarData = new ProgressBarData(
+    false,
+    "Updating the network..."
+  )
   let hoverData: HoverData = undefined
-
-  // Anytime the selected network index from the menu changes, we need to update the vegaEmbed
-  //$: $selectedNetworkIndex, loadNetwork()
-
   let detailedNode: Node = undefined
+  let isEditMode: boolean = false
 
   // Anytime the user updates a node in the modal, update the network
   function updateNode(event: CustomEvent) {
     console.log("updating node", event.detail.newNode)
     let newNode: Node = event.detail.newNode
-    networksList.update((networksList) => {
-      networksList[$selectedNetworkIndex].nodes[newNode.index] = newNode
-      return networksList
-    })
-    loadNetwork()
+    currentNetwork.nodes[newNode.index] = newNode
+    loadNetwork(true)
   }
 </script>
 
 <main>
   <div class="content">
-    {#if $networksList.length == 0}
+    {#if currentNetwork === undefined}
       <div class="no_networks">
         <h1>
           No networks to display. Displaying the default Miserables network 🥺
         </h1>
       </div>
     {:else}
+      {#if !isEditMode}
+        <CustomButton type={"secondary"} on:click={() => (isEditMode = true)}
+          >Enter Edit Mode</CustomButton
+        >
+      {:else if progressBarData.isPresent}
+        <ProgressBar helperText={progressBarData.text} />
+      {:else}
+        <CustomButton
+          type={"secondary"}
+          on:click={async () => {
+            isEditMode = false
+            progressBarData.isPresent = true
+            updateNetworkInFirebaseStorage()
+          }}>Save Changes</CustomButton
+        >
+        <CustomButton
+          type={"secondary"}
+          on:click={() => {
+            isEditMode = false
+            loadNetwork(false)
+          }}>Discard</CustomButton
+        >
+      {/if}
+      {#if editModeRequiredModalData.isOpen}
+        <Modal
+          passiveModal
+          bind:open={editModeRequiredModalData.isOpen}
+          modalHeading={editModeRequiredModalData.messageHeader}
+          on:open
+          on:close
+        >
+          <p>{editModeRequiredModalData.messageBody}</p>
+        </Modal>
+      {/if}
       <div class="stats">
         <div class="stats_header">
           <img src={statsIcon} class="stats_icon" alt="Stats Icon" />
           <h3>Network Stats</h3>
         </div>
         <div class="stats_content">
-          <p>Name: {$networksList[$selectedNetworkIndex].metadata.name}</p>
+          <p>Name: {currentNetwork.metadata.name}</p>
           <p>
-            Description: {$networksList[$selectedNetworkIndex].metadata
-              .description}
+            Description: {currentNetwork.metadata.description}
           </p>
-          <p>Nodes: {$networksList[$selectedNetworkIndex].nodes.length}</p>
-          <p>Edges: {$networksList[$selectedNetworkIndex].links.length}</p>
+          <p>Nodes: {currentNetwork.nodes.length}</p>
+          <p>Edges: {currentNetwork.links.length}</p>
         </div>
       </div>
     {/if}
   </div>
-    <div id="viz" />
-    {#if modalData.isOpen}
-      <NodeDetailModal
-        bind:open={modalData.isOpen}
-        detailedNode={detailedNode}
-        on:closeModal={() => (modalData.isOpen = false)}
-        on:updateNode={updateNode}
-      />
-    {/if}
-  
+  <div id="viz" />
+  {#if nodeDetailModalData.isOpen}
+    <NodeDetailModal
+      bind:open={nodeDetailModalData.isOpen}
+      {detailedNode}
+      on:closeModal={() => (nodeDetailModalData.isOpen = false)}
+      on:updateNode={updateNode}
+    />
+  {/if}
+
   <Hover {hoverData} />
 </main>
 
