@@ -11,8 +11,8 @@ docker_image:
     - apt update && apt -y upgrade && apt install openssh-client netcat -y
     - mkdir -p ~/.ssh
     - echo $VINGILOT_PRIVATE_KEY > ~/.ssh/uni_wuerzburg_cluster
-    - echo -e "Host login6 \n\t Hostname login6.informatik.uni-wuerzburg.de \n\t User $VINGILOT_USER \n\t IdentityFile ~/.ssh/uni_wuerzburg_cluster" > ~/.ssh/config
-    - echo -e "Host vingilot \n\t Hostname vingilot.informatik.uni-wuerzburg.de \n\t User $VINGILOT_USER \n\t ProxyCommand ssh login6 nc %h %p \n\t IdentityFile ~/.ssh/uni_wuerzburg_cluster" >> ~/.ssh/config
+    - echo -e "Host login6 \n\t Hostname login6.informatik.uni-wuerzburg.de \n\t StrictHostKeyChecking no \n\t User $VINGILOT_USER \n\t IdentityFile ~/.ssh/uni_wuerzburg_cluster" > ~/.ssh/config
+    - echo -e "Host vingilot \n\t Hostname vingilot.informatik.uni-wuerzburg.de \n\t StrictHostKeyChecking no \n\t User $VINGILOT_USER \n\t ProxyCommand ssh login6 nc %h %p \n\t IdentityFile ~/.ssh/uni_wuerzburg_cluster" >> ~/.ssh/config
     - chmod 600 ~/.ssh/uni_wuerzburg_cluster
     - chmod 600 ~/.ssh/config
-    - ssh -o "StrictHostKeyChecking no" vingilot
+    - ssh vingilot
