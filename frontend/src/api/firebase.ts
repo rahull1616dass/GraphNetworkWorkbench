@@ -1,9 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, type FirebaseApp } from "firebase/app"
 import {
-  getFirestore,
   collection,
   setDoc,
+  addDoc,
   doc,
   query,
   getDocs,
@@ -12,7 +12,6 @@ import {
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  signInWithCredential,
   signInWithEmailAndPassword,
 } from "firebase/auth"
 import {
@@ -26,11 +25,13 @@ import type { LoginUser } from "../definitions/user"
 import { authUserStore, loginUserStore, networksList } from "../stores"
 import { get } from "svelte/store"
 import { Network, type Metadata, Node, Link } from "../definitions/network"
-import { metadataConverter } from "./firebase_converters"
+import { metadataConverter, tasksConverter } from "./firebase_converters"
 import {
   blobToFile,
   parseNetwork,
 } from "../components/pages/AddNetwork/UploadNetwork/networkParser"
+import type { Task } from "../definitions/task"
+
 export const app: FirebaseApp = initializeApp(firebaseConfig)
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true, // this line
@@ -39,6 +40,7 @@ export const db = initializeFirestore(app, {
 const enum Database {
   USERS = "Users",
   NETWORKS = "Networks",
+  TASKS = "Tasks"
 }
 
 export async function registerUser(loginUser: LoginUser): Promise<void> {
@@ -63,9 +65,16 @@ export async function registerUser(loginUser: LoginUser): Promise<void> {
   })
 }
 
+
+function getNetworkPath(networkId: string): string {
+  if(networkId === undefined)
+    return `Users/${get(authUserStore).uid}/Networks`
+  return `Users/${get(authUserStore).uid}/Networks/${networkId}`
+}
+
 function getStorageRefs(networkId: string): any {
   const storage = getStorage(app)
-  const networkPath = `Users/${get(authUserStore).uid}/Networks/${networkId}`
+  const networkPath = getNetworkPath(networkId)
   return {
     nodeFileRef: ref(storage, `${networkPath}/nodes.csv`),
     edgesFileRef: ref(storage, `${networkPath}/edges.csv`),
@@ -120,10 +129,7 @@ export async function uploadNetworkToStorage(
 
 async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
   return new Promise((resolve, reject) => {
-    const docPath = `${Database.USERS}/${get(authUserStore).uid}/${
-      Database.NETWORKS
-    }/${networkMetadata.id}`
-    setDoc(doc(db, docPath), metadataConverter.toFirestore(networkMetadata))
+    setDoc(doc(db, getNetworkPath(networkMetadata.id)), metadataConverter.toFirestore(networkMetadata))
       .then(() => {
         resolve()
       })
@@ -137,7 +143,7 @@ export async function getNetworks() {
   const networksQuery = query(
     collection(
       db,
-      `${Database.USERS}/${get(authUserStore).uid}/${Database.NETWORKS}`
+      getNetworkPath(undefined)
     )
   )
   await getDocs(networksQuery).then((querySnapshot) => {
@@ -192,6 +198,43 @@ export async function getNetworkFromStorage(
   })
 }
 
+
+export async function setExperimentTask(networkId: string, task: Task): Promise<void> {
+  return new Promise((resolve, reject) => {
+    addDoc(collection(db, `${getNetworkPath(networkId)}/${Database.TASKS}`), tasksConverter.toFirestore(task))
+      .then(() => {
+        resolve()
+      })
+      .catch((error) => {
+        console.log(`Error setting experiment task for network ${networkId}. ${error}`)
+        reject(error)
+      })
+  })
+}
+
+export async function getExperimentTasks(networkId: string): Promise<Task[]> {
+  return new Promise((resolve, reject) => {
+    const tasksQuery = query(
+      collection(
+        db,
+        getNetworkPath(networkId),
+        Database.TASKS
+      )
+    )
+    getDocs(tasksQuery)
+    .then((querySnapshot) => {
+      let tasks: Task[] = []
+      querySnapshot.forEach((doc) => {
+        tasks.push(tasksConverter.fromFirestore(doc, undefined))
+      })
+      resolve(tasks)
+    }).catch((error) => {
+      console.log(`Error getting experiment tasks for network ${networkId}. ${error}`)
+      reject(error)
+    })
+  })
+}
+
 async function setUserDocument(user: LoginUser): Promise<void> {
   return new Promise((resolve, reject) => {
     setDoc(doc(db, Database.USERS, user.uid), {
@@ -209,3 +252,4 @@ async function setUserDocument(user: LoginUser): Promise<void> {
       })
   })
 }
+
