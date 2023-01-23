@@ -27,26 +27,8 @@
   import UploadNetwork from "../../AddNetwork/UploadNetwork/UploadNetwork.svelte"
   import { ProgressBar } from "carbon-components-svelte"
   import { ProgressBarData } from "../../../../definitions/progressBarData"
-  //import JSON from "json-strictify"
-  
-  function simpleStringify (object){
-    // stringify an object, avoiding circular structures
-    // https://stackoverflow.com/a/31557814
-    var simpleObject = {};
-    for (var prop in object ){
-        if (!object.hasOwnProperty(prop)){
-            continue;
-        }
-        if (typeof(object[prop]) == 'object'){
-            continue;
-        }
-        if (typeof(object[prop]) == 'function'){
-            continue;
-        }
-        simpleObject[prop] = object[prop];
-    }
-    return JSON.stringify(simpleObject); // returns cleaned up JSON
-};
+  //import JSON from "json-strictify" 
+  import cloneDeep from 'lodash.clonedeep'
 
   function loadNetwork(isNodeUpdate: boolean) {
     if (isNodeUpdate) {
@@ -55,18 +37,11 @@
       if ($networksList && $networksList.length > 0) {
         console.log("changing to ", $selectedNetworkIndex)
         /*
-        Note: Using the json-strictify package to deep clone the object rather than 
-        using JSON.parse(JSON.stringify()) because the latter may throw the following error:
-        Uncaught TypeError TypeError: Converting circular structure to JSON
-        --> starting at object with constructor 'GroupItem'
-        |     property 'mark' -> object with constructor 'Object'
-        |     property 'items' -> object with constructor 'Array'
-        --- index 0 closes the circle
-        See for more discussion regarding this: https://stackoverflow.com/a/4816258
+        Note that structuredClone does not work on the svelte store.
+        Same goes for JSON.stringify and JSON.parse which throws circular reference error.
+        Hence the usage of lodash.clonedeep
         */
-        currentNetwork = JSON.parse(
-          simpleStringify($networksList[$selectedNetworkIndex])
-        ) // Deep cloning
+        currentNetwork = cloneDeep($networksList[$selectedNetworkIndex]) 
         loadNetworkValues(currentNetwork)
       } else createVegaEmbed(MiserablesData)
     }
