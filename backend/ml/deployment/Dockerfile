@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:latest
+FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -9,6 +9,6 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN apt-get update && apt-get upgrade -y
 RUN pip install --upgrade pip setuptools
-RUN conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
+RUN conda install pandas
 RUN conda install pyg -c pyg
 RUN pip install flask snakecase py-healthcheck gunicorn
