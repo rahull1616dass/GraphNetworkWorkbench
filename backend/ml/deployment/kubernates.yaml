@@ -25,7 +25,7 @@ spec:
         name: graph-learning-workbench
         image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
         imagePullPolicy: Always
-        command: ["tail", "-f", "/dev/null"]
+        command: ["gunicorn", "--bind", "0.0.0.0:9000", "main:app"]
         ports:
         - name: http
           containerPort: 9000
