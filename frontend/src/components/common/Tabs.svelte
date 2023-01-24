@@ -1,6 +1,7 @@
 <script lang="ts">
     import {createEventDispatcher} from 'svelte'
     import logo from "../../assets/logo.svg"
+    import mlLogo from "../../assets/ml4nets_logo.svg"
     import { selectedMenuItem } from "../../stores"
     import { MenuItem } from "../../definitions/menuItem"
     import { getAuth } from "firebase/auth";
@@ -10,15 +11,17 @@
     $: isLoggedIn = $authUserStore !== undefined && getAuth().currentUser !== null
 
 
-    let menuItemsLogin: MenuItem[] = [MenuItem.HOME, MenuItem.NETWORKS, MenuItem.PLOT, MenuItem.EXPERIMENTS, MenuItem.REPORTS, MenuItem.PROFILE]
+    let menuItemsLogin: MenuItem[] = [MenuItem.HOME, MenuItem.NETWORKS, MenuItem.PLOT, MenuItem.EXPERIMENTS, MenuItem.REPORTS, MenuItem.PROFILE, MenuItem.FROM_WEB]
     let menuItemsLogout: MenuItem[] = [MenuItem.HOME, MenuItem.LOGIN, MenuItem.REGISTER]
 
 </script>
 
 <div class="tabs">
     <li class="image" > 
-         <img  src={logo} class="logo" alt="logo" > 
-        </li>
+        <img  src={logo} class="logo" alt="logo" > 
+        <img  src={mlLogo} class="mlLogo" alt="logo" >
+
+    </li>
     <ul> 
         {#if isLoggedIn}
             {#each menuItemsLogin as item}
@@ -41,12 +44,17 @@
 <style>
     .tabs{
         background-color: whitesmoke;
-        box-shadow: 0 0 0 0 rgba(0,0,0,.5);
+        box-shadow: 0 0 0 0 rgba(0,0,0,.5);    display: flex;
+        flex-direction: row;
+        align-content: center;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: nowrap;
     }
     .image{
         display: flex;
         justify-content: left;
-        padding: 0%;
+        padding: 0.1%;
         list-style-type: none;
     }
     ul{
@@ -56,8 +64,8 @@
         list-style-type: none;
         flex-wrap: wrap;
         align-content: center;
-        flex-direction: row-reverse;
-        
+        flex-direction: row;
+        width: -webkit-fill-available;
     }
     .menuItem{
         margin: 1% 1%;
@@ -79,7 +87,6 @@
     img{
         max-width: 30%;
         height: 30%;
-        
     }
     a{
         display: flex;
@@ -90,6 +97,10 @@
         height: 100%;
         cursor: pointer;
         color: #063d79;
+    }
+    .mlLogo{
+        width: 47Px;
+        padding-left: 4%;
     }
 </style>
 

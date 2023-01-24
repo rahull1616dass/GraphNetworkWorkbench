@@ -102,6 +102,8 @@
     {#if isLoggedIn === true}
     <ul id="menuLogin">
       <Tabs />
+      <div class ="OuterContailer">
+      <div class="InnerContainer">
       {#if $selectedMenuItem === MenuItem.HOME}
         <Home />
       {:else if $selectedMenuItem === MenuItem.NETWORKS}
@@ -119,6 +121,8 @@
       {:else if $selectedMenuItem === MenuItem.FROM_PC}
       <UploadNetwork />
       {/if}
+    </div>
+  </div>
     </ul>
     {:else if isLoggedIn === false}
       <Tabs />
@@ -312,6 +316,15 @@
     right: 0;
     bottom: 0;
     overflow-y: auto;
+  }
+
+  .InnerContainer{
+    max-height: 1000px; /* set the max-height of the inner div */
+  }
+
+  .OuterContailer{
+    overflow: auto;
+    width: 100%;
   }
   
 
