@@ -78,14 +78,14 @@
   let isHoveringMyNetworks: boolean = false
   let isHoveringNetworksList: boolean = false
 
-  $: $selectedNetworkIndex, selectNetwork()
+  // $: $selectedNetworkIndex, selectNetwork()
 
-  function selectNetwork() {
-    if ($selectedNetworkIndex === undefined) return
-    isHoveringMyNetworks = false
-    isHoveringNetworksList = false
-    $selectedMenuItem = MenuItem.PLOT
-  }
+  // function selectNetwork() {
+  //   if ($selectedNetworkIndex === undefined) return
+  //   isHoveringMyNetworks = false
+  //   isHoveringNetworksList = false
+  //   $selectedMenuItem = MenuItem.PLOT
+  // }
 
   /* ---- Import Modal ---- */
   let isImportModalOpen: boolean = false
