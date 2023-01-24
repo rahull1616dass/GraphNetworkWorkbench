@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: graph_learning_workbench
+  namespace: studtarasov
+  annotations:
+    description: "Deployment of the graph learning workbench"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: graph_learning_workbench
+    spec:
+      containers:
+      - resources:
+          limits:
+            nvidia.com/gpu: "1"
+            cpu: "16"
+            memory: "32Gi"
+          requests:
+            nvidia.com/gpu: "1"
+            cpu: "8"
+            memory: "16Gi"
+        name: graph_learning_workbench
+        image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
+        imagePullPolicy: Always
+        command: ["gunicorn", "--bind", "0.0.0.0:9000", "main:app"]
+        ports:
+        - name: http
+          containerPort: 5000
+      imagePullSecrets:
+      - name: lsx-registry
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graph_learning_workbench_service
+  namespace: studtarasov
+  annotations:
+    description: "Service for deployment of the graph learning workbench"
+spec:
+  type: NodePort
+  ports:
+  - port: 5000
+  selector:
+    name: graph_learning_workbench
