@@ -1,1 +1,1 @@
-cd ~/.ssh && ls -al
+pwd
