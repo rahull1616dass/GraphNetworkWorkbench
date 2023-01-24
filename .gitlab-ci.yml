@@ -8,5 +8,6 @@ stages:
 graph_learning_workbench:
   stage: build
   script:
+    - whoami
     - echo "Hello world"
     - pwd
