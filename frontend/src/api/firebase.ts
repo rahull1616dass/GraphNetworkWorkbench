@@ -40,11 +40,8 @@ export const db = initializeFirestore(app, {
 const enum Database {
   USERS = "Users",
   NETWORKS = "Networks",
-<<<<<<< HEAD
-  IMAGES = "Images"
-=======
+  IMAGES = "Images",
   TASKS = "Tasks"
->>>>>>> main
 }
 
 export async function registerUser(loginUser: LoginUser): Promise<void> {
