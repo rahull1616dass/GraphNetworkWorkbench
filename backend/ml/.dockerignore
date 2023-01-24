@@ -1,4 +1,4 @@
-Dockerfile
+deployment/Dockerfile
 README.md
 *.pyc
 *.pyo

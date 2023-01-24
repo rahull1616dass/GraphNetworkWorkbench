@@ -29,8 +29,20 @@ spec:
         ports:
         - name: http
           containerPort: 5000
+        volumeMounts:
+          - mountPath: /workspace
+            name: project_code
       imagePullSecrets:
       - name: lsx-registry
+      volumes:
+        - name: project_code
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studtarasov
+            path: "/home/stud/tarasov/xtai_lab3/application"
+            secretRef:
+              name: ceph-secret
 ---
 apiVersion: v1
 kind: Service
