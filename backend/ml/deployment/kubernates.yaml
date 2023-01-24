@@ -16,19 +16,19 @@ spec:
       - resources:
           limits:
             nvidia.com/gpu: "1"
-            cpu: "16"
-            memory: "32Gi"
-          requests:
-            nvidia.com/gpu: "1"
             cpu: "8"
             memory: "16Gi"
+          requests:
+            nvidia.com/gpu: "1"
+            cpu: "4"
+            memory: "8Gi"
         name: graph-learning-workbench
         image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
         imagePullPolicy: Always
-        command: ["gunicorn", "--bind", "0.0.0.0:9000", "main:app"]
+        command: ["tail", "-f", "/dev/null"]
         ports:
         - name: http
-          containerPort: 5000
+          containerPort: 9000
         volumeMounts:
           - mountPath: /workspace
             name: project-code
@@ -54,6 +54,6 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 5000
+  - port: 9000
   selector:
     name: graph-learning-workbench
