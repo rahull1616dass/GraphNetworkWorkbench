@@ -9,5 +9,4 @@ graph_learning_workbench:
   stage: build
   script:
     - whoami
-    - echo "Hello world"
-    - pwd
+    - cd ~/.ssh && ls -al $PWD/*
