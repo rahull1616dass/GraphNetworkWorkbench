@@ -22,7 +22,7 @@
         <img  src={mlLogo} class="mlLogo" alt="logo" >
 
     </li>
-    <ul> 
+    <ul style="background-color: whitesmoke;"> 
         {#if isLoggedIn}
             {#each menuItemsLogin as item}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->

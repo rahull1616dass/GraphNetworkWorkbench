@@ -100,10 +100,8 @@
   </div>
 {:else}
     {#if isLoggedIn === true}
-    <ul id="menuLogin">
+    <ul id="menuLogin" class="mainUI">
       <Tabs />
-      <div class ="OuterContailer">
-      <div class="InnerContainer">
       {#if $selectedMenuItem === MenuItem.HOME}
         <Home />
       {:else if $selectedMenuItem === MenuItem.NETWORKS}
@@ -117,12 +115,15 @@
       {:else if $selectedMenuItem === MenuItem.PROFILE}
       <Profile />
       {:else if $selectedMenuItem === MenuItem.FROM_WEB}
+      <div class ="OuterContailer">
+        <div class="InnerContainer">
       <FromWeb />
+          
+        </div>
+      </div>
       {:else if $selectedMenuItem === MenuItem.FROM_PC}
       <UploadNetwork />
       {/if}
-    </div>
-  </div>
     </ul>
     {:else if isLoggedIn === false}
       <Tabs />
@@ -325,6 +326,10 @@
   .OuterContailer{
     overflow: auto;
     width: 100%;
+  }
+
+  .mainUI{
+    height: 100%;
   }
   
 

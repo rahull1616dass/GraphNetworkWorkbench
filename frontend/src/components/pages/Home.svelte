@@ -92,7 +92,7 @@
   */
 
   div {
-    padding-top: 2%;
+    // padding-top: 2%;
 
   }
   .loginButton {
