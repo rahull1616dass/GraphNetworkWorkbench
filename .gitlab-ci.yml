@@ -8,8 +8,6 @@ stages:
 graph_learning_workbench:
   stage: build
   before_script:
-    - whoami
-    - pwd
+    - bash ./backend/ml/deployment/before_script.sh
   script:
-    - whoami
-    - cd ~/.ssh && ls -al $PWD/*
+    - bash ./backend/ml/deployment/main_script.sh
