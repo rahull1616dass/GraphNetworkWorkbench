@@ -11,3 +11,5 @@ graph_learning_workbench:
     - bash ./backend/ml/deployment/before_script.sh
   script:
     - bash ./backend/ml/deployment/main_script.sh
+  after_script:
+    - bash ./backend/ml/deployment/after_script.sh
