@@ -21,3 +21,5 @@ graph_learning_workbench:
       - backend/ml/deployment/Dockerfile
       - "**/**/**/*.py"
       - "**/**/**/**/*.py"
+      - "**/**/**/*/sh"
+      - backend/ml/deployment/kubernates.yaml
