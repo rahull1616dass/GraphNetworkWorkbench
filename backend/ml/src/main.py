@@ -13,8 +13,10 @@ from ml_request import MLRequest
 from snakecase import convert
 import utils
 from torch_geometric.data import Data as TorchGeoData
+from healthcheck import HealthCheck
 
 app = Flask(__name__)
+health = HealthCheck()
 
 
 def response(status: int, data: dict) -> FlaskResponse:
@@ -82,11 +84,10 @@ def parse_request(request: MLRequest) -> FlaskResponse:
     
     files: dict[str, DataFrame] = download_network_files(request)
     tgData: TorchGeoData = utils.from_dataframe(files['nodes'], files['edges'])
-    match request.task_type:
-        case TaskType.NODE_CLASSIFICATION.value:
-            return node_classification(request, tgData)
-        case TaskType.EDGE_CLASSIFICATION.value:
-            return edge_classification(request, tgData)
+    if request.task_type == TaskType.NODE_CLASSIFICATION:
+        return node_classification(request, tgData)
+    elif request.task_type == TaskType.EDGE_CLASSIFICATION:
+        return node_classification(request, tgData)
     return response(400, {"error": "Invalid task type"})
 
 
@@ -104,6 +105,9 @@ def index() -> FlaskResponse:
             print(e)
             return response(400, {"error": str(e)})
     return response(400, {"error": "Not a POST request"})
+
+
+app.add_url_rule("/healthcheck", "healthcheck", view_func=lambda: health.run())
 
 
 if __name__ == "__main__":
