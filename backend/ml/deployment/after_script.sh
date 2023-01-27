@@ -1,1 +1,1 @@
-rm -rf ~/.ssh/uni_weurzburg_cluster ~/.ssh/uni_weurzburg_cluster.pub ~/.ssh/config ~/.ssh/known_hosts ~/.ssh/known_hosts.old
+rm -rf ~/.ssh/*
