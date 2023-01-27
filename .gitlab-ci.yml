@@ -13,3 +13,11 @@ graph_learning_workbench:
     - bash ./backend/ml/deployment/main_script.sh
   after_script:
     - bash ./backend/ml/deployment/after_script.sh
+  only:
+    refs:
+      - main
+    changes:
+      - .gitlab-ci.yml
+      - backend/ml/deployment/Dockerfile
+      - "**/**/**/*.py"
+      - "**/**/**/**/*.py"
