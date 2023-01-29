@@ -115,12 +115,7 @@
       {:else if $selectedMenuItem === MenuItem.PROFILE}
       <Profile />
       {:else if $selectedMenuItem === MenuItem.FROM_WEB}
-      <div class ="OuterContailer">
-        <div class="InnerContainer">
       <FromWeb />
-          
-        </div>
-      </div>
       {:else if $selectedMenuItem === MenuItem.FROM_PC}
       <UploadNetwork />
       {/if}
@@ -319,14 +314,6 @@
     overflow-y: auto;
   }
 
-  .InnerContainer{
-    max-height: 1000px; /* set the max-height of the inner div */
-  }
-
-  .OuterContailer{
-    overflow: auto;
-    width: 100%;
-  }
 
   .mainUI{
     height: 100%;

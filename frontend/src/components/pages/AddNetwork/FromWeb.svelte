@@ -46,14 +46,16 @@
   <h1>Network Names</h1>
   {#if $netzschleuderNetworkNames}
     <Accordion>
-      <div class="networks">
-        {#each $netzschleuderNetworkNames as networkName}
-          <FetchableAccordionItem
-            title={networkName}
-            endpoint={`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCLEUDER_NET}${networkName}`}
-            on:fetchNetwork={onFetchNetwork}
-          />
-        {/each}
+      <div class ="OuterContailer">
+        <div class="networks">
+          {#each $netzschleuderNetworkNames as networkName}
+            <FetchableAccordionItem
+              title={networkName}
+              endpoint={`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCLEUDER_NET}${networkName}`}
+              on:fetchNetwork={onFetchNetwork}
+            />
+          {/each}
+        </div>
       </div>
     </Accordion>
   {:else}
@@ -70,5 +72,13 @@
     padding: 1rem;
     display: flex;
     flex-direction: column;
+    max-height: 400px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow: scroll;
+  }
+  .OuterContailer{
+    overflow: auto;
+    width: 100%;
   }
 </style>
