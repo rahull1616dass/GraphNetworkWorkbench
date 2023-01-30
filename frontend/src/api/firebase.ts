@@ -4,6 +4,7 @@ import {
   collection,
   setDoc,
   addDoc,
+  deleteDoc,
   doc,
   query,
   getDocs,
@@ -19,6 +20,7 @@ import {
   ref,
   uploadBytes,
   getBlob,
+  deleteObject
 } from "firebase/storage"
 import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
@@ -203,6 +205,9 @@ export async function setExperimentTask(networkId: string, task: Task): Promise<
   return new Promise((resolve, reject) => {
     addDoc(collection(db, `${getNetworkPath(networkId)}/${Database.TASKS}`), tasksConverter.toFirestore(task))
       .then(() => {
+        deleteObject(ref(getStorage(app), `${getNetworkPath(networkId)}`)).then(() => {
+          console.log(`Deleted file for task ${task.id}`)
+        })
         resolve()
       })
       .catch((error) => {
@@ -232,6 +237,25 @@ export async function getExperimentTasks(networkId: string): Promise<Task[]> {
       console.log(`Error getting experiment tasks for network ${networkId}. ${error}`)
       reject(error)
     })
+  })
+}
+
+export async function deleteNetwork(networkId: string): Promise<void>{
+  return new Promise((resolve, reject) => {
+    deleteDoc(doc(db, getNetworkPath(networkId)))
+      .then(() => {
+        deleteObject(ref(getStorage(app), `${getNetworkPath(networkId)}`)).then(() => {
+          console.log(`Deleted network ${networkId}`)
+          resolve()
+        }).catch((error) => {
+          console.log(`Error deleting network ${networkId} files. ${error}`)
+          reject(error)
+        })
+      })
+      .catch((error) => {
+        console.log(`Error deleting network ${networkId}. ${error}`)
+        reject(error)
+      })
   })
 }
 
