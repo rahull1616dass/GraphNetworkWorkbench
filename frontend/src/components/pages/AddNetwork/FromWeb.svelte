@@ -40,15 +40,18 @@
     // https://stackoverflow.com/a/61013504/11330757
     console.log(response)
   }
+  let searchTerm = "";
+  $: filteredItems = $netzschleuderNetworkNames.filter(item => item.includes(searchTerm));
 </script>
 
 <main>
   <h1>Network Names</h1>
   {#if $netzschleuderNetworkNames}
     <Accordion>
+      <input type="text" bind:value={searchTerm} placeholder="Search..." />
       <div class ="OuterContailer">
         <div class="networks">
-          {#each $netzschleuderNetworkNames as networkName}
+          {#each filteredItems as networkName}
             <FetchableAccordionItem
               title={networkName}
               endpoint={`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCLEUDER_NET}${networkName}`}
