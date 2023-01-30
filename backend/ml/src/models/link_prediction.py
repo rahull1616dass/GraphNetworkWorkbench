@@ -1,12 +1,30 @@
+import torch
 import torch.nn
 from tqdm import tqdm
 from torch.optim import Adam
 from torch_geometric.data import Data
+from torch_geometric.nn import GCNConv
 from torch.nn import BCEWithLogitsLoss
+from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import negative_sampling
-from sklearn.metrics import accuracy_score, roc_auc_score
 
-from .models.link_pred import Net
+
+class Net(torch.nn.Module):
+    def __init__(self, in_channels, hidden_channels = 128, out_channels=64):
+        super().__init__()
+        self.conv1 = GCNConv(in_channels, hidden_channels)
+        self.conv2 = GCNConv(hidden_channels, out_channels)
+
+    def encode(self, x, edge_index):
+        x = self.conv1(x, edge_index).relu()
+        return self.conv2(x, edge_index)
+
+    def decode(self, z, edge_label_index):
+        return (z[edge_label_index[0]] * z[edge_label_index[1]]).sum(dim=-1)
+
+    def decode_all(self, z):
+        prob_adj = z @ z.t()
+        return (prob_adj > 0).nonzero(as_tuple=False).t()
 
 
 class LinkPredictor:
@@ -59,5 +77,3 @@ class LinkPredictor:
         self.model.eval()
         z = self.model.encode(data.x, data.edge_index)
         return self.model.decode_all(z).cpu().numpy()
-
-
