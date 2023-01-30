@@ -16,12 +16,11 @@ class LinkPredictor:
         self.criterion = BCEWithLogitsLoss()
 
     def train(self, train_data: Data, val_data: Data, epochs: int = 100):
-        loss, train_acc, test_acc = [], [], []
+        loss, test_acc = [], []
         for _ in tqdm(range(1, epochs + 1), desc="Training epochs"):
             loss += [self.__train_iter(train_data)]
-            train_acc += [self.test(train_data)]
             test_acc += [self.test(val_data)]
-        return loss, train_acc, test_acc
+        return loss, test_acc
 
     def __train_iter(self, train_data: Data):
         self.model.train()
@@ -46,7 +45,7 @@ class LinkPredictor:
         loss = self.criterion(out, edge_label)
         loss.backward()
         self.optimizer.step()
-        return loss
+        return loss.cpu().detach().numpy()
 
     @torch.no_grad()
     def test(self, test_data: Data):
@@ -54,5 +53,11 @@ class LinkPredictor:
         z = self.model.encode(test_data.x, test_data.edge_index)
         out = self.model.decode(z, test_data.edge_label_index).view(-1).sigmoid()
         return roc_auc_score(test_data.edge_label.cpu().numpy(), out.cpu().numpy())
+
+    @torch.no_grad()
+    def predict(self, data: Data):
+        self.model.eval()
+        z = self.model.encode(data.x, data.edge_index)
+        return self.model.decode_all(z).cpu().numpy()
 
 
