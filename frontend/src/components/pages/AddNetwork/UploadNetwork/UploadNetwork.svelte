@@ -124,11 +124,13 @@
       if (element.__parsed_extra !== undefined) {
         switch(uploadedFileType) {
           case UploadedFileType.NODE_FILE:
+            /*
             onInvalidFile(
               `The node ${element.name} has an extra column that is not part of the network. 
               Please remove this column from the nodes file.`,
               UploadedFileType.NODE_FILE
             )
+            */
             break
           case UploadedFileType.EDGE_FILE:
             onInvalidFile(
@@ -226,6 +228,34 @@
 
 <main>
   <div class="root">
+    <div class="infobox">
+      Currently, only csv files are supported. It is required that the network consists of two files:
+      - nodes.csv
+      - edges.csv
+      Each file has to have a header row which contains the column names. There are special column names,
+      that may be required or may have a special function assigned to them (see below). Other than that,
+      the user is free to add any number of additional columns with arbitrary names that will function as
+      node or edge features depending on the file.
+
+      The nodes.csv file must contain either 'name' or 'index', or both. 
+      If the nodes are not named, then the user must provide at 
+      least the index column where each row is assigned a unique index from
+      0 to n-1 where n is the number of nodes. 
+      If the name column is present, then the index column is optional
+      as this can be automatically generated from each row's position. 
+      'name' is a special column and if present, it will be shown as the node's name in the Visualize page
+      when the node is hovered on.
+      'group' is another special column that can be used to assign a group to each node. Visualize page 
+      will then color the nodes according to their group.
+      
+      The edges.csv file must contain the 'source' and 'target' columns that specify which nodes the edge connects to.
+      Currently only undirected edges are supported in the Visualize Page, although the specific ordering can be relevant
+      for the machine learning algorithms that run on the network.
+      Note that 'source' and 'target' must be integers that correspond to the indices of nodes as either 
+      explicitly specified in the nodes.csv file or automatically generated from the nodes.csv file.
+      
+
+    </div>
     <div class="metadata">
       <div class="metadata_title">
         <TextInput
@@ -266,12 +296,6 @@
               status="complete"
               bind:files={nodeFiles}
             />
-            <!--
-      {#if nodeFiles.length > 0}
-        <h2>Selected node file:</h2>
-        <p>{nodeFiles[0].name} ({nodeFiles[0].size} bytes)</p>
-      {/if}
-      -->
           </div>
 
           <div class="edges_file">
@@ -281,12 +305,6 @@
               status="complete"
               bind:files={edgeFiles}
             />
-            <!--
-      {#if edgeFiles.length > 0}
-        <h2>Selected edge file:</h2>
-        <p>{edgeFiles[0].name} ({edgeFiles[0].size} bytes)</p>
-      {/if}
-      -->
           </div>
 
           {#if progressBarData.isPresent}
@@ -325,6 +343,11 @@
 
   .metadata {
     margin: 1rem;
+  }
+
+  .infobox{
+    margin: 1rem;
+
   }
 
   .palette {
