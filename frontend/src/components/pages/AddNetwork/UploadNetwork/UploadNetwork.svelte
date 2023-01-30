@@ -3,7 +3,7 @@
   import { XMLParser } from "fast-xml-parser"
   import { parseNetwork } from "./networkParser"
   import type ParseResult from "papaparse"
-  import { Node, Link } from "../../../../definitions/network"
+  import type { Node, Link } from "../../../../definitions/network"
   import { Network } from "../../../../definitions/network"
   import { ModalData } from "../../../../definitions/modalData"
   import { MenuItem } from "../../../../definitions/menuItem"
@@ -19,6 +19,8 @@
     TextInput,
     FileUploader,
     ProgressBar,
+    Accordion,
+    AccordionItem,
   } from "carbon-components-svelte"
   import { Palette } from "@untemps/svelte-palette"
   import cryptoRandomString from "crypto-random-string"
@@ -119,10 +121,13 @@
     })
   }
 
-  function checkForExtraField(list: Node[] | Link[], uploadedFileType: UploadedFileType) {
+  function checkForExtraField(
+    list: Node[] | Link[],
+    uploadedFileType: UploadedFileType
+  ) {
     list.forEach((element) => {
       if (element.__parsed_extra !== undefined) {
-        switch(uploadedFileType) {
+        switch (uploadedFileType) {
           case UploadedFileType.NODE_FILE:
             /*
             onInvalidFile(
@@ -229,32 +234,37 @@
 <main>
   <div class="root">
     <div class="infobox">
-      Currently, only csv files are supported. It is required that the network consists of two files:
-      - nodes.csv
-      - edges.csv
-      Each file has to have a header row which contains the column names. There are special column names,
-      that may be required or may have a special function assigned to them (see below). Other than that,
-      the user is free to add any number of additional columns with arbitrary names that will function as
-      node or edge features depending on the file.
-
-      The nodes.csv file must contain either 'name' or 'index', or both. 
-      If the nodes are not named, then the user must provide at 
-      least the index column where each row is assigned a unique index from
-      0 to n-1 where n is the number of nodes. 
-      If the name column is present, then the index column is optional
-      as this can be automatically generated from each row's position. 
-      'name' is a special column and if present, it will be shown as the node's name in the Visualize page
-      when the node is hovered on.
-      'group' is another special column that can be used to assign a group to each node. Visualize page 
-      will then color the nodes according to their group.
-      
-      The edges.csv file must contain the 'source' and 'target' columns that specify which nodes the edge connects to.
-      Currently only undirected edges are supported in the Visualize Page, although the specific ordering can be relevant
-      for the machine learning algorithms that run on the network.
-      Note that 'source' and 'target' must be integers that correspond to the indices of nodes as either 
-      explicitly specified in the nodes.csv file or automatically generated from the nodes.csv file.
-      
-
+      <Accordion>
+        <AccordionItem title="File Format Guide">
+          Currently, only csv files are supported. It is required that the
+          network consists of two files: <br> - nodes.csv <br>
+          - edges.csv <br>
+          Each file has
+          to have a header row which contains the column names. There are
+          special column names, that may be required or may have a special
+          function assigned to them (see below). Other than that, the user is
+          free to add any number of additional columns with arbitrary names that
+          will function as node or edge features depending on the file. <br> <br>
+          The
+          nodes.csv file must contain either 'name' or 'index', or both. If the
+          nodes are not named, then the user must provide at least the index
+          column where each row is assigned a unique index from 0 to n-1 where n
+          is the number of nodes. If the name column is present, then the index
+          column is optional as this can be automatically generated from each
+          row's position. 'name' is a special column and if present, it will be
+          shown as the node's name in the Visualize page when the node is
+          hovered on. <br> 'group' is another special column that can be used to
+          assign a group to each node. Visualize page will then color the nodes
+          according to their group. <br> <br> The edges.csv file must contain the 'source'
+          and 'target' columns that specify which nodes the edge connects to.
+          Currently only undirected edges are supported in the Visualize Page,
+          although the specific ordering can be relevant for the machine
+          learning algorithms that run on the network. Note that 'source' and
+          'target' must be integers that correspond to the indices of nodes as
+          either explicitly specified in the nodes.csv file or automatically
+          generated from the nodes.csv file.
+        </AccordionItem>
+      </Accordion>
     </div>
     <div class="metadata">
       <div class="metadata_title">
@@ -345,9 +355,10 @@
     margin: 1rem;
   }
 
-  .infobox{
+  .infobox {
+    border: 1px solid #ccc;
+    padding: 1rem;
     margin: 1rem;
-
   }
 
   .palette {
