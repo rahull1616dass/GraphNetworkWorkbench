@@ -50,7 +50,6 @@ async function parseCSV(file: File): Promise<ParseResult> {
   console.log("my name is " + file.name)
   // Parse the CSV file using PapaParse and return a promise
   return await new Promise((resolve, reject) => {
-    console.log("my name is in promise" + file.name)
     Papa.parse(file, {
       header: true,
       dynamicTyping: true,

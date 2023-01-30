@@ -3,8 +3,7 @@
   import { XMLParser } from "fast-xml-parser"
   import { parseNetwork } from "./networkParser"
   import type ParseResult from "papaparse"
-  import type { Link, Metadata } from "../../../../definitions/network"
-  import type { Node } from "../../../../definitions/network"
+  import { Node, Link } from "../../../../definitions/network"
   import { Network } from "../../../../definitions/network"
   import { ModalData } from "../../../../definitions/modalData"
   import { MenuItem } from "../../../../definitions/menuItem"
@@ -58,7 +57,6 @@
 
   let isUploadSuccessful = false
 
-
   $: if (edgeFiles.length > 0) {
     let edgeFile = edgeFiles[0]
     console.log(`Selected edge file: ${edgeFile.name}: ${edgeFile.size} bytes`)
@@ -77,17 +75,89 @@
       console.log(`Parsed network: ${parsedNetwork as ParseResult}`)
       switch (uploadedFileType) {
         case UploadedFileType.NODE_FILE:
+          if (!parsedNetwork.meta.fields.includes("name")) {
+            onInvalidFile(
+              `'name' field is required for nodes. Please create this column 
+            in your nodes file and assign a name to each node.
+            `,
+              UploadedFileType.NODE_FILE
+            )
+            return
+          }
+          if (!parsedNetwork.meta.fields.includes("index")) {
+            parsedNetwork.data.forEach((value, index) => {
+              value["index"] = index
+            })
+            parsedNetwork.meta.fields.push("index")
+          }
           newNetwork.nodes = <Node[]>(
             JSON.parse(JSON.stringify(parsedNetwork.data))
           )
+          checkForExtraField(newNetwork.nodes, UploadedFileType.NODE_FILE)
           break
         case UploadedFileType.EDGE_FILE:
+          let isFileValid = true
+          const requiredColumns = ["source", "target"]
+          requiredColumns.forEach((column) => {
+            if (!parsedNetwork.meta.fields.includes(column)) {
+              onInvalidFile(
+                `'${column}' field is required for edges. Please create this column and assign a 
+              ${column} to each edge.`,
+                UploadedFileType.EDGE_FILE
+              )
+              isFileValid = false
+              return
+            }
+            if (!isFileValid) return
+          })
           newNetwork.links = <Link[]>(
             JSON.parse(JSON.stringify(parsedNetwork.data))
           )
+          checkForExtraField(newNetwork.links, UploadedFileType.EDGE_FILE)
           break
       }
     })
+  }
+
+  function checkForExtraField(list: Node[] | Link[], uploadedFileType: UploadedFileType) {
+    list.forEach((element) => {
+      if (element.__parsed_extra !== undefined) {
+        switch(uploadedFileType) {
+          case UploadedFileType.NODE_FILE:
+            onInvalidFile(
+              `The node ${element.name} has an extra column that is not part of the network. 
+              Please remove this column from the nodes file.`,
+              UploadedFileType.NODE_FILE
+            )
+            break
+          case UploadedFileType.EDGE_FILE:
+            onInvalidFile(
+              `The edge Index_${element.source} -> Index_${element.target} has an extra column that 
+              is not part of the network. Please remove this column from the edges file.`,
+              UploadedFileType.EDGE_FILE
+            )
+            break
+        }
+      }
+    })
+  }
+
+  function onInvalidFile(
+    messageBody: string,
+    uploadedFileType: UploadedFileType
+  ) {
+    modalData.messageBody = messageBody
+    modalData.isOpen = true
+    switch (uploadedFileType) {
+      case UploadedFileType.NODE_FILE:
+        nodeFiles = []
+        newNetwork.nodes = []
+        break
+      case UploadedFileType.EDGE_FILE:
+        edgeFiles = []
+        newNetwork.links = []
+        break
+    }
   }
 
   function onSaveButtonClicked() {
