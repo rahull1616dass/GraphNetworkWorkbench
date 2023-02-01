@@ -44,7 +44,7 @@
         deleteNetworkProgressData.isPresent = false
         deleteModalData.isOpen = false
         deleteResultModalData.messageBody = `Network ${$networksList[networkIndexToDelete].metadata.name} 
-        deleted successfully!}`
+        deleted successfully!`
         deleteResultModalData.isOpen = true
         $networksList = $networksList.filter(
           (_, i) => i !== networkIndexToDelete
