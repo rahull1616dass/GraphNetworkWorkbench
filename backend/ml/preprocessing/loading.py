@@ -3,6 +3,7 @@ from pandas import DataFrame, read_csv
 from requests import Response as RequestsResponse
 
 from core.typing import MLTask
+from core.logging_helpers import timeit
 
 def get_data_frame(file_url: str) -> DataFrame:
     file_response: RequestsResponse = http_get(
@@ -21,6 +22,7 @@ def get_data_frame(file_url: str) -> DataFrame:
     return read_csv(file_response.raw)
 
 
+@timeit
 def download_network_files(task: MLTask) -> dict[str, DataFrame]:
     return {
         'nodes': get_data_frame(task.nodes_file_url),

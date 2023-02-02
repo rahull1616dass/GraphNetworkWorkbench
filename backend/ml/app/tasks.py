@@ -1,14 +1,33 @@
-from celery import chain
+import asyncio
+from celery import chain, Celery
 
+import celery_queue
 from core.typing import MLTask
-from celery_queue import celery_queue
-from celery_queue.pipe_running import run_pipe
 
-# TODO: create functions signatures
-load_network_files = celery_queue.signature("app.loading.download_network_files")
-create_graph_data = celery_queue.signature("app.parsing.from_dataframe")
-train_and_estimate_link_pred = celery_queue.signature("ml.link_prediction.predict_edges")
+
+celery_instance = Celery(
+    __name__,
+    broker="amqp://localhost:5672",
+    backend="redis://localhost:6379"
+)
+
+celery_instance.conf.update(
+    accept_content={"pickle"},
+    task_serializer="pickle",
+    result_serializer="pickle",
+    event_serializer="pickle"
+)
+
+download_task = celery_instance.signature("preprocessing.loading.download_network_files")
+parse_task = celery_instance.signature("preprocessing.parsing.from_dataframe")
+edge_predict_task = celery_instance.signature("ml.link_prediction.predict_edges")
+
+
+async def run_pipe(chain):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, chain.get)
+
 
 async def link_prediction_task(task: MLTask):
-    pipe = chain(load_network_files.s(task), create_graph_data.s(task), train_and_estimate_link_pred.s(task))
+    pipe = chain(download_task(task), parse_task(task), edge_predict_task(task))
     return await run_pipe(pipe)

@@ -7,6 +7,7 @@ from math import ceil
 from torch_geometric.data import Data as TorchGeoData
 
 from core.typing import MLTask
+from core.logging_helpers import timeit
 
 
 def generate_train_mask(dataset_size: int, train_percentage: float) -> torch.Tensor:
@@ -18,6 +19,7 @@ def generate_train_mask(dataset_size: int, train_percentage: float) -> torch.Ten
     return train_mask[torch.randperm(train_mask.size(0))]
 
 
+@timeit
 def from_dataframe(data: Dict[str, pd.DataFrame], task: MLTask) -> TorchGeoData:
     nodes = data["nodes"]
     edges = data["edges"]

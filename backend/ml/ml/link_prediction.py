@@ -10,6 +10,7 @@ from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import negative_sampling
 
 from core.typing import MLTask
+from core.logging_helpers import timeit
 
 
 class Net(torch.nn.Module):
@@ -82,6 +83,7 @@ class LinkPredictor:
         return self.model.decode_all(z).cpu().numpy()
 
 
+@timeit
 def predict_edges(data: Data, task: MLTask):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     transform = T.Compose([
