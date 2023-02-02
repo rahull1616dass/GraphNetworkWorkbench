@@ -1,7 +1,9 @@
 """Celery config"""
 from celery import Celery
 
-from celery_queue.tasks import get_random_number, count_numbers
+from app.loading import download_network_files
+from app.parsing import from_dataframe
+from ml.link_prediction import predict_edges
 
 celery_queue = Celery(
     __name__,
@@ -17,3 +19,6 @@ celery_queue.conf.update(
 )
 
 # TODO: assign celery tasks
+celery_queue.task(download_network_files)
+celery_queue.task(from_dataframe)
+celery_queue.task(predict_edges)
