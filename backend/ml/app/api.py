@@ -1,15 +1,18 @@
 """REST API"""
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from fastapi.responses import RedirectResponse
+
+from core.typing import MLTask
+from app.tasks import link_prediction_task
 
 api = APIRouter()
 
 # TODO: implement node classification and edge prediction endpoints
 
 
-@api.get("/link_pred")
-async def link_prediction():
-    return {"msg": "Link pred is not implemented"}
+@api.post("/link_pred")
+async def link_prediction(task: MLTask = Body()):
+    return await link_prediction_task(task)
 
 
 @api.get("/node_class")
@@ -18,5 +21,5 @@ async def node_classification():
 
 
 @api.get("/")
-def index():
+async def index():
     return RedirectResponse("/docs")
