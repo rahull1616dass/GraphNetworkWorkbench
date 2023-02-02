@@ -77,3 +77,17 @@ class LinkPredictor:
         self.model.eval()
         z = self.model.encode(data.x, data.edge_index)
         return self.model.decode_all(z).cpu().numpy()
+
+
+def predict_edges(data: TorchGeoData):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    transform = T.Compose([
+        T.NormalizeFeatures(),
+        T.ToDevice(device),
+        T.RandomLinkSplit(num_val=0.1, num_test=0.1, is_undirected=False, add_negative_train_samples=False)
+    ])
+    train_data, val_data, test_data = transform(data)
+    predictor = LinkPredictor(data.num_features, device, learning_rate=0.001)
+    train_loss, val_roc_auc_score = predictor.train(train_data, val_data, epochs=2000)
+    test_roc_auc_score = predictor.test(test_data)
+    return train_loss, val_roc_auc_score, test_roc_auc_score

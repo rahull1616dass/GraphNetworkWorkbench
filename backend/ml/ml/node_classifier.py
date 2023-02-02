@@ -48,4 +48,24 @@ class NodeClassifier:
         accuracy = correct / self.data.test_mask.sum().item()
         print('Accuracy: {:.4f}'.format(accuracy))
         return accuracy
+
+
+def classify_nodes(request: MLRequest, tgData: TorchGeoData) -> FlaskResponse:
+    node_classifier = NodeClassifier(tgData)
+
+    # Need to set them first before creating the MLResult dataclass
+    # since train,predict,evaluate has to happen in a consecutive manner
+    losses: list[float] = node_classifier.train(request.epochs)
+    predictions: list[int] = node_classifier.predict()
+    accuracy: float = node_classifier.evaluate()
+
+    return response(
+        200,
+        MLResult(
+            message="Training complete",
+            losses=losses,
+            predictions=predictions,
+            accuracy=accuracy,
+        ).__dict__,
+    )
     
