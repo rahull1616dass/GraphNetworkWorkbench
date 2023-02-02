@@ -1,21 +1,12 @@
-from flask import Response as FlaskResponse
+from typing import Dict
+
+import torch
+import numpy as np
+import pandas as pd
+from math import ceil
 from torch_geometric.data import Data as TorchGeoData
 
-from app.typing import MLRequest
-
-
-
-def parse_request(request: MLRequest) -> FlaskResponse:
-    if request.task_type is None:
-        return response(400, {"error": "No task type found"})
-
-    files: dict[str, DataFrame] = download_network_files(request)
-    tgData: TorchGeoData = utils.from_dataframe(files['nodes'], files['edges'])
-    if request.task_type == TaskType.NODE_CLASSIFICATION:
-        return node_classification(request, tgData)
-    elif request.task_type == TaskType.EDGE_CLASSIFICATION:
-        return node_classification(request, tgData)
-    return response(400, {"error": "Invalid task type"})
+from core.typing import MLTask
 
 
 def generate_train_mask(dataset_size: int, train_percentage: float) -> torch.Tensor:
@@ -27,9 +18,11 @@ def generate_train_mask(dataset_size: int, train_percentage: float) -> torch.Ten
     return train_mask[torch.randperm(train_mask.size(0))]
 
 
-def from_dataframe(nodes: DataFrame, edges: DataFrame, train_percentage: float = 0.8) -> TorchGeoData:
+def from_dataframe(data: Dict[str, pd.DataFrame], task: MLTask) -> TorchGeoData:
+    nodes = data["nodes"]
+    edges = data["edges"]
     y: np.ndarray = nodes["groups"].to_numpy()
-    train_mask: torch.Tensor = generate_train_mask(y.shape[0], train_percentage)
+    train_mask: torch.Tensor = generate_train_mask(y.shape[0], task.train_percentage)
 
     return TorchGeoData(
         x=torch.from_numpy(np.eye(nodes.shape[0])).to(torch.float32),

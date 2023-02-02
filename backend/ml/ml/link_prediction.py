@@ -5,8 +5,11 @@ from torch.optim import Adam
 from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv
 from torch.nn import BCEWithLogitsLoss
+import torch_geometric.transforms as T
 from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import negative_sampling
+
+from core.typing import MLTask
 
 
 class Net(torch.nn.Module):
@@ -79,7 +82,7 @@ class LinkPredictor:
         return self.model.decode_all(z).cpu().numpy()
 
 
-def predict_edges(data: TorchGeoData):
+def predict_edges(data: Data, task: MLTask):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     transform = T.Compose([
         T.NormalizeFeatures(),
