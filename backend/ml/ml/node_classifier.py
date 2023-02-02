@@ -1,12 +1,21 @@
-from models.single_layer_gcn import SingleLayerGCN
 import torch
-import torch.nn.functional as F
-from torch.optim import Adam
-from torch_geometric.data import Data as TorchGeoData
-from dataclasses import dataclass
 import numpy as np
-from pandas import DataFrame
-from math import ceil
+from torch.optim import Adam
+import torch.nn.functional as F
+from dataclasses import dataclass
+from torch_geometric.nn import GCNConv
+from torch_geometric.data import Data as TorchGeoData
+
+
+class SingleLayerGCN(torch.nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(SingleLayerGCN, self).__init__()
+        self.conv1 = GCNConv(in_channels, out_channels)
+
+    def forward(self, x, edge_index):
+        x = self.conv1(x, edge_index)
+        return F.log_softmax(x, dim=1)
+
 @dataclass
 class NodeClassifier:
     data: TorchGeoData
