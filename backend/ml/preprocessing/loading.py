@@ -5,6 +5,8 @@ from requests import Response as RequestsResponse
 from core.typing import MLTask
 from core.logging_helpers import timeit
 
+
+@timeit
 def get_data_frame(file_url: str) -> DataFrame:
     file_response: RequestsResponse = http_get(
         file_url, stream=True, headers={"Content-Type": "text/csv"}
