@@ -4,7 +4,10 @@ from fastapi.responses import RedirectResponse, FileResponse
 
 from core.typing import MLTask
 from core.logging_helpers import get_logger
-from app.workflows import link_prediction_workflow
+from app.workflows import (
+    link_prediction_workflow,
+    node_prediction_workflow
+)
 
 api = APIRouter()
 logger = get_logger(__name__)
@@ -17,9 +20,9 @@ async def link_prediction(task: MLTask = Body()):
     return await link_prediction_workflow(task)
 
 
-@api.get("/node_class")
-async def node_classification():
-    return {"msg": "Node classification is not implemented"}
+@api.post("/node_class")
+async def node_classification(task: MLTask = Body()):
+    return await node_prediction_workflow(task)
 
 
 @api.get("/")

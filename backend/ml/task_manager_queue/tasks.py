@@ -1,9 +1,8 @@
-"""Celery instance"""
-from tqdm import tqdm
+"""Celery tasks"""
 from celery import Celery
-import time
 
 from ml.link_prediction import predict_edges
+from ml.node_classifier import classify_nodes
 from preprocessing.parsing import from_dataframe
 from preprocessing.loading import download_network_files
 
@@ -31,3 +30,8 @@ def convert_task(*args, **kwargs):
 @celery_queue.task
 def edge_prediction_task(*args, **kwargs):
     return predict_edges(*args, **kwargs)
+
+
+@celery_queue.task
+def node_classification_task(*args, **kwargs):
+    return classify_nodes(*args, **kwargs)

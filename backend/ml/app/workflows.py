@@ -4,7 +4,8 @@ from celery import chain
 from task_manager_queue.tasks import (
     convert_task,
     download_task,
-    edge_prediction_task
+    edge_prediction_task,
+    node_classification_task
 )
 from core.typing import MLTask
 from core.logging_helpers import get_logger
@@ -18,6 +19,9 @@ async def run_workflow(pipe):
 
 
 async def link_prediction_workflow(task: MLTask):
-    logger.info("The link prediction workflow is run")
     pipe = chain(download_task.s(task), convert_task.s(task), edge_prediction_task.s(task))
+    return await run_workflow(pipe)
+
+async def node_prediction_workflow(task: MLTask):
+    pipe = chain(download_task.s(task), convert_task.s(task), node_classification_task.s(task))
     return await run_workflow(pipe)

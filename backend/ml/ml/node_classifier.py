@@ -3,8 +3,11 @@ import numpy as np
 from torch.optim import Adam
 import torch.nn.functional as F
 from dataclasses import dataclass
+from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv
-from torch_geometric.data import Data as TorchGeoData
+
+from core.typing import MLTask
+from core.logging_helpers import timeit
 
 
 class SingleLayerGCN(torch.nn.Module):
@@ -18,7 +21,7 @@ class SingleLayerGCN(torch.nn.Module):
 
 @dataclass
 class NodeClassifier:
-    data: TorchGeoData
+    data: Data
     
     def __post_init__(self): pass
     
@@ -50,22 +53,15 @@ class NodeClassifier:
         return accuracy
 
 
-def classify_nodes(request: MLRequest, tgData: TorchGeoData) -> FlaskResponse:
-    node_classifier = NodeClassifier(tgData)
+@timeit
+def classify_nodes(data: Data, task: MLTask):
+    node_classifier = NodeClassifier(data)
 
     # Need to set them first before creating the MLResult dataclass
     # since train,predict,evaluate has to happen in a consecutive manner
-    losses: list[float] = node_classifier.train(request.epochs)
+    losses: list[float] = node_classifier.train(task.epochs)
     predictions: list[int] = node_classifier.predict()
     accuracy: float = node_classifier.evaluate()
 
-    return response(
-        200,
-        MLResult(
-            message="Training complete",
-            losses=losses,
-            predictions=predictions,
-            accuracy=accuracy,
-        ).__dict__,
-    )
+    return losses, predictions, accuracy
     

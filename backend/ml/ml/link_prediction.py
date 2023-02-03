@@ -89,10 +89,13 @@ def predict_edges(data: Data, task: MLTask):
     transform = T.Compose([
         T.NormalizeFeatures(),
         T.ToDevice(device),
-        T.RandomLinkSplit(num_val=0.1, num_test=0.1, is_undirected=False, add_negative_train_samples=False)
+        T.RandomLinkSplit(
+            num_val=task.val_percentage,
+            num_test=1 - task.val_percentage - task.train_percentage,
+            is_undirected=False, add_negative_train_samples=False)
     ])
     train_data, val_data, test_data = transform(data)
     predictor = LinkPredictor(data.num_features, device, learning_rate=0.001)
-    train_loss, val_roc_auc_score = predictor.train(train_data, val_data, epochs=2000)
+    train_loss, val_roc_auc_score = predictor.train(train_data, val_data, epochs=task.epochs)
     test_roc_auc_score = predictor.test(test_data)
     return train_loss, val_roc_auc_score, test_roc_auc_score
