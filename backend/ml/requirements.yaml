@@ -1,0 +1,17 @@
+channels:
+  - pytorch
+  - nvidia
+  - pyg
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10.8=haa1d7c7_0
+  - pytorch=1.13.1=py3.10_cuda11.6_cudnn8.3.2_0
+  - torchvision=0.14.1=py310_cu116
+  - torchaudio=0.13.1=py310_cu116
+  - pytorch-cuda=11.6=h867d48c_1
+  - pyg=2.2.0=py310_torch_1.13.0_cu116
+  - pandas=1.4.4=py310h6a678d5_0
+  - fastapi=0.89.1=pyhd8ed1ab_0
+  - fastapi-healthcheck=0.2.12=pyhd8ed1ab_0
+  - scikit-learn=1.2.0=py310h6a678d5_1
