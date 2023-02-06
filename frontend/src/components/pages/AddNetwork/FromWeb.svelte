@@ -11,6 +11,15 @@
   import { parse } from "vega"
   import { selectedMenuItem } from "../../../stores"
   import { MenuItem } from "../../../definitions/menuItem"
+  import JSZip from 'jszip'
+  import { browserLocalPersistence } from "firebase/auth";
+  import { uploadNetworkToStorage } from "../../../api/firebase"
+  import { Network } from "../../../definitions/network"
+  import type { Link, Metadata, Node } from "../../../definitions/network"
+    import Networks from "../Workbench/Networks.svelte";
+    import { UploadedFileType } from "../../../definitions/uploadedFileType"
+    import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte";
+
 
   onMount(async () => {
     /*
@@ -28,17 +37,86 @@
   })
 
   async function onFetchNetwork(event) {
-    const response = await request(
-      `https://networks.skewed.de/net/${event.detail.networkName}/files/${event.detail.networkName}.csv.zip`,
-      undefined,
-      false
-    )
-    // Extract the zipped file on response.body to a REadableStream
-    const readableStream = decompressResponse(response).body
 
-    parseReadableStream(readableStream, undefined)
-    // https://stackoverflow.com/a/61013504/11330757
-    console.log(response)
+
+
+    fetch(`https://networks.skewed.de/net/${event.detail.networkName}/files/${event.detail.networkName}.csv.zip`)
+    .then(response => response.blob())
+    .then(blob =>{
+      return JSZip.loadAsync(blob)
+    })
+    .then(zip =>{ 
+      let edgeFile
+      let nodeFile
+      edgeFile = zip.files['edges.csv'].async('text')
+      nodeFile = zip.files['nodes.csv'].async('text')
+      return Promise.all([edgeFile , nodeFile])
+    })
+    .then(alltext =>{
+      
+      let nodesString = removeCSVColumns(alltext[1].replace('# ',''), [' name',' _pos'])
+      let edgesString = alltext[0].replace('# ','')
+      let network = new Network();
+      network.metadata.name = event.detail.networkName
+      network.metadata.description = event.detail.content.description
+      network.metadata.id = event.detail.networkName
+      network.metadata.color = ""
+      return UploadTheData(nodesString, edgesString, network)
+    })
+    .then(url => {
+      console.log(`Network uploaded to ${url}`)
+    })
+  }
+
+  function UploadTheData(nodes, edges, network){
+    console.log(nodes)
+    console.log(edges)
+      let nodesFile = new File([nodes], "Nodes.csv", { type: "text/csv" })
+      let edgesFile = new File([edges], "Edges.csv", { type: "text/csv" })
+      
+      network.nodes = <Node[]>(
+            JSON.parse(JSON.stringify(nodes))
+          )
+      network.links = <Link[]>(
+            JSON.parse(JSON.stringify(edges))
+          )
+      return uploadNetworkToStorage(
+      network.metadata,
+      nodesFile,
+      edgesFile
+    )
+  }
+  function removeCSVColumns(csvData, columnsToRemove) {
+    const rows = csvData.split("\n").map(row => {
+      const cells = [];
+      let cell = "";
+      let insideQuote = false;
+      for (const char of row) {
+        if (char === '"') {
+          insideQuote = !insideQuote;
+        } else if (char === "," && !insideQuote) {
+          cells.push(cell);
+          cell = "";
+        } else {
+          cell += char;
+        }
+      }
+      cells.push(cell);
+      return cells;
+    });
+    const header = rows[0];
+    let indicesToRemove = [];
+    if (Array.isArray(columnsToRemove)) {
+      for (const col of columnsToRemove) {
+        const index = header.indexOf(col);
+        if (index !== -1) {
+          indicesToRemove.push(index);
+        }
+      }
+    }
+    return rows.map(row => {
+      return row.filter((_, i) => !indicesToRemove.includes(i));
+    }).map(row => row.join(",")).join("\n");
   }
   let searchTerm = "";
   $: filteredItems = $netzschleuderNetworkNames.filter(item => item.includes(searchTerm));

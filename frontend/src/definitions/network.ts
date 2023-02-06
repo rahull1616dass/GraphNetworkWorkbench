@@ -19,7 +19,7 @@ export class Link{
     constructor(
         readonly source: string = undefined,
         readonly target: string = undefined,
-        readonly value: number = undefined
+        readonly value: (string|number)[] = undefined
     ){}
 
     public equals(other: Link): boolean{

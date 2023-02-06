@@ -36,7 +36,7 @@
       </div>
       <div class="import_button">
         <Button
-          on:click={() => dispatch("fetchNetwork", { networkName: title })}
+          on:click={() => dispatch("fetchNetwork", { networkName: title, content: content })}
           size="small"
           on:click>Import Network</Button
         >
