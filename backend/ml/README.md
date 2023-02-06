@@ -23,7 +23,7 @@ install [docker](https://docs.docker.com/engine/install/ubuntu/) and [docker-com
 
 start [redis](https://redis.io/) and [rabbitmq](https://www.rabbitmq.com/)
 ```shell
-docker-compose up -f deployment/development/docker-compose.yaml -d
+docker-compose -f deployment/development/docker-compose.yaml up -d
 ```
 
 start task manager workers
