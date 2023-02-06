@@ -28,7 +28,7 @@ docker-compose up -f deployment/development/docker-compose.yaml -d
 
 start task manager workers
 ```shell
-celery -A task_manager_queue worker
+celery -A task_manager_queue.tasks worker
 ```
 
 start the web application
