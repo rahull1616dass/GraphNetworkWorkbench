@@ -16,22 +16,26 @@ spec:
       - resources:
           limits:
             nvidia.com/gpu: "1"
-            cpu: "8"
-            memory: "16Gi"
+            cpu: "4"
+            memory: "8Gi"
           requests:
             nvidia.com/gpu: "1"
             cpu: "4"
             memory: "8Gi"
         name: graph-learning-workbench
         image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
-        imagePullPolicy: Always
-        command: ["gunicorn", "--bind", "0.0.0.0:9000", "main:app"]
+        imagePullPolicy: "Always"
+        command: ["tail", "-f", "/dev/null"]
+        env:
+          - name: REDIS-HOST
+            value: redis-service
         ports:
         - name: http
           containerPort: 9000
         volumeMounts:
           - mountPath: /workspace
             name: project-code
+      priorityClassName: "research-high"
       imagePullSecrets:
       - name: lsx-registry
       restartPolicy: "Always"
@@ -58,3 +62,53 @@ spec:
   - port: 9000
   selector:
     name: graph-learning-workbench
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      pod: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        pod: redis
+    spec:
+      containers:
+      - name: master
+        image: redis
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 6379
+      priorityClassName: "research-high"
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      pod: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        pod: redis
+    spec:
+      containers:
+      - name: master
+        image: redis
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 6379
+      priorityClassName: "research-high"
