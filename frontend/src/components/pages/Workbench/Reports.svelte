@@ -1,7 +1,8 @@
 <script lang="ts">
-
+  import Embedding from "../../common/Embedding.svelte"
 </script>
 
-<style lang="scss">
+<Embedding />
 
+<style lang="scss">
 </style>
