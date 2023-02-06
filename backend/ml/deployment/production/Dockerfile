@@ -10,4 +10,4 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get upgrade -y
 RUN pip install --upgrade pip setuptools
 COPY ./requirements.yaml ./requirements.yaml
-RUN conda env update --file ./requirements.yaml
+RUN conda env update --file ./requirements.yaml --name base
