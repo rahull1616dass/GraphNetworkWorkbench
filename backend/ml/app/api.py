@@ -28,11 +28,3 @@ async def node_classification(task: MLTask = Body()):
 @api.get("/")
 async def index():
     return RedirectResponse("/docs")
-
-@api.get("/nodes")
-async def get_nodes():
-    return FileResponse("nodes.csv")
-
-@api.get("/edges")
-async def get_nodes():
-    return FileResponse("edges.csv")
