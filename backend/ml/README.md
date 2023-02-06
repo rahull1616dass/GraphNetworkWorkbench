@@ -43,3 +43,9 @@ Root path `/` will be redirected to `/docs` where you can play around with endpo
 
 #### Global
 See details about CI/CD in [.gitlab-ci.yml](../../.gitlab-ci.yml) and in [deployment/global](deployment/global)
+
+### Architecture
+
+![Main workflow](./docs/architecture.png)
+
+
