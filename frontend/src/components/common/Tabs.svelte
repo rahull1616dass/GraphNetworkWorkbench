@@ -1,14 +1,13 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-  import logo from "../../assets/logo.svg";
-  import { selectedMenuItem } from "../../stores";
-  import { MenuItem } from "../../definitions/menuItem";
-  import { getAuth } from "firebase/auth";
-  import { authUserStore } from "../../stores";
+  import { createEventDispatcher } from "svelte"
+  import logo from "../../assets/logo.svg"
+  import { selectedMenuItem } from "../../stores"
+  import { MenuItem } from "../../definitions/menuItem"
+  import { getAuth } from "firebase/auth"
+  import { authUserStore } from "../../stores"
 
-  let isLoggedIn: boolean = false;
-  $: isLoggedIn =
-    $authUserStore !== undefined && getAuth().currentUser !== null;
+  let isLoggedIn: boolean = false
+  $: isLoggedIn = $authUserStore !== undefined && getAuth().currentUser !== null
 
   let menuItemsLogin: MenuItem[] = [
     MenuItem.HOME,
@@ -17,12 +16,13 @@
     MenuItem.EXPERIMENTS,
     MenuItem.REPORTS,
     MenuItem.PROFILE,
-  ];
+    MenuItem.TEST,
+  ]
   let menuItemsLogout: MenuItem[] = [
     MenuItem.HOME,
     MenuItem.LOGIN,
     MenuItem.REGISTER,
-  ];
+  ]
 </script>
 
 <div class="tabs">

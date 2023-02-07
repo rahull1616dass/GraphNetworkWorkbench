@@ -46,6 +46,7 @@
     "papaparse": "^5.3.2",
     "sass": "^1.56.1",
     "svelte-vega": "^1.2.0",
+    "train-test-split": "^1.0.0",
     "vega": "^5.22.1",
     "vega-functions": "^5.13.0",
     "vega-lite": "^5.6.0"

@@ -12,6 +12,7 @@
   import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte";
   import Footer from "./components/common/Footer.svelte";
   import Tabs from "./components/common/Tabs.svelte";
+  import Test from "./components/pages/Test.svelte"
   import Networks from "./components/pages/Workbench/Networks.svelte";
   import {
     selectedMenuItem,
@@ -77,37 +78,42 @@
   <div class="main_progress_bar">
     <ProgressBar helperText={progressBarData.text} />
   </div>
-{:else if isLoggedIn === true}
-  <ul id="menuLogin">
-    <Tabs />
-    {#if $selectedMenuItem === MenuItem.HOME}
-      <Home />
-    {:else if $selectedMenuItem === MenuItem.NETWORKS}
-      <Networks />
-    {:else if $selectedMenuItem === MenuItem.PLOT}
+{:else}
+    {#if isLoggedIn === true}
+    <ul id="menuLogin">
+      <Tabs />
+      {#if $selectedMenuItem === MenuItem.HOME}
+        <Home />
+      {:else if $selectedMenuItem === MenuItem.NETWORKS}
+      <Networks/>
+      {:else if $selectedMenuItem === MenuItem.PLOT}
       <Plot />
-    {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
-      <Experiments />
-    {:else if $selectedMenuItem === MenuItem.REPORTS}
-      <Reports />
-    {:else if $selectedMenuItem === MenuItem.PROFILE}
+      {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
+      <Experiments/>
+      {:else if $selectedMenuItem === MenuItem.REPORTS}
+      <Reports/>
+      {:else if $selectedMenuItem === MenuItem.PROFILE}
       <Profile />
-    {:else if $selectedMenuItem === MenuItem.FROM_WEB}
+      {:else if $selectedMenuItem === MenuItem.FROM_WEB}
       <FromWeb />
-    {:else if $selectedMenuItem === MenuItem.FROM_PC}
+      {:else if $selectedMenuItem === MenuItem.FROM_PC}
       <UploadNetwork />
+      {:else if $selectedMenuItem === MenuItem.TEST}
+      <Test />
+      {/if}
+    </ul>
+    {:else if isLoggedIn === false}
+      <Tabs />
+      {#if $selectedMenuItem === MenuItem.HOME}
+        <Home />
+      {:else if $selectedMenuItem === MenuItem.LOGIN}
+        <Login />
+      {:else if $selectedMenuItem === MenuItem.REGISTER}
+        <Register />
+      {/if}
     {/if}
-  </ul>
-{:else if isLoggedIn === false}
-  <Tabs />
-  {#if $selectedMenuItem === MenuItem.HOME}
-    <Home />
-  {:else if $selectedMenuItem === MenuItem.LOGIN}
-    <Login />
-  {:else if $selectedMenuItem === MenuItem.REGISTER}
-    <Register />
-  {/if}
 {/if}
+
 
 <Footer />
 
