@@ -7,6 +7,7 @@
   import CustomButton from "../../common/CustomButton.svelte"
   import { MLModelType } from "../../../definitions/mlModelType";
   import { networksList, selectedNetworkIndex, selectedModelType } from "../../../stores";
+  import Plot from "./Plot/Plot.svelte"
 
   export let networkIndex: number = undefined
   let placeholderNetwork: string = "Select a network"
@@ -160,6 +161,10 @@
       {/if}
     </div>
 
+</li>
+
+<li class="Modal">
+   
 </li>
 
 </div>
