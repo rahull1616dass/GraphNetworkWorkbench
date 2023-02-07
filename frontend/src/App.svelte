@@ -12,7 +12,6 @@
   import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte"
   import Footer from "./components/common/Footer.svelte"
   import Tabs from "./components/common/Tabs.svelte"
-  import CustomModal from "./components/common/CustomModal.svelte"
   import Networks from "./components/pages/Workbench/Networks.svelte"
   import {
     selectedMenuItem,
@@ -71,24 +70,6 @@
     }
   }
 
-  /* ---- My Networks ---- */
-  let isHoveringMyNetworks: boolean = false
-  let isHoveringNetworksList: boolean = false
-
-  // $: $selectedNetworkIndex, selectNetwork()
-
-  // function selectNetwork() {
-  //   if ($selectedNetworkIndex === undefined) return
-  //   isHoveringMyNetworks = false
-  //   isHoveringNetworksList = false
-  //   $selectedMenuItem = MenuItem.PLOT
-  // }
-
-  /* ---- Import Modal ---- */
-  let isImportModalOpen: boolean = false
-  let selectedImportType: ImportModalType = ImportModalType.NONE
-
-  let showModal = false
 </script>
 
 {#if progressBarData.isPresent}
@@ -131,106 +112,6 @@
 
 
 <Footer />
-
-      <!---
-      <li>
-        <a href="/" on:click|preventDefault={performLogout}>Logout</a>
-      </li>
-      <li>
-        <div
-          class:menu_my_networks_open={isHoveringMyNetworks}
-          class:menu_my_networks={!isHoveringMyNetworks}
-          on:mouseenter={() => (isHoveringMyNetworks = true)}
-          on:mouseleave={() => /*(isHoveringMyNetworks = false)*/ null}
-        >
-          My Networks
-        </div>
-      </li>
-      {#if $selectedNetworkIndex !== undefined}
-        <li>
-          <a
-            href="/"
-            on:click|preventDefault={() => ($selectedMenuItem = MenuItem.PLOT)}
-            >Visualize</a
-          >
-        </li>
-        <li>
-          <a
-            href="/"
-            on:click|preventDefault={() =>
-              ($selectedMenuItem = MenuItem.EXPERIMENTS)}>Experiments</a
-          >
-        </li>
-        <li>
-          <a
-            href="/"
-            on:click|preventDefault={() =>
-              ($selectedMenuItem = MenuItem.REPORTS)}>Reports</a
-          >
-        </li>
-      {/if}
-    </ul>
-  {/if}
-  <div class="root">
-    {#if $selectedMenuItem === MenuItem.HOME}
-      <Home />
-    {:else if $selectedMenuItem === MenuItem.LOGIN}
-      <Login />
-    {:else if $selectedMenuItem === MenuItem.REGISTER}
-      <Register />
-    {:else if $selectedMenuItem === MenuItem.PLOT}
-      <Plot />
-    {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
-      <Experiments />
-    {:else if $selectedMenuItem === MenuItem.REPORTS}
-      <Reports />
-    {/if}
-  </div>
-  {#if isHoveringMyNetworks || isHoveringNetworksList}
-    <div
-      class="networks_list"
-      on:mouseenter={() => (isHoveringNetworksList = true)}
-      on:mouseleave={() => (isHoveringNetworksList = false)}
-    >
-      <div class="networks_list_header">
-        <p>Networks</p>
-        <Button
-          class="btn_networks_list_import"
-          on:click={() => {
-            isHoveringMyNetworks = false
-            isHoveringNetworksList = false
-            isImportModalOpen = true
-          }}
-          size="small"
-          on:click>Import Network</Button
-        >
-      </div>
-      <div class="networks_list_items" style="--height: {$networksList.length * 120}px;">
-        {#each $networksList as network, index}
-          <NetworkListItem
-            {network}
-            {index}
-            selected={$selectedNetworkIndex == index}
-            on:selectItem={(event) => {
-              $selectedNetworkIndex = event.detail.selectedIndex
-            }}
-          />
-        {/each}
-      </div>
-    </div>
-  {/if}
-  
-  <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
-  {#if selectedImportType === ImportModalType.FROM_WEB}
-    <FromWeb/>
-  {:else if selectedImportType === ImportModalType.UPLOAD}
-    <UploadNetwork/>
-  {/if}
-
-{/if}
--->
-
-
 
 <style lang="scss">
   .main_progress_bar {
