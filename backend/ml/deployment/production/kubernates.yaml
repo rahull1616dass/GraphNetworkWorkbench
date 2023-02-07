@@ -25,7 +25,16 @@ spec:
         name: graph-learning-workbench
         image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
         imagePullPolicy: "Always"
-        command: ["tail", "-f", "/dev/null"]
+        command: ["celery", "-A", "task_manager.tasks", "worker"]
+        env:
+          - name: REDIS_HOST
+            value: redis-master
+          - name: REDIS_PORT
+            value: 6379
+          - name: RABBITMQ_HOST
+            value: rabbitmq-service
+          - name: RABBITMQ_PORT
+            value: 5672
         ports:
         - name: http
           containerPort: 9000
