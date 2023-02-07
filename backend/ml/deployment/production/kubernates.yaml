@@ -26,9 +26,6 @@ spec:
         image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
         imagePullPolicy: "Always"
         command: ["tail", "-f", "/dev/null"]
-        env:
-          - name: REDIS-HOST
-            value: redis-service
         ports:
         - name: http
           containerPort: 9000
@@ -63,52 +60,59 @@ spec:
   selector:
     name: graph-learning-workbench
 ---
-apiVersion: apps/v1beta2
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: redis
+  creationTimestamp: null
+  labels:
+    app: redis
+    role: master
+    tier: backend
+  name: redis-master
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      pod: redis
-  replicas: 1
+      app: redis
+      role: master
+      tier: backend
+  strategy: {}
   template:
     metadata:
+      creationTimestamp: null
       labels:
-        pod: redis
+        app: redis
+        role: master
+        tier: backend
     spec:
       containers:
-      - name: master
-        image: redis
+      - image: redis
+        name: redis-master
+        ports:
+        - containerPort: 6379
         resources:
           requests:
             cpu: 100m
             memory: 100Mi
-        ports:
-        - containerPort: 6379
-      priorityClassName: "research-high"
+status: {}
 ---
-apiVersion: apps/v1beta2
-kind: Deployment
+apiVersion: v1
+kind: Service
 metadata:
-  name: redis
+  creationTimestamp: null
+  labels:
+    app: redis
+    role: master
+    tier: backend
+  name: redis-master
 spec:
+  ports:
+  - port: 6379
+    protocol: TCP
+    targetPort: 6379
   selector:
-    matchLabels:
-      pod: redis
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        pod: redis
-    spec:
-      containers:
-      - name: master
-        image: redis
-        resources:
-          requests:
-            cpu: 100m
-            memory: 100Mi
-        ports:
-        - containerPort: 6379
-      priorityClassName: "research-high"
+    app: redis
+    role: master
+    tier: backend
+status:
+  loadBalancer: {}
