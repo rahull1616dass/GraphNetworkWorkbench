@@ -12,8 +12,6 @@ from app.workflows import (
 api = APIRouter()
 logger = get_logger(__name__)
 
-# TODO: implement node classification and edge prediction endpoints
-
 
 @api.post("/link_pred")
 async def link_prediction(task: MLTask = Body()):
