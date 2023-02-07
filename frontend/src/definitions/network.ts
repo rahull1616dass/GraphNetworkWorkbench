@@ -17,10 +17,16 @@ export class Metadata{
 }
 export class Link{
     constructor(
-        readonly source: string,
-        readonly target: string,
-        readonly value: number
+        readonly source: string = undefined,
+        readonly target: string = undefined,
+        readonly value: number = undefined
     ){}
+
+    public equals(other: Link): boolean{
+        // Cruically, the value need not be equal for the links to be equal
+        return this.source === other.source &&
+            this.target === other.target
+    }
 }
 
 export class Node{

@@ -1,20 +1,28 @@
 import os
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+import torch
+from snakecase import convert
+from healthcheck import HealthCheck
+from requests import get as http_get
+import torch_geometric.transforms as T
+from pandas import DataFrame, read_csv
 from flask import Flask, request, jsonify
 from flask import Response as FlaskResponse
-from requests import get as http_get
 from requests import Response as RequestsResponse
-from task_type import TaskType
-from pandas import DataFrame, read_csv
-from node_classifier import NodeClassifier
-from ml_result import MLResult
-from ml_request import MLRequest
-from snakecase import convert
-import utils
 from torch_geometric.data import Data as TorchGeoData
 
+import utils
+from task_type import TaskType
+from ml_result import MLResult
+from ml_request import MLRequest
+from node_classifier import NodeClassifier
+from models.link_prediction import LinkPredictor
+
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
 app = Flask(__name__)
+health = HealthCheck()
 
 
 def response(status: int, data: dict) -> FlaskResponse:
@@ -72,8 +80,18 @@ def node_classification(request: MLRequest, tgData: TorchGeoData) -> FlaskRespon
     )
     
   
-def edge_classification(request: MLRequest, tgData: TorchGeoData) -> FlaskResponse:
-    return response(200, {"message": "Edge Classification not implemented yet"})
+def edge_prediction(data: TorchGeoData):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    transform = T.Compose([
+        T.NormalizeFeatures(),
+        T.ToDevice(device),
+        T.RandomLinkSplit(num_val=0.1, num_test=0.1, is_undirected=False, add_negative_train_samples=False)
+    ])
+    train_data, val_data, test_data = transform(data)
+    predictor = LinkPredictor(data.num_features, device, learning_rate=0.001)
+    train_loss, val_roc_auc_score = predictor.train(train_data, val_data, epochs=2000)
+    test_roc_auc_score = predictor.test(test_data)
+    return train_loss, val_roc_auc_score, test_roc_auc_score
 
 
 def parse_request(request: MLRequest) -> FlaskResponse:
@@ -82,11 +100,10 @@ def parse_request(request: MLRequest) -> FlaskResponse:
     
     files: dict[str, DataFrame] = download_network_files(request)
     tgData: TorchGeoData = utils.from_dataframe(files['nodes'], files['edges'])
-    match request.task_type:
-        case TaskType.NODE_CLASSIFICATION.value:
-            return node_classification(request, tgData)
-        case TaskType.EDGE_CLASSIFICATION.value:
-            return edge_classification(request, tgData)
+    if request.task_type == TaskType.NODE_CLASSIFICATION:
+        return node_classification(request, tgData)
+    elif request.task_type == TaskType.EDGE_CLASSIFICATION:
+        return node_classification(request, tgData)
     return response(400, {"error": "Invalid task type"})
 
 
@@ -104,6 +121,9 @@ def index() -> FlaskResponse:
             print(e)
             return response(400, {"error": str(e)})
     return response(400, {"error": "Not a POST request"})
+
+
+app.add_url_rule("/healthcheck", "healthcheck", view_func=lambda: health.run())
 
 
 if __name__ == "__main__":

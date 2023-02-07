@@ -37,6 +37,16 @@ export const paletteColors: Readable<string[]> = readable([
   "#17becf",
 ])
 
+/* 
+  These are the attributes that are not editable by the user in Plot.svelte.
+*/
+export const unchangeableAttributes: Readable<string[]> = readable([
+  "id",
+  "name",
+  "source",
+  "target",
+])
+
 /*
   userStore holds the current User instance from Firebase Auth.
   It is also used to check if the user is logged in.

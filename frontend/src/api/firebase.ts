@@ -4,6 +4,7 @@ import {
   collection,
   setDoc,
   addDoc,
+  deleteDoc,
   doc,
   query,
   getDocs,
@@ -19,6 +20,7 @@ import {
   ref,
   uploadBytes,
   getBlob,
+  deleteObject,
 } from "firebase/storage"
 import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
@@ -40,7 +42,7 @@ export const db = initializeFirestore(app, {
 const enum Database {
   USERS = "Users",
   NETWORKS = "Networks",
-  TASKS = "Tasks"
+  TASKS = "Tasks",
 }
 
 export async function registerUser(loginUser: LoginUser): Promise<void> {
@@ -65,10 +67,8 @@ export async function registerUser(loginUser: LoginUser): Promise<void> {
   })
 }
 
-
 function getNetworkPath(networkId: string): string {
-  if(networkId === undefined)
-    return `Users/${get(authUserStore).uid}/Networks`
+  if (networkId === undefined) return `Users/${get(authUserStore).uid}/Networks`
   return `Users/${get(authUserStore).uid}/Networks/${networkId}`
 }
 
@@ -76,14 +76,18 @@ function getStorageRefs(networkId: string): any {
   const storage = getStorage(app)
   const networkPath = getNetworkPath(networkId)
   return {
-    nodeFileRef: ref(storage, `${networkPath}/nodes.csv`),
+    nodesFileRef: ref(storage, `${networkPath}/nodes.csv`),
     edgesFileRef: ref(storage, `${networkPath}/edges.csv`),
   }
 }
 
 export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
   return new Promise((resolve, reject) => {
-    signInWithEmailAndPassword(getAuth(app), loginUser.email, loginUser.password)
+    signInWithEmailAndPassword(
+      getAuth(app),
+      loginUser.email,
+      loginUser.password
+    )
       .then((userCredential) => {
         // Signed in
         authUserStore.set(userCredential.user)
@@ -103,10 +107,10 @@ export async function uploadNetworkToStorage(
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const storagePaths = getStorageRefs(networkMetadata.id)
-    uploadBytes(storagePaths['nodeFileRef'], nodesFile)
+    uploadBytes(storagePaths.nodesFileRef, nodesFile)
       .then((nodesFileSnapshot) => {
         console.log(`Uploaded nodes file for network ${networkMetadata.id}`)
-        uploadBytes(storagePaths['edgesFileRef'], edgesFile)
+        uploadBytes(storagePaths.edgesFileRef, edgesFile)
           .then((edgesFileSnapshot) => {
             console.log(`Uploaded edges file for network ${networkMetadata.id}`)
             saveNetworkDocument(networkMetadata)
@@ -129,7 +133,10 @@ export async function uploadNetworkToStorage(
 
 async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
   return new Promise((resolve, reject) => {
-    setDoc(doc(db, getNetworkPath(networkMetadata.id)), metadataConverter.toFirestore(networkMetadata))
+    setDoc(
+      doc(db, getNetworkPath(networkMetadata.id)),
+      metadataConverter.toFirestore(networkMetadata)
+    )
       .then(() => {
         resolve()
       })
@@ -140,12 +147,7 @@ async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
 }
 
 export async function getNetworks() {
-  const networksQuery = query(
-    collection(
-      db,
-      getNetworkPath(undefined)
-    )
-  )
+  const networksQuery = query(collection(db, getNetworkPath(undefined)))
   await getDocs(networksQuery).then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
       const metadata = metadataConverter.fromFirestore(doc, undefined)
@@ -163,15 +165,13 @@ export async function getNetworkFromStorage(
   return new Promise((resolve, reject) => {
     let network: Network = new Network(metadata)
     const storagePaths = getStorageRefs(metadata.id)
-    getBlob(storagePaths['nodeFileRef'])
+    getBlob(storagePaths.nodesFileRef)
       .then((blob) => {
         console.log(blob)
         parseNetwork(blobToFile(blob, "nodes.csv"))
           .then((parsedNodes) => {
-            network.nodes = <Node[]>(
-              JSON.parse(JSON.stringify(parsedNodes.data))
-            )
-            getBlob(storagePaths['edgesFileRef'])
+            network.nodes = <Node[]>JSON.parse(JSON.stringify(parsedNodes.data))
+            getBlob(storagePaths.edgesFileRef)
               .then((blob) => {
                 parseNetwork(blobToFile(blob, "edges.csv"))
                   .then((parsedEdges) => {
@@ -198,15 +198,22 @@ export async function getNetworkFromStorage(
   })
 }
 
-
-export async function setExperimentTask(networkId: string, task: Task): Promise<void> {
+export async function setExperimentTask(
+  networkId: string,
+  task: Task
+): Promise<void> {
   return new Promise((resolve, reject) => {
-    addDoc(collection(db, `${getNetworkPath(networkId)}/${Database.TASKS}`), tasksConverter.toFirestore(task))
+    addDoc(
+      collection(db, `${getNetworkPath(networkId)}/${Database.TASKS}`),
+      tasksConverter.toFirestore(task)
+    )
       .then(() => {
         resolve()
       })
       .catch((error) => {
-        console.log(`Error setting experiment task for network ${networkId}. ${error}`)
+        console.log(
+          `Error setting experiment task for network ${networkId}. ${error}`
+        )
         reject(error)
       })
   })
@@ -215,22 +222,55 @@ export async function setExperimentTask(networkId: string, task: Task): Promise<
 export async function getExperimentTasks(networkId: string): Promise<Task[]> {
   return new Promise((resolve, reject) => {
     const tasksQuery = query(
-      collection(
-        db,
-        getNetworkPath(networkId),
-        Database.TASKS
-      )
+      collection(db, getNetworkPath(networkId), Database.TASKS)
     )
     getDocs(tasksQuery)
-    .then((querySnapshot) => {
-      let tasks: Task[] = []
-      querySnapshot.forEach((doc) => {
-        tasks.push(tasksConverter.fromFirestore(doc, undefined))
+      .then((querySnapshot) => {
+        let tasks: Task[] = []
+        querySnapshot.forEach((doc) => {
+          tasks.push(tasksConverter.fromFirestore(doc, undefined))
+        })
+        resolve(tasks)
       })
-      resolve(tasks)
-    }).catch((error) => {
-      console.log(`Error getting experiment tasks for network ${networkId}. ${error}`)
-      reject(error)
+      .catch((error) => {
+        console.log(
+          `Error getting experiment tasks for network ${networkId}. ${error}`
+        )
+        reject(error)
+      })
+  })
+}
+
+export async function deleteNetwork(networkId: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    deleteDoc(doc(db, getNetworkPath(networkId))).then(() => {
+      console.log(`Deleted network document ${networkId}`)
+      const storageRefs = getStorageRefs(networkId)
+      deleteObject(storageRefs.nodesFileRef)
+        .then(() => {
+          console.log(`Deleted network nodes file ${networkId}`)
+          deleteObject(storageRefs.edgesFileRef)
+            .then(() => {
+              console.log(`Deleted network edges file ${networkId}`)
+              resolve()
+            })
+            .catch((error) => {
+              console.log(
+                `Error deleting network edges file ${networkId}. ${error}`
+              )
+              reject(error)
+            })
+        })
+        .catch((error) => {
+          console.log(
+            `Error deleting network nodes file ${networkId}. ${error}`
+          )
+          reject(error)
+        })
+        .catch((error) => {
+          console.log(`Error deleting network document ${networkId}. ${error}`)
+          reject(error)
+        })
     })
   })
 }
@@ -252,4 +292,3 @@ async function setUserDocument(user: LoginUser): Promise<void> {
       })
   })
 }
-
