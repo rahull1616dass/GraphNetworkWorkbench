@@ -21,28 +21,12 @@
   let placeholderModel: string = "Select a model";
   let unique = {}; // every {} is unique, {} === {} evaluates to false
 
-  let hiddenLayers = [{ checked: false, size: 10 }];
-
-  function add() {
-    hiddenLayers = hiddenLayers.concat({ checked: false, size: 1 });
-  }
-
-  function clear() {
-    hiddenLayers = hiddenLayers.filter((t) => !t.checked);
-  }
-
-  $: remaining = hiddenLayers.filter((t) => !t.checked).length;
-
   // These values should be set by UI Elements later on
-  let trainPercentage = 0.8;
-  let epochs = 100;
-  let learningRate = 0.01;
-  let numberOfLayers = 5;
-  let hiddenDimension = [];
+  let trainPercentage:number = 0.8;
+  let epochs:number = 100;
+  let learningRate: number = 0.01;
+  let hiddenLayers = [{ first: true, checked: false, size: 10 }];
 
-  function handleHiddenDimensions(event) {
-    hiddenDimension = [...hiddenDimension, event.target.value];
-  }
 
   function startNewExperiment() {
     $selectedNetworkIndex = undefined;
@@ -50,7 +34,7 @@
     trainPercentage = 0.8;
     epochs = 100;
     learningRate = 0.01;
-    hiddenDimension = [];
+    hiddenLayers = [{ first: true, checked: false, size: 10 }];
     unique = {};
   }
 
@@ -58,6 +42,14 @@
     false,
     "Training..."
   );
+
+  function add() {
+    hiddenLayers = hiddenLayers.concat({ first: false, checked: false, size: 1 });
+  }
+
+  function clear() {
+    hiddenLayers = hiddenLayers.filter((t) => (!t.checked || t.first) );
+  }
 
   async function createTask() {
     const taskToBeCreated = new Task(
@@ -233,6 +225,7 @@
               on:click={() => add()}>Add New Layer</CustomButton
             >
 
+             -     
             <CustomButton
               type={"delete"}
               inverse={false}
@@ -250,13 +243,9 @@
             type={"secondary"}
             inverse={false}
             disabled={epochs === 0 ||
-              epochs === 1000 ||
               learningRate === 0.0 ||
-              learningRate === 0.4 ||
               trainPercentage === 0 ||
-              trainPercentage === 1 ||
-              numberOfLayers === 1 ||
-              numberOfLayers === 10}
+              trainPercentage === 1 }
             on:click={() => createTask()}>Create Task</CustomButton
           >
         </div>
@@ -272,15 +261,17 @@
 <style lang="scss">
     .hiddenLayerButtons {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         //flex-direction: row;
         margin-top: 5%;
+        margin-bottom: 5%;
+        font-size: small;
     }
     .hiddenLayers {
         //display: flex;
         flex-direction: row;
         align-items: center;
-        padding: 2%;
+        padding: 1%;
         
     }
   .newExperiment {
