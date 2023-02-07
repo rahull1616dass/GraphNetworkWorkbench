@@ -206,20 +206,26 @@
         <div class="hiddenLayers">
             <li>Add/Delete Hidden Layers</li>
           <li>
-            {#each hiddenLayers as hiddenLayer}
+            {#each hiddenLayers as hiddenLayer, index}
               <div class:checked={hiddenLayer.checked}>
+                <label for="hiddenLayer">Hidden Layer { index + 1}</label>
                 <input type="checkbox" bind:checked={hiddenLayer.checked} />
 
                 <input
                   type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
+                  min=1
+                  max=20
+                  step=1
                   class="slider"
                   bind:value={hiddenLayer.size}
                 />
+                {hiddenLayer.size}
               </div>
             {/each}
+
+            <div class="hiddenLayerButtons">
+
+            
 
             <CustomButton
               type={"secondary"}
@@ -232,8 +238,12 @@
               inverse={false}
               on:click={() => clear()}>Delete Selected Layer</CustomButton
             >
+        </div>
           </li>
         </div>
+
+        <hr
+        />
 
         <div class="createTask">
           <CustomButton
@@ -260,20 +270,25 @@
 </div>
 
 <style lang="scss">
+    .hiddenLayerButtons {
+        display: flex;
+        justify-content: space-between;
+        //flex-direction: row;
+        margin-top: 5%;
+    }
+    .hiddenLayers {
+        //display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 2%;
+        
+    }
   .newExperiment {
     display: flex;
     justify-content: center;
     margin-top: 1%;
   }
   .tooltip {
-    // position: flex;
-    // top: 55%;
-    // left: 30%;
-    // transform: translateX(-10%);
-    // padding: 1px;
-    // background-color: white;
-    // border: 1px solid gray;
-    // border-radius: 5px;
     z-index: 1;
   }
   .background {
@@ -404,6 +419,6 @@
   .createTask {
     display: block;
     margin-bottom: 8%;
-    padding-top: 55%;
+    padding-top: 5%;
   }
 </style>
