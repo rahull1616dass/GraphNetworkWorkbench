@@ -4,10 +4,10 @@
   import MiserablesData from "../../../../data/MiserablesVisSpec"
   import VisSpec from "../../../../data/VisSpec"
   import { default as vegaEmbed } from "vega-embed"
+  import { updateVisSpec } from "../../../../helper/VisSpecUtil"
   import {
     networksList,
     selectedNetworkIndex,
-    selectedMenuItem,
   } from "../../../../stores"
   import { ModalData } from "../../../../definitions/modalData"
   import { HoverData } from "../../../../definitions/hoverData"
@@ -16,24 +16,24 @@
   import Hover from "./Hover.svelte"
   import statsIcon from "../../../../assets/stats.svg"
   import { HoverType } from "../../../../definitions/hoverType"
-  import { MenuItem } from "../../../../definitions/menuItem"
   import { Toggle, Modal } from "carbon-components-svelte"
-  import CustomModal from "../../../common/CustomModal.svelte"
   import CustomButton from "../../../common/CustomButton.svelte"
-  import { toCSVFile } from "../../AddNetwork/UploadNetwork/networkParser"
+  import { toCSVFile } from "../../../../helper/networkParser"
   import { uploadNetworkToStorage } from "../../../../api/firebase"
   import type { Network } from "../../../../definitions/network"
   import { UploadedFileType } from "../../../../definitions/uploadedFileType"
-  import UploadNetwork from "../../AddNetwork/UploadNetwork/UploadNetwork.svelte"
   import { ProgressBar } from "carbon-components-svelte"
   import { ProgressBarData } from "../../../../definitions/progressBarData"
+
   //import JSON from "json-strictify"
   import cloneDeep from "lodash.clonedeep"
 
-  function loadNetwork(isNodeUpdate: boolean) {
-    if (isNodeUpdate) {
+  function loadNetwork(isItemUpdated: boolean) {
+    if (isItemUpdated) {
       loadNetworkValues(currentNetwork)
     } else {
+
+      // No item in the Plot is updated by the user, reload the plot without updating VisSpec
       if ($networksList && $networksList.length > 0) {
         console.log("changing to ", $selectedNetworkIndex)
         /*
@@ -48,42 +48,7 @@
   }
 
   function loadNetworkValues(network: Network) {
-    /*
-    There was a nasty bug with the previous network's data still being visible in the new network,
-    whenever the network was updated (for instance the links would stay in their previous positions
-    thus not being connected to any of its nodes which already changed positions). 
-    This was because the visualization related data was not being reset. Tried several things to fix this, including
-    using vega's own functions such as view.data() and view.change() with changeSet but none of them worked.
-    Hence this slightly hacky solution. 
-    Once vegaEmbed generates a visualization, it attaches some extra data to the network object
-    such as the position of the nodes and links.
-    This data is not present in the network object when the network is first loaded.
-    Therefore by checking if one of the properties is present, we can determine if the network has been generated before.
-    This resets the previous data and allows them to be re-generated according to the updated data.
-    */
-    // @ts-ignore
-    if (network.links[0].source.datum !== undefined) {
-      VisSpec.data[0].values = network.nodes.map((node) => {
-        return {
-          name: node.name,
-          group: node.group,
-          index: node.index,
-        }
-      })
-      VisSpec.data[1].values = network.links.map((link) => {
-        return {
-          // @ts-ignore
-          source: link.source.index,
-          // @ts-ignore
-          target: link.target.index,
-          value: link.value,
-        }
-      })
-    } else {
-      VisSpec.data[0].values = network.nodes
-      VisSpec.data[1].values = network.links
-    }
-
+    updateVisSpec(network, VisSpec)
     createVegaEmbed(VisSpec)
   }
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { GraphFormatConverter } from "graph-format-converter"
   import { XMLParser } from "fast-xml-parser"
-  import { parseNetwork } from "./networkParser"
+  import { parseNetwork } from "../../../../helper/networkParser"
   import type ParseResult from "papaparse"
   import type { Node, Link } from "../../../../definitions/network"
   import { Network } from "../../../../definitions/network"

@@ -1,7 +1,7 @@
-import { FileExtension } from "../../../../definitions/fileExtension"
+import { FileExtension } from "../definitions/fileExtension"
 import Papa from "papaparse"
 import type ParseResult from "papaparse"
-import { UploadedFileType } from "../../../../definitions/uploadedFileType"
+import { UploadedFileType } from "../definitions/uploadedFileType"
 
 export async function parseNetwork(file: File): Promise<ParseResult> {
   let fileExtension: string = file.name.split(".").pop()
