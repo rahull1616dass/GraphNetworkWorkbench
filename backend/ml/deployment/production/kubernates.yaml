@@ -69,11 +69,9 @@ spec:
       containers:
       - resources:
           limits:
-            nvidia.com/gpu: "1"
             cpu: "4"
             memory: "8Gi"
           requests:
-            nvidia.com/gpu: "1"
             cpu: "4"
             memory: "8Gi"
         name: graph-learning-workbench
@@ -88,7 +86,7 @@ spec:
             value: "rabbitmq-service"
           - name: RABBITMQ_PORT
             value: "5672"
-        command: ["uvicorn", "app:create_app", "--factory"]
+        command: ["uvicorn", "app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
         ports:
         - name: http
           containerPort: 8000
