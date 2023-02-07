@@ -3,8 +3,6 @@ import VisSpec from "../data/VisSpec"
 import type { VisualizationSpec } from "vega-embed"
 import type { Network } from "../definitions/network"
 
-
-
 export function updateVisSpec(
   network: Network,
   visSpec: VisualizationSpec
@@ -49,14 +47,22 @@ export function updateVisSpec(
   return visSpec
 }
 
-
-
-export function setColorKey(visSpec: VisualizationSpec, colorKey: string){
+export function setColorKey(
+  visSpec: VisualizationSpec,
+  colorKey: string,
+  colorPalette: string[] = undefined
+): VisualizationSpec {
   /*
   Set what key to use for coloring the nodes.
   */
 
   // @ts-ignore
   visSpec.scales[0].domain.field = colorKey
+  if (colorPalette !== undefined) {
+    // @ts-ignore
+    visSpec.scales[0].range = colorPalette
+  }
+  // @ts-ignore
+  visSpec.marks[0].encode.enter.fill.field = colorKey
   return visSpec
 }
