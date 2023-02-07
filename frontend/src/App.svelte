@@ -10,7 +10,6 @@
   import Reports from "./components/pages/Workbench/Reports.svelte"
   import FromWeb from "./components/pages/AddNetwork/FromWeb.svelte"
   import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte"
-  import Header from "./components/common/Header.svelte"
   import Footer from "./components/common/Footer.svelte"
   import Tabs from "./components/common/Tabs.svelte"
   import CustomModal from "./components/common/CustomModal.svelte"
