@@ -26,9 +26,18 @@ start [redis](https://redis.io/) and [rabbitmq](https://www.rabbitmq.com/)
 docker-compose -f deployment/development/docker-compose.yaml up -d
 ```
 
+Add environmental variables to the `.env` file in the root of this project
+
+```shell
+REDIS_HOST=localhost
+REDIS_PORT=6379
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+```
+
 start task manager workers
 ```shell
-celery -A task_manager_queue.tasks worker
+celery -A task_manager.tasks worker
 ```
 
 start the web application
