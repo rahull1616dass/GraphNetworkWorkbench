@@ -1,7 +1,8 @@
 import asyncio
+
 from celery import chain
 
-from task_manager_queue.tasks import (
+from task_manager.tasks import (
     convert_task,
     download_task,
     edge_prediction_task,
