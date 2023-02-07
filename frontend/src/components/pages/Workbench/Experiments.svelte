@@ -26,6 +26,7 @@
   let epochs:number = 100;
   let learningRate: number = 0.01;
   let hiddenLayers = [{ first: true, checked: false, size: 10 }];
+  $: hiddenLayerSizes = hiddenLayers.map(layer => layer.size);
 
 
   function startNewExperiment() {
@@ -44,7 +45,7 @@
   );
 
   function add() {
-    hiddenLayers = hiddenLayers.concat({ first: false, checked: false, size: 1 });
+    hiddenLayers = hiddenLayers.concat({ first: false, checked: false, size: 10 });
   }
 
   function clear() {
@@ -56,7 +57,9 @@
       undefined, // This will be set by the backend
       TaskType.NODE_CLASSIFICATION,
       trainPercentage,
-      epochs
+      epochs,
+      learningRate,
+      hiddenLayerSizes
     );
     const networkId = $networksList[$selectedNetworkIndex].metadata.id;
     await getExperimentTasks(networkId)
@@ -195,9 +198,9 @@
           </li>
         </div>
 
-        <div class="hiddenLayers">
+        <div >
             <li>Add/Delete Hidden Layers</li>
-          <li>
+          <li class="hiddenLayers">
             {#each hiddenLayers as hiddenLayer, index}
               <div class:checked={hiddenLayer.checked}>
                 <label for="hiddenLayer">Hidden Layer { index + 1}</label>
@@ -268,11 +271,11 @@
         font-size: small;
     }
     .hiddenLayers {
-        //display: flex;
         flex-direction: row;
         align-items: center;
-        padding: 1%;
-        
+        margin-left: 10%;
+        margin-right: 10%;
+        margin-top: 1%;
     }
   .newExperiment {
     display: flex;
