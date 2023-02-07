@@ -1,6 +1,60 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
+  name: celery-worker
+  namespace: studtarasov
+  annotations:
+    description: "Deployment of the graph learning workbench"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: celery-worker
+    spec:
+      containers:
+      - resources:
+          limits:
+            nvidia.com/gpu: "1"
+            cpu: "4"
+            memory: "8Gi"
+          requests:
+            nvidia.com/gpu: "1"
+            cpu: "4"
+            memory: "8Gi"
+        name: celery-worker
+        image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
+        imagePullPolicy: "Always"
+        env:
+          - name: REDIS_HOST
+            value: "redis-master"
+          - name: REDIS_PORT
+            value: "6379"
+          - name: RABBITMQ_HOST
+            value: "rabbitmq-service"
+          - name: RABBITMQ_PORT
+            value: "5672"
+        command: ["celery", "-A", "task_manager.tasks", "worker"]
+        volumeMounts:
+          - mountPath: /workspace
+            name: project-code-for-celery
+      priorityClassName: "research-high"
+      imagePullSecrets:
+      - name: lsx-registry
+      restartPolicy: "Always"
+      volumes:
+        - name: project-code-for-celery
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studtarasov
+            path: "/home/stud/tarasov/xtai_lab3/application"
+            secretRef:
+              name: ceph-secret
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
   name: graph-learning-workbench
   namespace: studtarasov
   annotations:
@@ -25,16 +79,16 @@ spec:
         name: graph-learning-workbench
         image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
         imagePullPolicy: "Always"
-        command: ["celery", "-A", "task_manager.tasks", "worker"]
         env:
           - name: REDIS_HOST
-            value: redis-master
+            value: "redis-master"
           - name: REDIS_PORT
-            value: 6379
+            value: "6379"
           - name: RABBITMQ_HOST
-            value: rabbitmq-service
+            value: "rabbitmq-service"
           - name: RABBITMQ_PORT
-            value: 5672
+            value: "5672"
+        command: ["uvicorn", "app:create_app", "--factory"]
         ports:
         - name: http
           containerPort: 9000
