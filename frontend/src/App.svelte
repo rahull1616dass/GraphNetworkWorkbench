@@ -13,6 +13,7 @@
   import Header from "./components/common/Header.svelte"
   import Footer from "./components/common/Footer.svelte"
   import Tabs from "./components/common/Tabs.svelte"
+  import Test from "./components/pages/Test.svelte"
   import CustomModal from "./components/common/CustomModal.svelte"
   import Networks from "./components/pages/Workbench/Networks.svelte"
   import {
@@ -116,6 +117,8 @@
       <FromWeb />
       {:else if $selectedMenuItem === MenuItem.FROM_PC}
       <UploadNetwork />
+      {:else if $selectedMenuItem === MenuItem.TEST}
+      <Test />
       {/if}
     </ul>
     {:else if isLoggedIn === false}

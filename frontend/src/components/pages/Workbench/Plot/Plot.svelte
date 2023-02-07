@@ -4,7 +4,7 @@
   import MiserablesData from "../../../../data/MiserablesVisSpec"
   import VisSpec from "../../../../data/VisSpec"
   import { default as vegaEmbed } from "vega-embed"
-  import { updateVisSpec } from "../../../../helper/VisSpecUtil"
+  import { updateVisSpec } from "../../../../util/visSpecUtil"
   import {
     networksList,
     selectedNetworkIndex,
@@ -18,7 +18,7 @@
   import { HoverType } from "../../../../definitions/hoverType"
   import { Toggle, Modal } from "carbon-components-svelte"
   import CustomButton from "../../../common/CustomButton.svelte"
-  import { toCSVFile } from "../../../../helper/networkParser"
+  import { toCSVFile } from "../../../../util/networkParserUtil"
   import { uploadNetworkToStorage } from "../../../../api/firebase"
   import type { Network } from "../../../../definitions/network"
   import { UploadedFileType } from "../../../../definitions/uploadedFileType"

@@ -1,10 +1,9 @@
 <script lang="ts">
   import { GraphFormatConverter } from "graph-format-converter"
   import { XMLParser } from "fast-xml-parser"
-  import { parseNetwork } from "../../../../helper/networkParser"
+  import { parseNetwork, toCSVFile } from "../../../../util/networkParserUtil"
   import type ParseResult from "papaparse"
-  import type { Node, Link } from "../../../../definitions/network"
-  import { Network } from "../../../../definitions/network"
+  import { Network, Node, Link } from "../../../../definitions/network"
   import { ModalData } from "../../../../definitions/modalData"
   import { MenuItem } from "../../../../definitions/menuItem"
   import {
@@ -199,10 +198,27 @@
 
   async function uploadNetworkToFirebaseStorage() {
     progressBarData.text = "Saving network to the cloud..."
+    /*
+    Why create the CSV file from scratch using the newNetwork object, rather than simply
+    uploading the files that the user uploaded? 
+    This is because the user may have uploaded a file that has extra 
+    columns that are not part of the network. We want to remove these
+    extra columns before uploading the network to Firebase Storage. Or it could be that the
+    index was missing and it was added by the client. In these cases, the user's file
+    is not the same as the network that we want to upload.
+    */
     await uploadNetworkToStorage(
       newNetwork.metadata,
-      nodeFiles[0],
-      edgeFiles[0]
+      toCSVFile(
+        UploadedFileType.NODE_FILE,
+        Object.keys(new Node()),
+        newNetwork.nodes
+      ),
+      toCSVFile(
+        UploadedFileType.EDGE_FILE,
+        Object.keys(new Link()),
+        newNetwork.links
+      )
     )
       .then((url) => {
         console.log(`Network uploaded to ${url}`)
@@ -237,32 +253,29 @@
       <Accordion>
         <AccordionItem title="File Format Guide">
           Currently, only csv files are supported. It is required that the
-          network consists of two files: <br> - nodes.csv <br>
-          - edges.csv <br>
-          Each file has
-          to have a header row which contains the column names. There are
-          special column names, that may be required or may have a special
-          function assigned to them (see below). Other than that, the user is
-          free to add any number of additional columns with arbitrary names that
-          will function as node or edge features depending on the file. <br> <br>
-          The
-          nodes.csv file must contain either 'name' or 'index', or both. If the
-          nodes are not named, then the user must provide at least the index
-          column where each row is assigned a unique index from 0 to n-1 where n
-          is the number of nodes. If the name column is present, then the index
-          column is optional as this can be automatically generated from each
-          row's position. 'name' is a special column and if present, it will be
-          shown as the node's name in the Visualize page when the node is
-          hovered on. <br> 'group' is another special column that can be used to
-          assign a group to each node. Visualize page will then color the nodes
-          according to their group. <br> <br> The edges.csv file must contain the 'source'
-          and 'target' columns that specify which nodes the edge connects to.
-          Currently only undirected edges are supported in the Visualize Page,
-          although the specific ordering can be relevant for the machine
-          learning algorithms that run on the network. Note that 'source' and
-          'target' must be integers that correspond to the indices of nodes as
-          either explicitly specified in the nodes.csv file or automatically
-          generated from the nodes.csv file.
+          network consists of two files: <br /> - nodes.csv <br />
+          - edges.csv <br />
+          Each file has to have a header row which contains the column names. There
+          are special column names, that may be required or may have a special function
+          assigned to them (see below). Other than that, the user is free to add
+          any number of additional columns with arbitrary names that will function
+          as node or edge features depending on the file. <br /> <br />
+          The nodes.csv file must contain either 'name' or 'index', or both. If the
+          nodes are not named, then the user must provide at least the index column
+          where each row is assigned a unique index from 0 to n-1 where n is the
+          number of nodes. If the name column is present, then the index column is
+          optional as this can be automatically generated from each row's position.
+          'name' is a special column and if present, it will be shown as the node's
+          name in the Visualize page when the node is hovered on. <br /> 'group'
+          is another special column that can be used to assign a group to each
+          node. Visualize page will then color the nodes according to their
+          group. <br /> <br /> The edges.csv file must contain the 'source' and 'target'
+          columns that specify which nodes the edge connects to. Currently only undirected
+          edges are supported in the Visualize Page, although the specific ordering
+          can be relevant for the machine learning algorithms that run on the network.
+          Note that 'source' and 'target' must be integers that correspond to the
+          indices of nodes as either explicitly specified in the nodes.csv file or
+          automatically generated from the nodes.csv file.
         </AccordionItem>
       </Accordion>
     </div>

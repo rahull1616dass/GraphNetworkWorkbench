@@ -7,7 +7,7 @@
   import { Accordion } from "carbon-components-svelte"
   import request from "../../../api/request"
   import decompressResponse from "decompress-response"
-  import { parseReadableStream } from "../../../helper/networkParser"
+  import { parseReadableStream } from "../../../util/networkParserUtil"
   import { parse } from "vega"
   import { selectedMenuItem } from "../../../stores"
   import { MenuItem } from "../../../definitions/menuItem"

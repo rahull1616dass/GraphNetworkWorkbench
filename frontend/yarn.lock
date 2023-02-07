@@ -3812,6 +3812,11 @@ scss-tokenizer@^0.4.3:
     js-base64 "^2.4.9"
     source-map "^0.7.3"
 
+seedrandom@^2.4.4:
+  version "2.4.4"
+  resolved "https://registry.yarnpkg.com/seedrandom/-/seedrandom-2.4.4.tgz#b25ea98632c73e45f58b77cfaa931678df01f9ba"
+  integrity sha512-9A+PDmgm+2du77B5i0Ip2cxOqqHjgNxnBgglxLcX78A2D6c2rTo61z4jnVABpF4cKeDMDG+cmXXvdnqse2VqMA==
+
 selenium-webdriver@4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.5.0.tgz#7e20d0fc038177970dad81159950c12f7411ac0d"
@@ -4172,6 +4177,13 @@ tr46@~0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
+
+train-test-split@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/train-test-split/-/train-test-split-1.0.0.tgz#a40bc24a292c64e6b21c9a4d80560313b6e76e3d"
+  integrity sha512-Ycp9KDjKj70Bv58DP6cChWKSkkL12eSgakDuuR8IsEcgfClD3HfZO8gCT7voihL7PcjELdDjldzInX4xHLkMQw==
+  dependencies:
+    seedrandom "^2.4.4"
 
 trim-newlines@^3.0.0:
   version "3.0.1"

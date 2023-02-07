@@ -52,6 +52,7 @@ async function parseCSV(file: File): Promise<ParseResult> {
   return await new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
+      skipEmptyLines: true,
       dynamicTyping: true,
       complete: (results) => {
         // Log the results of PapaParse

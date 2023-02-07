@@ -22,13 +22,15 @@ export function updateVisSpec(
     Therefore by checking if one of the properties is present, we can determine if the network has been generated before.
     This resets the previous data and allows them to be re-generated according to the updated data.
     */
+  console.log("what do i do ", network.links[1].source.datum !== undefined)
   // @ts-ignore
-  if (network.links[0].source.datum !== undefined) {
+  if (network.links[1].source.datum !== undefined) {
     visSpec.data[0].values = network.nodes.map((node) => {
       return {
         name: node.name,
         group: node.group,
         index: node.index,
+        is_train: node.is_train,
       }
     })
     visSpec.data[1].values = network.links.map((link) => {

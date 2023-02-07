@@ -31,7 +31,7 @@ import { metadataConverter, tasksConverter } from "./firebase_converters"
 import {
   blobToFile,
   parseNetwork,
-} from "../helper/networkParser"
+} from "../util/networkParserUtil"
 import type { Task } from "../definitions/task"
 
 export const app: FirebaseApp = initializeApp(firebaseConfig)

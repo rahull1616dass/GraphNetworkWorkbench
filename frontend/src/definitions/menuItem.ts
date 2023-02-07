@@ -9,5 +9,6 @@ export enum MenuItem {
     PROFILE = 'Profile',
     NONE = 'None',
     FROM_WEB = 'From Web',
-    FROM_PC = 'From PC'
+    FROM_PC = 'From PC',
+    TEST = 'Test',
 }
