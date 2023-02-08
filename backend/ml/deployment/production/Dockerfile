@@ -12,9 +12,4 @@ RUN pip install --upgrade pip setuptools
 COPY ./requirements.yaml ./requirements.yaml
 RUN conda env update --file ./requirements.yaml --name base
 
-RUN groupadd -r app &&\
-    useradd -r -g app -d /home/app -s /sbin/nologin -c "Docker image user" app
-
-RUN chown app /workspace
-RUN chgrp app /workspace
-USER app
+ENV C_FORCE_ROOT=true
