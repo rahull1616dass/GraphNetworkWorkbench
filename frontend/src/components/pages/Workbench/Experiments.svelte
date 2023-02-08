@@ -10,7 +10,7 @@
     networksList,
     selectedNetworkIndex,
     selectedModelType,
-    selectedTaskType
+    selectedTaskType,
   } from "../../../stores";
   import { fade, slide, scale } from "svelte/transition";
   import Plot from "./Plot/Plot.svelte";
@@ -24,17 +24,15 @@
   let unique = {}; // every {} is unique, {} === {} evaluates to false
 
   // These values should be set by UI Elements later on
-  let trainPercentage:number = 0.8;
-  let epochs:number = 100;
+  let trainPercentage: number = 0.8;
+  let epochs: number = 100;
   let learningRate: number = 0.01;
   let hiddenLayers = [{ first: true, checked: false, size: 10 }];
-  $: hiddenLayerSizes = hiddenLayers.map(layer => layer.size);
-  
+  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
 
   function openModal() {
-    return
+    return;
   }
-
 
   function startNewExperiment() {
     $selectedNetworkIndex = undefined;
@@ -52,29 +50,31 @@
   );
 
   function add() {
-    hiddenLayers = hiddenLayers.concat({ first: false, checked: false, size: 10 });
+    hiddenLayers = hiddenLayers.concat({
+      first: false,
+      checked: false,
+      size: 10,
+    });
   }
 
   function clear() {
-    hiddenLayers = hiddenLayers.filter((t) => (!t.checked || t.first) );
+    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first);
   }
 
-  function handleSelectedNetwork (index: number) {
+  function handleSelectedNetwork(index: number) {
     if (typeof index !== "number") {
-      return
+      return;
     }
-    selectedNetworkIndex.update(index => index);
-    return
+    selectedNetworkIndex.update((index) => index);
+    return;
   }
 
-  function handleSelectedModel (model: MLModelType) {
-
-    
-    selectedModelType.update(model => model);
-    return
+  function handleSelectedModel(model: MLModelType) {
+    selectedModelType.update((model) => model);
+    return;
   }
 
-  console.log("Selected model", $selectedModelType)
+  console.log("Selected model", $selectedModelType);
 
   async function createTask() {
     const taskToBeCreated = new Task(
@@ -108,7 +108,7 @@
   ];
   let taskTypes: TaskType[] = [
     TaskType.NODE_CLASSIFICATION,
-    TaskType.EDGE_CLASSIFICATION
+    TaskType.EDGE_CLASSIFICATION,
   ];
 
   async function setTaskDocument(
@@ -145,7 +145,11 @@
     <div>
       <li class="Model">
         <div>
-          <select class="selectModel" bind:value={networkIndex} on:click={() => $selectedNetworkIndex = networkIndex} >
+          <select
+            class="selectModel"
+            bind:value={networkIndex}
+            on:click={() => ($selectedNetworkIndex = networkIndex)}
+          >
             {#if placeholderNetwork}
               <option>{placeholderNetwork}</option>
             {/if}
@@ -153,7 +157,7 @@
               <option
                 class="optionDropdown"
                 value={networkIndex}
-                on:click={() => $selectedNetworkIndex = networkIndex}
+                on:click={() => ($selectedNetworkIndex = networkIndex)}
               >
                 {network.metadata.name} --- Nodes: {network.nodes.length} , Edges:
                 {network.links.length}
@@ -163,24 +167,32 @@
         </div>
 
         <div>
-            <select class="selectModel" bind:value={task} on:click={() => $selectedTaskType = task}>
-              {#if placeholderModel}
-                <option>{placeholderTask}</option>
-              {/if}
-              {#each taskTypes as task, _}
-                <option
-                  class="optionDropdown"
-                  value={task}
-                  on:click={() => ($selectedTaskType = task)}
-                >
-                  {task}
-                </option>
-              {/each}
-            </select>
-          </div>
+          <select
+            class="selectModel"
+            bind:value={task}
+            on:click={() => ($selectedTaskType = task)}
+          >
+            {#if placeholderModel}
+              <option>{placeholderTask}</option>
+            {/if}
+            {#each taskTypes as task, _}
+              <option
+                class="optionDropdown"
+                value={task}
+                on:click={() => ($selectedTaskType = task)}
+              >
+                {task}
+              </option>
+            {/each}
+          </select>
+        </div>
 
         <div>
-          <select class="selectModel" bind:value={model} on:click={() => $selectedModelType = model}>
+          <select
+            class="selectModel"
+            bind:value={model}
+            on:click={() => ($selectedModelType = model)}
+          >
             {#if placeholderModel}
               <option>{placeholderModel}</option>
             {/if}
@@ -195,8 +207,6 @@
             {/each}
           </select>
         </div>
-
-
 
         <hr />
 
@@ -243,31 +253,30 @@
             />
             {trainPercentage}
             <div class="customizeButton">
-
-            
-            {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
-            <CustomButton
-            type={"secondary"}
-            inverse={false}
-            on:click={() => openModal()}>Customize</CustomButton>
-            {/if}
-        </div>
+              {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+                <CustomButton
+                  type={"secondary"}
+                  inverse={false}
+                  on:click={() => openModal()}>Customize</CustomButton
+                >
+              {/if}
+            </div>
           </li>
         </div>
 
-        <div >
-            <li>Add/Delete Hidden Layers</li>
+        <div>
+          <li>Add/Delete Hidden Layers</li>
           <li class="hiddenLayers">
             {#each hiddenLayers as hiddenLayer, index}
               <div class:checked={hiddenLayer.checked}>
-                <label for="hiddenLayer">Hidden Layer { index + 1}</label>
+                <label for="hiddenLayer">Hidden Layer {index + 1}</label>
                 <input type="checkbox" bind:checked={hiddenLayer.checked} />
 
                 <input
                   type="range"
-                  min=1
-                  max=20
-                  step=1
+                  min="1"
+                  max="20"
+                  step="1"
                   class="slider"
                   bind:value={hiddenLayer.size}
                 />
@@ -276,27 +285,23 @@
             {/each}
 
             <div class="hiddenLayerButtons">
+              <CustomButton
+                type={"secondary"}
+                inverse={false}
+                on:click={() => add()}>Add New Layer</CustomButton
+              >
 
-            
-
-            <CustomButton
-              type={"secondary"}
-              inverse={false}
-              on:click={() => add()}>Add New Layer</CustomButton
-            >
-
-             -     
-            <CustomButton
-              type={"delete"}
-              inverse={false}
-              on:click={() => clear()}>Delete Selected Layer</CustomButton
-            >
-        </div>
+              -
+              <CustomButton
+                type={"delete"}
+                inverse={false}
+                on:click={() => clear()}>Delete Selected Layer</CustomButton
+              >
+            </div>
           </li>
         </div>
 
-        <hr
-        />
+        <hr />
 
         <div class="createTask">
           <CustomButton
@@ -305,7 +310,7 @@
             disabled={epochs === 0 ||
               learningRate === 0.0 ||
               trainPercentage === 0 ||
-              trainPercentage === 1 }
+              trainPercentage === 1}
             on:click={() => createTask()}>Create Task</CustomButton
           >
         </div>
@@ -322,27 +327,27 @@
 </div>
 
 <style lang="scss">
-    .customizeButton {
-        display: flex;
-        justify-content: center;
-        margin-top: 5%;
-        font-size: small;
-    }
-    .hiddenLayerButtons {
-        display: flex;
-        justify-content: center;
-        //flex-direction: row;
-        margin-top: 5%;
-        margin-bottom: 5%;
-        font-size: small;
-    }
-    .hiddenLayers {
-        flex-direction: row;
-        align-items: center;
-        margin-left: 25%;
-        margin-right: 20%;
-        margin-top: 1%;
-    }
+  .customizeButton {
+    display: flex;
+    justify-content: center;
+    margin-top: 5%;
+    font-size: small;
+  }
+  .hiddenLayerButtons {
+    display: flex;
+    justify-content: center;
+    //flex-direction: row;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    font-size: small;
+  }
+  .hiddenLayers {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 25%;
+    margin-right: 20%;
+    margin-top: 1%;
+  }
   .newExperiment {
     display: flex;
     justify-content: center;
