@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv
 
-from core.typing import MLTask
+from core.types import MLTask
 from core.logging_helpers import timeit
 
 

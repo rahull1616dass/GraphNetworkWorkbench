@@ -8,7 +8,7 @@ from task_manager.tasks import (
     edge_prediction_task,
     node_classification_task
 )
-from core.typing import MLTask
+from core.types import MLTask
 from core.logging_helpers import get_logger
 
 logger = get_logger(__name__)

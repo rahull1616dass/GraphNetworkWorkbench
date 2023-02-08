@@ -2,7 +2,7 @@ from requests import get as http_get
 from pandas import DataFrame, read_csv
 from requests import Response as RequestsResponse
 
-from core.typing import MLTask
+from core.types import MLTask
 from core.logging_helpers import timeit
 
 

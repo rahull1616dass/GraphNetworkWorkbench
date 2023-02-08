@@ -6,7 +6,7 @@ import pandas as pd
 from math import ceil
 from torch_geometric.data import Data as TorchGeoData
 
-from core.typing import MLTask
+from core.types import MLTask
 from core.logging_helpers import timeit
 
 

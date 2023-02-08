@@ -9,7 +9,7 @@ import torch_geometric.transforms as T
 from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import negative_sampling
 
-from core.typing import MLTask
+from core.types import MLTask
 from core.logging_helpers import timeit
 
 
@@ -38,11 +38,11 @@ class LinkPredictor:
         self.criterion = BCEWithLogitsLoss()
 
     def train(self, train_data: Data, val_data: Data, epochs: int = 100):
-        loss, test_acc = [], []
+        loss, val_acc = [], []
         for _ in tqdm(range(1, epochs + 1), desc="Training epochs"):
             loss += [self.__train_iter(train_data)]
-            test_acc += [self.test(val_data)]
-        return loss, test_acc
+            val_acc += [self.test(val_data)]
+        return loss, val_acc
 
     def __train_iter(self, train_data: Data):
         self.model.train()
@@ -98,4 +98,5 @@ def predict_edges(data: Data, task: MLTask):
     predictor = LinkPredictor(data.num_features, device, learning_rate=0.001)
     train_loss, val_roc_auc_score = predictor.train(train_data, val_data, epochs=task.epochs)
     test_roc_auc_score = predictor.test(test_data)
-    return train_loss, val_roc_auc_score, test_roc_auc_score
+    predictions = predictor.predict(test_data)
+    return train_loss, val_roc_auc_score, test_roc_auc_score, predictions.tolist()
