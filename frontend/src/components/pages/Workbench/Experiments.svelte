@@ -10,15 +10,17 @@
     networksList,
     selectedNetworkIndex,
     selectedModelType,
+    selectedTaskType
   } from "../../../stores";
   import { fade, slide, scale } from "svelte/transition";
   import Plot from "./Plot/Plot.svelte";
-  import { forEach } from "vega-lite/build/src/encoding";
-  import { each } from "svelte/internal";
 
   export let networkIndex: number = undefined;
+  export let task: TaskType;
+  export let model: MLModelType;
   let placeholderNetwork: string = "Select a network";
   let placeholderModel: string = "Select a model";
+  let placeholderTask: string = "Select a task";
   let unique = {}; // every {} is unique, {} === {} evaluates to false
 
   // These values should be set by UI Elements later on
@@ -27,6 +29,11 @@
   let learningRate: number = 0.01;
   let hiddenLayers = [{ first: true, checked: false, size: 10 }];
   $: hiddenLayerSizes = hiddenLayers.map(layer => layer.size);
+  
+
+  function openModal() {
+    return
+  }
 
 
   function startNewExperiment() {
@@ -51,6 +58,23 @@
   function clear() {
     hiddenLayers = hiddenLayers.filter((t) => (!t.checked || t.first) );
   }
+
+  function handleSelectedNetwork (index: number) {
+    if (typeof index !== "number") {
+      return
+    }
+    selectedNetworkIndex.update(index => index);
+    return
+  }
+
+  function handleSelectedModel (model: MLModelType) {
+
+    
+    selectedModelType.update(model => model);
+    return
+  }
+
+  console.log("Selected model", $selectedModelType)
 
   async function createTask() {
     const taskToBeCreated = new Task(
@@ -81,6 +105,10 @@
     MLModelType.GCN,
     MLModelType.DeepWalk,
     MLModelType.GIN,
+  ];
+  let taskTypes: TaskType[] = [
+    TaskType.NODE_CLASSIFICATION,
+    TaskType.EDGE_CLASSIFICATION
   ];
 
   async function setTaskDocument(
@@ -117,7 +145,7 @@
     <div>
       <li class="Model">
         <div>
-          <select class="selectModel" bind:value={networkIndex}>
+          <select class="selectModel" bind:value={networkIndex} on:click={() => $selectedNetworkIndex = networkIndex} >
             {#if placeholderNetwork}
               <option>{placeholderNetwork}</option>
             {/if}
@@ -125,7 +153,7 @@
               <option
                 class="optionDropdown"
                 value={networkIndex}
-                on:click={() => ($selectedNetworkIndex = networkIndex)}
+                on:click={() => $selectedNetworkIndex = networkIndex}
               >
                 {network.metadata.name} --- Nodes: {network.nodes.length} , Edges:
                 {network.links.length}
@@ -135,11 +163,28 @@
         </div>
 
         <div>
-          <select class="selectModel">
+            <select class="selectModel" bind:value={task} on:click={() => $selectedTaskType = task}>
+              {#if placeholderModel}
+                <option>{placeholderTask}</option>
+              {/if}
+              {#each taskTypes as task, _}
+                <option
+                  class="optionDropdown"
+                  value={task}
+                  on:click={() => ($selectedTaskType = task)}
+                >
+                  {task}
+                </option>
+              {/each}
+            </select>
+          </div>
+
+        <div>
+          <select class="selectModel" bind:value={model} on:click={() => $selectedModelType = model}>
             {#if placeholderModel}
               <option>{placeholderModel}</option>
             {/if}
-            {#each modelTypes as model}
+            {#each modelTypes as model, _}
               <option
                 class="optionDropdown"
                 value={model}
@@ -150,6 +195,8 @@
             {/each}
           </select>
         </div>
+
+
 
         <hr />
 
@@ -195,6 +242,16 @@
               class="slider"
             />
             {trainPercentage}
+            <div class="customizeButton">
+
+            
+            {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+            <CustomButton
+            type={"secondary"}
+            inverse={false}
+            on:click={() => openModal()}>Customize</CustomButton>
+            {/if}
+        </div>
           </li>
         </div>
 
@@ -252,6 +309,9 @@
             on:click={() => createTask()}>Create Task</CustomButton
           >
         </div>
+        {$selectedNetworkIndex}
+        {$selectedTaskType}
+        {$selectedModelType}
       </li>
 
       <li class="Modal" />
@@ -262,6 +322,12 @@
 </div>
 
 <style lang="scss">
+    .customizeButton {
+        display: flex;
+        justify-content: center;
+        margin-top: 5%;
+        font-size: small;
+    }
     .hiddenLayerButtons {
         display: flex;
         justify-content: center;
@@ -273,8 +339,8 @@
     .hiddenLayers {
         flex-direction: row;
         align-items: center;
-        margin-left: 10%;
-        margin-right: 10%;
+        margin-left: 25%;
+        margin-right: 20%;
         margin-top: 1%;
     }
   .newExperiment {
@@ -305,8 +371,8 @@
   }
   .Model {
     position: center;
-    width: 35%;
-    margin-left: 32%;
+    width: 55%;
+    margin-left: 22%;
     margin-top: 1%;
     margin-bottom: 3%;
     border-radius: 15px;
