@@ -1,67 +1,75 @@
 <script lang="ts">
-  import { Dropdown, ProgressBar } from "carbon-components-svelte";
-  import { ProgressBarData } from "../../../definitions/progressBarData";
-  import { Task } from "../../../definitions/task";
-  import { TaskType } from "../../../definitions/taskType";
-  import { setExperimentTask, getExperimentTasks } from "../../../api/firebase";
-  import CustomButton from "../../common/CustomButton.svelte";
-  import { MLModelType } from "../../../definitions/mlModelType";
-  import { MenuItem } from "../../../definitions/menuItem";
+  import { Dropdown, ProgressBar } from "carbon-components-svelte"
+  import { ProgressBarData } from "../../../definitions/progressBarData"
+  import { Task } from "../../../definitions/task"
+  import { TaskType } from "../../../definitions/taskType"
+  import CustomButton from "../../common/CustomButton.svelte"
+  import { MenuItem } from "../../../definitions/menuItem"
+  import NetworkSelector from "../../common/NetworkSelector.svelte"
+  import { setExperimentTask, getExperimentTasks } from "../../../api/firebase"
+  import { MLModelType } from "../../../definitions/mlModelType"
   import {
     networksList,
     selectedNetworkIndex,
     selectedModelType,
     selectedTaskType,
     selectedMenuItem,
-  } from "../../../stores";
-  import { fade, slide, scale } from "svelte/transition";
-  import Plot from "./Plot/Plot.svelte";
-  import CustomModal from "../../common/CustomModal.svelte";
+  } from "../../../stores"
+  import { fade, slide, scale } from "svelte/transition"
 
-  let networkIndex: number = undefined;
-  let task: TaskType;
-  let model: MLModelType;
-  let placeholderNetwork: string = "Select a network";
-  let placeholderModel: string = "Select a model";
-  let placeholderTask: string = "Select a task";
-  let unique = {}; // every {} is unique, {} === {} evaluates to false
+  let networkIndex: number = undefined
+  let task: TaskType
+  let model: MLModelType
+
+  let placeholderTask: string = "Select a task"
+  let unique = {} // every {} is unique, {} === {} evaluates to false
 
   // These values should be set by UI Elements later on
-  let trainPercentage: number = 0.8;
-  let epochs: number = 100;
-  let learningRate: number = 0.01;
-  let seed: number = 42;
-  let hiddenLayers = [{ first: true, checked: false, size: 10 }];
-  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
+  let trainPercentage: number = 0.8
+  let epochs: number = 100
+  let learningRate: number = 0.01
+  let seed: number = 42
+  let hiddenLayers = [{ first: true, checked: false, size: 10 }]
+  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
 
   function randomize() {
-    seed = Math.floor(Math.random() * 10000);
+    seed = Math.floor(Math.random() * 10000)
   }
 
   function openModal() {
-    return;
+    return
   }
 
   function startNewExperiment() {
-    $selectedMenuItem = MenuItem.PLOT;
+    $selectedMenuItem = MenuItem.PLOT
     //$selectedMenuItem = MenuItem.EXPERIMENTS;
+  }
+
+  function handleEpoch(event) {
+    epochs = event.target.value
+  }
+  function handleLearningRate(event) {
+    learningRate = event.target.value
+  }
+  function handleTrainingPercentage(event) {
+    trainPercentage = event.target.value
   }
 
   let progressBarData: ProgressBarData = new ProgressBarData(
     false,
     "Training..."
-  );
+  )
 
   function add() {
     hiddenLayers = hiddenLayers.concat({
       first: false,
       checked: false,
       size: 10,
-    });
+    })
   }
 
   function clear() {
-    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first);
+    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first)
   }
 
   async function createTask() {
@@ -74,32 +82,32 @@
       learningRate,
       hiddenLayerSizes,
       seed
-    );
-    const networkId = $networksList[$selectedNetworkIndex].metadata.id;
+    )
+    const networkId = $networksList[$selectedNetworkIndex].metadata.id
     await getExperimentTasks(networkId)
       .then((tasks) => {
-        console.log("Tasks", tasks);
+        console.log("Tasks", tasks)
         tasks.forEach((task) => {
           if (task.equals(taskToBeCreated)) {
-            console.log("Task already exists");
-            return;
+            console.log("Task already exists")
+            return
           }
-        });
-        setTaskDocument(networkId, taskToBeCreated);
+        })
+        setTaskDocument(networkId, taskToBeCreated)
       })
       .catch((error) => {
-        console.log("Error getting tasks list", error);
-      });
+        console.log("Error getting tasks list", error)
+      })
   }
   let modelTypes: MLModelType[] = [
     MLModelType.GCN,
     MLModelType.DeepWalk,
     MLModelType.GIN,
-  ];
+  ]
   let taskTypes: TaskType[] = [
     TaskType.NODE_CLASSIFICATION,
     TaskType.EDGE_CLASSIFICATION,
-  ];
+  ]
 
   async function setTaskDocument(
     networkId: string,
@@ -108,14 +116,14 @@
     return new Promise((resolve, reject) => {
       setExperimentTask(networkId, taskToBeCreated)
         .then((task) => {
-          console.log("Task created", task);
-          resolve();
+          console.log("Task created", task)
+          resolve()
         })
         .catch((error) => {
-          console.log("Error creating task", error);
-          reject();
-        });
-    });
+          console.log("Error creating task", error)
+          reject()
+        })
+    })
   }
 </script>
 
@@ -128,229 +136,188 @@
       >Start New Experiment
     </CustomButton>
   </div>
+  <div class="background">
+    <NetworkSelector />
 
-  <hr />
+    <hr />
 
-  <div>
-    <li class="Model">
-      <div>
-        <select
-          class="selectModel"
-          bind:value={networkIndex}
-          on:click={() => ($selectedNetworkIndex = networkIndex)}
-        >
-          {#if placeholderNetwork}
-            <option>{placeholderNetwork}</option>
-          {/if}
-          {#each $networksList as network, networkIndex}
-            <option
-              class="optionDropdown"
-              value={networkIndex}
-              on:click={() => ($selectedNetworkIndex = networkIndex)}
-            >
-              {network.metadata.name} --- Nodes: {network.nodes.length} , Edges:
-              {network.links.length}
-            </option>
-          {/each}
-        </select>
-      </div>
+    <div>
+      <li class="Model">
+        <div>
+          <select class="selectModel">
+            {#each modelTypes as model}
+              <option
+                class="optionDropdown"
+                value={model}
+                on:click={() => ($selectedModelType = model)}
+              >
+                {model}
+              </option>
+            {/each}
+          </select>
+        </div>
 
-      <div>
-        <select
-          class="selectModel"
-          bind:value={task}
-          on:click={() => ($selectedTaskType = task)}
-        >
-          {#if placeholderModel}
-            <option>{placeholderTask}</option>
-          {/if}
-          {#each taskTypes as task, _}
-            <option
-              class="optionDropdown"
-              value={task}
-              on:click={() => ($selectedTaskType = task)}
-            >
-              {task}
-            </option>
-          {/each}
-        </select>
-      </div>
+        <hr />
 
-      <div>
-        <select
-          class="selectModel"
-          bind:value={model}
-          on:click={() => ($selectedModelType = model)}
-        >
-          {#if placeholderModel}
-            <option>{placeholderModel}</option>
-          {/if}
-          {#each modelTypes as model, _}
-            <option
-              class="optionDropdown"
-              value={model}
-              on:click={() => ($selectedModelType = model)}
-            >
-              {model}
-            </option>
-          {/each}
-        </select>
-      </div>
+        <div>Configurable Parameters:</div>
 
-      <hr />
+        <div>
+          <li>Epochs</li>
+          <li class="range">
+            <input
+              type="range"
+              bind:value={epochs}
+              min="0"
+              max="1000"
+              step="10"
+              class="slider"
+            />
+            <input type="number" bind:value={epochs} class="inputNumber" />
+          </li>
+        </div>
+        <div>
+          <li>Learning Rate</li>
+          <li class="range">
+            <input
+              type="range"
+              bind:value={learningRate}
+              min="0"
+              max="0.4"
+              step="0.001"
+              class="slider"
+            />
+            <input
+              type="number"
+              bind:value={learningRate}
+              min="0"
+              max="0.4"
+              step="0.001"
+              class="inputNumber"
+            />
+          </li>
+        </div>
+        <div>
+          <li>
+            Training Percentage
 
-      <div>Configurable Parameters:</div>
+            {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+              <CustomButton
+                type={"secondary"}
+                inverse={false}
+                fontsize={8}
+                on:click={() => openModal()}>Customize</CustomButton
+              >
+            {/if}
+          </li>
+        </div>
+        <div>
+          <li>Learning Rate</li>
+          <li class="range">
+            <input
+              type="range"
+              bind:value={trainPercentage}
+              min="0"
+              max="1"
+              step="0.05"
+              class="slider"
+            />
+            <input
+              type="number"
+              bind:value={trainPercentage}
+              min="0"
+              max="1"
+              step="0.05"
+              class="inputNumber"
+            />
+          </li>
+        </div>
 
-      <div>
-        <li>Epochs</li>
-        <li class="range">
-          <input
-            type="range"
-            bind:value={epochs}
-            min="0"
-            max="1000"
-            step="10"
-            class="slider"
-          />
-          <input type="number" bind:value={epochs} class="inputNumber" />
-        </li>
-      </div>
-      <div>
-        <li>Learning Rate</li>
-        <li class="range">
-          <input
-            type="range"
-            bind:value={learningRate}
-            min="0"
-            max="0.4"
-            step="0.001"
-            class="slider"
-          />
-          <input
-            type="number"
-            bind:value={learningRate}
-            min="0"
-            max="0.4"
-            step="0.001"
-            class="inputNumber"
-          />
-        </li>
-      </div>
-      <div>
-        <li>
-          Training Percentage
-
-          {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+        <div>
+          <li>
+            Seed
             <CustomButton
               type={"secondary"}
               inverse={false}
-              fontsize={8}
-              on:click={() => openModal()}>Customize</CustomButton
+              on:click={() => randomize()}
+              fontsize={8}>Randomize</CustomButton
             >
-          {/if}
-        </li>
-        <li class="range">
-          <input
-            type="range"
-            bind:value={trainPercentage}
-            min="0"
-            max="1"
-            step="0.05"
-            class="slider"
-          />
-          <input
-            type="number"
-            bind:value={trainPercentage}
-            min="0"
-            max="1"
-            step="0.05"
-            class="inputNumber"
-          />
-        </li>
-      </div>
+          </li>
+        </div>
+        <div>
+          <li>Training Percentage</li>
+          <li class="range">
+            <input
+              type="range"
+              bind:value={seed}
+              min="0"
+              max="1000"
+              step="10"
+              class="slider"
+            />
+            <input type="number" bind:value={seed} class="inputNumber" />
+          </li>
+        </div>
 
-      <div>
-        <li>
-          Seed
+        <div>
+          <li>Add/Delete Hidden Layers</li>
+          <li class="hiddenLayers">
+            {#each hiddenLayers as hiddenLayer, index}
+              <div class:checked={hiddenLayer.checked}>
+                <label for="hiddenLayer">Hidden Layer {index + 1}</label>
+                <input type="checkbox" bind:checked={hiddenLayer.checked} />
+                <input
+                  type="range"
+                  min="1"
+                  max="20"
+                  step="1"
+                  class="slider"
+                  bind:value={hiddenLayer.size}
+                />
+                {hiddenLayer.size}
+              </div>
+            {/each}
+
+            <div class="hiddenLayerButtons">
+              <CustomButton
+                type={"secondary"}
+                inverse={false}
+                fontsize={8}
+                on:click={() => add()}>Add New Layer</CustomButton
+              >
+
+              -
+              <CustomButton
+                type={"delete"}
+                inverse={false}
+                fontsize={8}
+                on:click={() => clear()}>Delete Selected Layer</CustomButton
+              >
+            </div>
+          </li>
+        </div>
+
+        <hr />
+
+        <div class="createTask">
           <CustomButton
             type={"secondary"}
             inverse={false}
-            on:click={() => randomize()}
-            fontsize={8}>Randomize</CustomButton
+            disabled={$selectedModelType === undefined ||
+              $selectedTaskType === undefined ||
+              epochs === 0 ||
+              learningRate === 0.0 ||
+              trainPercentage === 0 ||
+              trainPercentage === 1}
+            on:click={() => createTask()}>Create Task</CustomButton
           >
-        </li>
-        <li class="range">
-          <input
-            type="range"
-            bind:value={seed}
-            min="0"
-            max="1000"
-            step="10"
-            class="slider"
-          />
-          <input type="number" bind:value={seed} class="inputNumber" />
-        </li>
-      </div>
+        </div>
+      </li>
 
-      <div>
-        <li>Add/Delete Hidden Layers</li>
-        <li class="hiddenLayers">
-          {#each hiddenLayers as hiddenLayer, index}
-            <div class:checked={hiddenLayer.checked}>
-              <label for="hiddenLayer">Hidden Layer {index + 1}</label>
-              <input type="checkbox" bind:checked={hiddenLayer.checked} />
-              <input
-                type="range"
-                min="1"
-                max="20"
-                step="1"
-                class="slider"
-                bind:value={hiddenLayer.size}
-              />
-              {hiddenLayer.size}
-            </div>
-          {/each}
+      <li class="Modal" />
+    </div>
 
-          <div class="hiddenLayerButtons">
-            <CustomButton
-              type={"secondary"}
-              inverse={false}
-              fontsize={8}
-              on:click={() => add()}>Add New Layer</CustomButton
-            >
-
-            -
-            <CustomButton
-              type={"delete"}
-              inverse={false}
-              fontsize={8}
-              on:click={() => clear()}>Delete Selected Layer</CustomButton
-            >
-          </div>
-        </li>
-      </div>
-
-      <hr />
-
-      <div class="createTask">
-        <CustomButton
-          type={"secondary"}
-          inverse={false}
-          disabled={$selectedModelType === undefined ||
-            $selectedTaskType === undefined ||
-            epochs === 0 ||
-            learningRate === 0.0 ||
-            trainPercentage === 0 ||
-            trainPercentage === 1}
-          on:click={() => createTask()}>Create Task</CustomButton
-        >
-      </div>
-    </li>
-
-    <li class="Modal" />
+    <hr />
   </div>
-
-  <hr />
 </div>
 
 <style lang="scss">
@@ -418,22 +385,8 @@
     // border: whitesmoke 4px inset;
     box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.2);
     background-color: whitesmoke;
-    //color: white;
   }
-  .selectNetwork {
-    width: 95%;
-    height: 100%;
-    font-family: var(font-family);
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--lightblack);
-    background-color: white;
-    padding: 1%;
-    margin: 2%;
-    cursor: pointer;
-    border-radius: 10px;
-    box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.2);
-  }
+
   .selectModel {
     width: 60%;
     height: 100%;
