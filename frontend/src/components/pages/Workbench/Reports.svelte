@@ -1,8 +1,21 @@
 <script lang="ts">
-  import Embedding from "../../common/Embedding.svelte"
+  import { DataTable } from "carbon-components-svelte"
+
+  
+
 </script>
 
-<Embedding />
+<DataTable
+  expandable
+  headers={[
+    { key: "name", value: "Name" },
+    { key: "protocol", value: "Protocol" },
+    { key: "port", value: "Port" },
+    { key: "rule", value: "Rule" },
+  ]}>
+
+
+</DataTable>
 
 <style lang="scss">
 </style>
