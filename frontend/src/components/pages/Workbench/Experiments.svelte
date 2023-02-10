@@ -21,6 +21,7 @@
   let task: TaskType
   let model: MLModelType
 
+  let placeholderModel: string = "Select a model"
   let placeholderTask: string = "Select a task"
   let unique = {} // every {} is unique, {} === {} evaluates to false
 
@@ -156,9 +157,29 @@
             {/each}
           </select>
         </div>
-
+        <div>
+          <select
+            class="selectModel"
+            bind:value={task}
+            on:click={() => ($selectedTaskType = task)}
+          >
+            {#if placeholderModel}
+              <option>{placeholderTask}</option>
+            {/if}
+            {#each taskTypes as task, _}
+              <option
+                class="optionDropdown"
+                value={task}
+                on:click={() => ($selectedTaskType = task)}
+              >
+                {task}
+              </option>
+            {/each}
+          </select>
+        </div>
+  
         <hr />
-
+        
         <div>Configurable Parameters:</div>
 
         <div>

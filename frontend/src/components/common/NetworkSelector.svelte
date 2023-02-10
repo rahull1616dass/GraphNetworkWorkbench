@@ -2,7 +2,7 @@
 import { networksList, selectedNetworkIndex } from "../../stores"
 
 export let placeholderNetwork: string = "Select a network"
-export let placeholderModel: string = "Select a model"
+
 </script>
 
 <div class="dropdown">
