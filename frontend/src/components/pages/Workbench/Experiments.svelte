@@ -223,7 +223,10 @@
               step="10"
               class="slider"
             />
-            {epochs}
+            <input type="number"
+                bind:value={epochs}
+                class="inputNumber"  
+            />
           </li>
         </div>
         <div>
@@ -237,7 +240,13 @@
               step="0.001"
               class="slider"
             />
-            {learningRate}
+            <input type="number"
+                bind:value={learningRate}
+                min="0"
+              max="0.4"
+              step="0.001"
+                class="inputNumber"  
+            />
           </li>
         </div>
         <div>
@@ -251,7 +260,13 @@
               step="0.05"
               class="slider"
             />
-            {trainPercentage}
+            <input type="number"
+                bind:value={trainPercentage}
+                min="0"
+              max="1"
+              step="0.05"
+                class="inputNumber"  
+            />
             <div class="customizeButton">
               {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
                 <CustomButton
@@ -271,7 +286,6 @@
               <div class:checked={hiddenLayer.checked}>
                 <label for="hiddenLayer">Hidden Layer {index + 1}</label>
                 <input type="checkbox" bind:checked={hiddenLayer.checked} />
-
                 <input
                   type="range"
                   min="1"
@@ -314,9 +328,7 @@
             on:click={() => createTask()}>Create Task</CustomButton
           >
         </div>
-        {$selectedNetworkIndex}
-        {$selectedTaskType}
-        {$selectedModelType}
+        
       </li>
 
       <li class="Modal" />
@@ -324,9 +336,18 @@
   {/key}
 
   <hr />
+  
 </div>
 
 <style lang="scss">
+  .inputNumber {
+    width: 15%;
+    padding: 1%;
+    //background-color: whitesmoke;
+    border-radius: 15px;
+    box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.1);
+     
+  }
   .customizeButton {
     display: flex;
     justify-content: center;
