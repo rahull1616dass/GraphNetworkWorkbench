@@ -6,19 +6,21 @@
   import { setExperimentTask, getExperimentTasks } from "../../../api/firebase";
   import CustomButton from "../../common/CustomButton.svelte";
   import { MLModelType } from "../../../definitions/mlModelType";
+  import { MenuItem } from "../../../definitions/menuItem";
   import {
     networksList,
     selectedNetworkIndex,
     selectedModelType,
     selectedTaskType,
+    selectedMenuItem,
   } from "../../../stores";
   import { fade, slide, scale } from "svelte/transition";
   import Plot from "./Plot/Plot.svelte";
   import CustomModal from "../../common/CustomModal.svelte";
 
-  export let networkIndex: number = undefined;
-  export let task: TaskType;
-  export let model: MLModelType;
+  let networkIndex: number = undefined;
+  let task: TaskType;
+  let model: MLModelType;
   let placeholderNetwork: string = "Select a network";
   let placeholderModel: string = "Select a model";
   let placeholderTask: string = "Select a task";
@@ -41,13 +43,8 @@
   }
 
   function startNewExperiment() {
-    $selectedNetworkIndex = undefined;
-    networkIndex = undefined;
-    trainPercentage = 0.8;
-    epochs = 100;
-    learningRate = 0.01;
-    hiddenLayers = [{ first: true, checked: false, size: 10 }];
-    unique = {};
+    $selectedMenuItem = MenuItem.PLOT;
+    //$selectedMenuItem = MenuItem.EXPERIMENTS;
   }
 
   let progressBarData: ProgressBarData = new ProgressBarData(
@@ -70,11 +67,13 @@
   async function createTask() {
     const taskToBeCreated = new Task(
       undefined, // This will be set by the backend
-      TaskType.NODE_CLASSIFICATION,
+      $selectedModelType,
+      $selectedTaskType,
       trainPercentage,
       epochs,
       learningRate,
-      hiddenLayerSizes
+      hiddenLayerSizes,
+      seed
     );
     const networkId = $networksList[$selectedNetworkIndex].metadata.id;
     await getExperimentTasks(networkId)
@@ -132,238 +131,226 @@
 
   <hr />
 
-  {#key unique}
-    <div>
-      <li class="Model">
-        <div>
-          <select
-            class="selectModel"
-            bind:value={networkIndex}
-            on:click={() => ($selectedNetworkIndex = networkIndex)}
-          >
-            {#if placeholderNetwork}
-              <option>{placeholderNetwork}</option>
-            {/if}
-            {#each $networksList as network, networkIndex}
-              <option
-                class="optionDropdown"
-                value={networkIndex}
-                on:click={() => ($selectedNetworkIndex = networkIndex)}
-              >
-                {network.metadata.name} --- Nodes: {network.nodes.length} , Edges:
-                {network.links.length}
-              </option>
-            {/each}
-          </select>
-        </div>
+  <div>
+    <li class="Model">
+      <div>
+        <select
+          class="selectModel"
+          bind:value={networkIndex}
+          on:click={() => ($selectedNetworkIndex = networkIndex)}
+        >
+          {#if placeholderNetwork}
+            <option>{placeholderNetwork}</option>
+          {/if}
+          {#each $networksList as network, networkIndex}
+            <option
+              class="optionDropdown"
+              value={networkIndex}
+              on:click={() => ($selectedNetworkIndex = networkIndex)}
+            >
+              {network.metadata.name} --- Nodes: {network.nodes.length} , Edges:
+              {network.links.length}
+            </option>
+          {/each}
+        </select>
+      </div>
 
-        <div>
-          <select
-            class="selectModel"
-            bind:value={task}
-            on:click={() => ($selectedTaskType = task)}
-          >
-            {#if placeholderModel}
-              <option>{placeholderTask}</option>
-            {/if}
-            {#each taskTypes as task, _}
-              <option
-                class="optionDropdown"
-                value={task}
-                on:click={() => ($selectedTaskType = task)}
-              >
-                {task}
-              </option>
-            {/each}
-          </select>
-        </div>
+      <div>
+        <select
+          class="selectModel"
+          bind:value={task}
+          on:click={() => ($selectedTaskType = task)}
+        >
+          {#if placeholderModel}
+            <option>{placeholderTask}</option>
+          {/if}
+          {#each taskTypes as task, _}
+            <option
+              class="optionDropdown"
+              value={task}
+              on:click={() => ($selectedTaskType = task)}
+            >
+              {task}
+            </option>
+          {/each}
+        </select>
+      </div>
 
-        <div>
-          <select
-            class="selectModel"
-            bind:value={model}
-            on:click={() => ($selectedModelType = model)}
-          >
-            {#if placeholderModel}
-              <option>{placeholderModel}</option>
-            {/if}
-            {#each modelTypes as model, _}
-              <option
-                class="optionDropdown"
-                value={model}
-                on:click={() => ($selectedModelType = model)}
-              >
-                {model}
-              </option>
-            {/each}
-          </select>
-        </div>
+      <div>
+        <select
+          class="selectModel"
+          bind:value={model}
+          on:click={() => ($selectedModelType = model)}
+        >
+          {#if placeholderModel}
+            <option>{placeholderModel}</option>
+          {/if}
+          {#each modelTypes as model, _}
+            <option
+              class="optionDropdown"
+              value={model}
+              on:click={() => ($selectedModelType = model)}
+            >
+              {model}
+            </option>
+          {/each}
+        </select>
+      </div>
 
-        <hr />
+      <hr />
 
-        <div>Configurable Parameters:</div>
+      <div>Configurable Parameters:</div>
 
-        
+      <div>
+        <li>Epochs</li>
+        <li class="range">
+          <input
+            type="range"
+            bind:value={epochs}
+            min="0"
+            max="1000"
+            step="10"
+            class="slider"
+          />
+          <input type="number" bind:value={epochs} class="inputNumber" />
+        </li>
+      </div>
+      <div>
+        <li>Learning Rate</li>
+        <li class="range">
+          <input
+            type="range"
+            bind:value={learningRate}
+            min="0"
+            max="0.4"
+            step="0.001"
+            class="slider"
+          />
+          <input
+            type="number"
+            bind:value={learningRate}
+            min="0"
+            max="0.4"
+            step="0.001"
+            class="inputNumber"
+          />
+        </li>
+      </div>
+      <div>
+        <li>
+          Training Percentage
 
-        <div>
-          <li>Epochs</li>
-          <li class="range">
-            <input
-              type="range"
-              bind:value={epochs}
-              min="0"
-              max="1000"
-              step="10"
-              class="slider"
-            />
-            <input type="number"
-                bind:value={epochs}
-                class="inputNumber"  
-            />
-          </li>
-        </div>
-        <div>
-          <li>Learning Rate</li>
-          <li class="range">
-            <input
-              type="range"
-              bind:value={learningRate}
-              min="0"
-              max="0.4"
-              step="0.001"
-              class="slider"
-            />
-            <input type="number"
-                bind:value={learningRate}
-                min="0"
-              max="0.4"
-              step="0.001"
-                class="inputNumber"  
-            />
-          </li>
-        </div>
-        <div>
-          <li>Training Percentage
-            
-                {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
-                  <CustomButton
-                    type={"secondary"}
-                    inverse={false}
-                    fontsize={8}
-                    on:click={() => openModal()}>Customize</CustomButton
-                  > 
-                {/if}
-              
-            </li>
-          <li class="range">
-            <input
-              type="range"
-              bind:value={trainPercentage}
-              min="0"
-              max="1"
-              step="0.05"
-              class="slider"
-            />
-            <input type="number"
-                bind:value={trainPercentage}
-                min="0"
-              max="1"
-              step="0.05"
-                class="inputNumber"  
-            />
-            
-          </li>
-        </div>
+          {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+            <CustomButton
+              type={"secondary"}
+              inverse={false}
+              fontsize={8}
+              on:click={() => openModal()}>Customize</CustomButton
+            >
+          {/if}
+        </li>
+        <li class="range">
+          <input
+            type="range"
+            bind:value={trainPercentage}
+            min="0"
+            max="1"
+            step="0.05"
+            class="slider"
+          />
+          <input
+            type="number"
+            bind:value={trainPercentage}
+            min="0"
+            max="1"
+            step="0.05"
+            class="inputNumber"
+          />
+        </li>
+      </div>
 
-        <div>
-            <li>Seed
-                <CustomButton
-                type={"secondary"}
-                inverse={false}
-                on:click={() => randomize()}
-                fontsize={8}
-                >Randomize</CustomButton
-                >
-            </li>
-            <li class="range">
-              <input
-                type="range"
-                bind:value={seed}
-                min="0"
-                max="1000"
-                step="10"
-                class="slider"
-              />
-              <input type="number"
-                  bind:value={seed}
-                  class="inputNumber"  
-              />
-              
-                
-              
-            </li>
-          </div>
-
-        <div>
-          <li>Add/Delete Hidden Layers</li>
-          <li class="hiddenLayers">
-            {#each hiddenLayers as hiddenLayer, index}
-              <div class:checked={hiddenLayer.checked}>
-                <label for="hiddenLayer">Hidden Layer {index + 1}</label>
-                <input type="checkbox" bind:checked={hiddenLayer.checked} />
-                <input
-                  type="range"
-                  min="1"
-                  max="20"
-                  step="1"
-                  class="slider"
-                  bind:value={hiddenLayer.size}
-                />
-                {hiddenLayer.size}
-              </div>
-            {/each}
-
-            <div class="hiddenLayerButtons">
-              <CustomButton
-                type={"secondary"}
-                inverse={false}
-                fontsize={8}
-                on:click={() => add()}>Add New Layer</CustomButton
-              >
-
-              -
-              <CustomButton
-                type={"delete"}
-                inverse={false}
-                fontsize={8}
-                on:click={() => clear()}>Delete Selected Layer</CustomButton
-              >
-            </div>
-          </li>
-        </div>
-
-        <hr />
-
-        <div class="createTask">
+      <div>
+        <li>
+          Seed
           <CustomButton
             type={"secondary"}
             inverse={false}
-            disabled={epochs === 0 ||
-              learningRate === 0.0 ||
-              trainPercentage === 0 ||
-              trainPercentage === 1}
-            on:click={() => createTask()}>Create Task</CustomButton
+            on:click={() => randomize()}
+            fontsize={8}>Randomize</CustomButton
           >
-        </div>
-        
-      </li>
+        </li>
+        <li class="range">
+          <input
+            type="range"
+            bind:value={seed}
+            min="0"
+            max="1000"
+            step="10"
+            class="slider"
+          />
+          <input type="number" bind:value={seed} class="inputNumber" />
+        </li>
+      </div>
 
-      <li class="Modal" />
-    </div>
-  {/key}
+      <div>
+        <li>Add/Delete Hidden Layers</li>
+        <li class="hiddenLayers">
+          {#each hiddenLayers as hiddenLayer, index}
+            <div class:checked={hiddenLayer.checked}>
+              <label for="hiddenLayer">Hidden Layer {index + 1}</label>
+              <input type="checkbox" bind:checked={hiddenLayer.checked} />
+              <input
+                type="range"
+                min="1"
+                max="20"
+                step="1"
+                class="slider"
+                bind:value={hiddenLayer.size}
+              />
+              {hiddenLayer.size}
+            </div>
+          {/each}
+
+          <div class="hiddenLayerButtons">
+            <CustomButton
+              type={"secondary"}
+              inverse={false}
+              fontsize={8}
+              on:click={() => add()}>Add New Layer</CustomButton
+            >
+
+            -
+            <CustomButton
+              type={"delete"}
+              inverse={false}
+              fontsize={8}
+              on:click={() => clear()}>Delete Selected Layer</CustomButton
+            >
+          </div>
+        </li>
+      </div>
+
+      <hr />
+
+      <div class="createTask">
+        <CustomButton
+          type={"secondary"}
+          inverse={false}
+          disabled={$selectedModelType === undefined ||
+            $selectedTaskType === undefined ||
+            epochs === 0 ||
+            learningRate === 0.0 ||
+            trainPercentage === 0 ||
+            trainPercentage === 1}
+          on:click={() => createTask()}>Create Task</CustomButton
+        >
+      </div>
+    </li>
+
+    <li class="Modal" />
+  </div>
 
   <hr />
-  
 </div>
 
 <style lang="scss">
@@ -373,7 +360,6 @@
     //background-color: whitesmoke;
     border-radius: 15px;
     box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.1);
-     
   }
   .customizeButton {
     display: flex;
