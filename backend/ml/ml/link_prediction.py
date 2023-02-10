@@ -5,8 +5,12 @@ from torch.optim import Adam
 from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv
 from torch.nn import BCEWithLogitsLoss
+import torch_geometric.transforms as T
 from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import negative_sampling
+
+from core.types import MLTask
+from core.logging_helpers import timeit
 
 
 class Net(torch.nn.Module):
@@ -34,11 +38,11 @@ class LinkPredictor:
         self.criterion = BCEWithLogitsLoss()
 
     def train(self, train_data: Data, val_data: Data, epochs: int = 100):
-        loss, test_acc = [], []
+        loss, val_acc = [], []
         for _ in tqdm(range(1, epochs + 1), desc="Training epochs"):
             loss += [self.__train_iter(train_data)]
-            test_acc += [self.test(val_data)]
-        return loss, test_acc
+            val_acc += [self.test(val_data)]
+        return loss, val_acc
 
     def __train_iter(self, train_data: Data):
         self.model.train()
@@ -77,3 +81,22 @@ class LinkPredictor:
         self.model.eval()
         z = self.model.encode(data.x, data.edge_index)
         return self.model.decode_all(z).cpu().numpy()
+
+
+@timeit
+def predict_edges(data: Data, task: MLTask):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    transform = T.Compose([
+        T.NormalizeFeatures(),
+        T.ToDevice(device),
+        T.RandomLinkSplit(
+            num_val=task.val_percentage,
+            num_test=1 - task.val_percentage - task.train_percentage,
+            is_undirected=False, add_negative_train_samples=False)
+    ])
+    train_data, val_data, test_data = transform(data)
+    predictor = LinkPredictor(data.num_features, device, learning_rate=0.001)
+    train_loss, val_roc_auc_score = predictor.train(train_data, val_data, epochs=task.epochs)
+    test_roc_auc_score = predictor.test(test_data)
+    predictions = predictor.predict(test_data)
+    return train_loss, val_roc_auc_score, test_roc_auc_score, predictions.tolist()

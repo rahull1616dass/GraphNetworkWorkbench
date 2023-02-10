@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  broker:
+    container_name: celery-broker
+    image: rabbitmq:3.8.2-management-alpine
+    ports:
+      - "8080:15672"
+      - "5672:5672"
+    restart: always
+
+  backend:
+    container_name: celery-backend
+    image: redis:5.0.7
+    ports:
+      - "6379:6379"
+    restart: always

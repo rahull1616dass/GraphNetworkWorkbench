@@ -11,11 +11,15 @@
   import { HoverData } from "../../definitions/hoverData"
   import Hover from "../pages/Workbench/Plot/Hover.svelte"
   import { HoverType } from "../../definitions/hoverType"
+  import CustomButton from "./CustomButton.svelte"
+  import { createEventDispatcher } from "svelte"
+  import CustomModal from "./CustomModal.svelte"
 
   export let seed: number = 0
   export let trainPercentage: number = 0.8
   let hoverData: HoverData = undefined
   let currentNetwork: Network = undefined
+  const dispatcher = createEventDispatcher()
 
   // Run an onMount function to initialize the plot
   onMount(() => {
@@ -24,13 +28,11 @@
 
   function loadNetwork(isFirstLoad: boolean = false) {
     if (isFirstLoad) {
-      currentNetwork = cloneDeep(
-        $networksList[$selectedNetworkIndex]
-      )
+      currentNetwork = cloneDeep($networksList[$selectedNetworkIndex])
       currentNetwork = train_test_split(currentNetwork, seed, trainPercentage)
     }
     updateVisSpec(currentNetwork, VisSpec)
-    if(isFirstLoad){
+    if (isFirstLoad) {
       setColorKey(VisSpec, "is_train")
     }
     vegaEmbed("#viz", VisSpec, { actions: false })
@@ -41,16 +43,24 @@
           if (item.path !== undefined) {
             // Link clicked, pass
           } else {
-            console.log(`For node ${item.datum.name} is_train = ${currentNetwork.nodes[item.datum.index].is_train}`)
+            console.log(
+              `For node ${item.datum.name} is_train = ${
+                currentNetwork.nodes[item.datum.index].is_train
+              }`
+            )
             let newValue: number
             // See experimentUtils.ts for the meaning of the values
             if (item.datum.is_train === 1) {
               newValue = 2
-            }else{
+            } else {
               newValue = 1
             }
             currentNetwork.nodes[item.datum.index].is_train = newValue
-            console.log(`For node ${item.datum.name} is_train = ${currentNetwork.nodes[item.datum.index].is_train}`)
+            console.log(
+              `For node ${item.datum.name} is_train = ${
+                currentNetwork.nodes[item.datum.index].is_train
+              }`
+            )
             loadNetwork(false)
           }
         })
@@ -102,10 +112,37 @@
   }
 </script>
 
-<div id="viz" />
-{#if hoverData !== undefined}
-  <Hover {hoverData} />
-{/if}
+<CustomModal on:close>
+  <h4 slot="header">Customize Train/Test Split</h4>
+  <div slot="body">
+    <div id="viz" />
+    {#if hoverData !== undefined}
+      <Hover {hoverData} />
+    {/if}
+  </div>
+
+  <div slot="footer">
+    <CustomButton
+      type={"primary"}
+      inverse={true}
+      on:click={() => {
+        dispatcher("onSaveSplitClicked", currentNetwork)
+      }}
+    >
+      Save
+    </CustomButton>
+
+    <CustomButton
+      type={"delete"}
+      inverse={true}
+      on:click={() => {
+        loadNetwork(true)
+      }}
+    >
+      Cancel
+    </CustomButton>
+  </div>
+</CustomModal>
 
 <style lang="scss">
   .viz {

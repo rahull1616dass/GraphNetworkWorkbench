@@ -9,6 +9,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN apt-get update && apt-get upgrade -y
 RUN pip install --upgrade pip setuptools
-RUN conda install pandas
-RUN conda install pyg -c pyg
-RUN pip install flask snakecase py-healthcheck gunicorn
+COPY ./requirements.yaml ./requirements.yaml
+RUN conda env update --file ./requirements.yaml --name base
+
+ENV C_FORCE_ROOT=true
