@@ -12,7 +12,9 @@ export let placeholderModel: string = "Select a model"
         <option >{placeholderNetwork}</option>
         {/if}
         {#each $networksList as network, networkIndex}
-            <option class="optionDropdown" value={networkIndex} on:click={() => $selectedNetworkIndex=networkIndex}>
+            <option class="optionDropdown" value={networkIndex} on:click={() => {$selectedNetworkIndex = networkIndex
+            console.log("Selected network index", $selectedNetworkIndex)
+            }}>
                 {network.metadata.name} ---
                 Nodes: {network.nodes.length} , Edges: {network.links.length} 
             </option>
