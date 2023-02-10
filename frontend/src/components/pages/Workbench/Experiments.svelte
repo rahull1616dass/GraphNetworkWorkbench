@@ -138,11 +138,15 @@
     </CustomButton>
   </div>
   <div class="background">
-    <NetworkSelector />
+    
 
     <hr />
 
     <div>
+      <li>
+        <NetworkSelector />
+      </li>
+      
       <li class="Model">
         <div>
           <select class="selectModel">
@@ -217,10 +221,9 @@
             />
           </li>
         </div>
+        
         <div>
-          <li>
-            Training Percentage
-
+          <li>Training Percentage
             {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
               <CustomButton
                 type={"secondary"}
@@ -230,9 +233,7 @@
               >
             {/if}
           </li>
-        </div>
-        <div>
-          <li>Learning Rate</li>
+          
           <li class="range">
             <input
               type="range"
@@ -254,18 +255,13 @@
         </div>
 
         <div>
-          <li>
-            Seed
+          <li>Seed
             <CustomButton
               type={"secondary"}
               inverse={false}
               on:click={() => randomize()}
               fontsize={8}>Randomize</CustomButton
-            >
-          </li>
-        </div>
-        <div>
-          <li>Training Percentage</li>
+            ></li>
           <li class="range">
             <input
               type="range"
