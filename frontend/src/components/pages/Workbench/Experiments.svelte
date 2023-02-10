@@ -14,6 +14,7 @@
   } from "../../../stores";
   import { fade, slide, scale } from "svelte/transition";
   import Plot from "./Plot/Plot.svelte";
+  import CustomModal from "../../common/CustomModal.svelte";
 
   export let networkIndex: number = undefined;
   export let task: TaskType;
@@ -27,8 +28,13 @@
   let trainPercentage: number = 0.8;
   let epochs: number = 100;
   let learningRate: number = 0.01;
+  let seed: number = 42;
   let hiddenLayers = [{ first: true, checked: false, size: 10 }];
   $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
+
+  function randomize() {
+    seed = Math.floor(Math.random() * 10000);
+  }
 
   function openModal() {
     return;
@@ -60,21 +66,6 @@
   function clear() {
     hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first);
   }
-
-  function handleSelectedNetwork(index: number) {
-    if (typeof index !== "number") {
-      return;
-    }
-    selectedNetworkIndex.update((index) => index);
-    return;
-  }
-
-  function handleSelectedModel(model: MLModelType) {
-    selectedModelType.update((model) => model);
-    return;
-  }
-
-  console.log("Selected model", $selectedModelType);
 
   async function createTask() {
     const taskToBeCreated = new Task(
@@ -212,6 +203,8 @@
 
         <div>Configurable Parameters:</div>
 
+        
+
         <div>
           <li>Epochs</li>
           <li class="range">
@@ -250,7 +243,18 @@
           </li>
         </div>
         <div>
-          <li>Training Percentage</li>
+          <li>Training Percentage
+            
+                {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+                  <CustomButton
+                    type={"secondary"}
+                    inverse={false}
+                    fontsize={8}
+                    on:click={() => openModal()}>Customize</CustomButton
+                  > 
+                {/if}
+              
+            </li>
           <li class="range">
             <input
               type="range"
@@ -267,17 +271,38 @@
               step="0.05"
                 class="inputNumber"  
             />
-            <div class="customizeButton">
-              {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
-                <CustomButton
-                  type={"secondary"}
-                  inverse={false}
-                  on:click={() => openModal()}>Customize</CustomButton
-                >
-              {/if}
-            </div>
+            
           </li>
         </div>
+
+        <div>
+            <li>Seed
+                <CustomButton
+                type={"secondary"}
+                inverse={false}
+                on:click={() => randomize()}
+                fontsize={8}
+                >Randomize</CustomButton
+                >
+            </li>
+            <li class="range">
+              <input
+                type="range"
+                bind:value={seed}
+                min="0"
+                max="1000"
+                step="10"
+                class="slider"
+              />
+              <input type="number"
+                  bind:value={seed}
+                  class="inputNumber"  
+              />
+              
+                
+              
+            </li>
+          </div>
 
         <div>
           <li>Add/Delete Hidden Layers</li>
@@ -302,6 +327,7 @@
               <CustomButton
                 type={"secondary"}
                 inverse={false}
+                fontsize={8}
                 on:click={() => add()}>Add New Layer</CustomButton
               >
 
@@ -309,6 +335,7 @@
               <CustomButton
                 type={"delete"}
                 inverse={false}
+                fontsize={8}
                 on:click={() => clear()}>Delete Selected Layer</CustomButton
               >
             </div>
@@ -351,7 +378,7 @@
   .customizeButton {
     display: flex;
     justify-content: center;
-    margin-top: 5%;
+    margin-top: 2%;
     font-size: small;
   }
   .hiddenLayerButtons {
@@ -405,6 +432,7 @@
     // border: whitesmoke 4px inset;
     box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.2);
     background-color: whitesmoke;
+    //color: white;
   }
   .selectNetwork {
     width: 95%;
