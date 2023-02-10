@@ -143,11 +143,11 @@
     <hr />
 
     <div>
-      <li>
-        <NetworkSelector />
-      </li>
       
       <li class="Model">
+        
+          <NetworkSelector />
+        
         <div>
           <select class="selectModel">
             {#each modelTypes as model}
