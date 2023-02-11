@@ -7,7 +7,6 @@
   import { MenuItem } from "../../../definitions/menuItem";
   import DropdownSelector from "../../common/DropdownSelector.svelte";
   import { setExperimentTask, getExperimentTasks } from "../../../api/firebase";
-  import { MLModelType } from "../../../definitions/mlModelType";
   import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType";
   import {
     networksList,
