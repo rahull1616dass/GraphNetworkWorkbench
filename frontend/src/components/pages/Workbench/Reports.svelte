@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DataTable } from "carbon-components-svelte"
-  import NetworkSelector from "../../common/NetworkSelector.svelte"
+  import DropdownSelector from "../../common/DropdownSelector.svelte"
   import { selectedNetworkIndex, networksList } from "../../../stores"
   import { getExperimentTasks } from "../../../api/firebase"
   import type { Task } from "../../../definitions/task"
@@ -34,7 +34,7 @@
   }
 </script>
 
-<NetworkSelector />
+<DropdownSelector />
 
 {#if errorData !== undefined}
   <h2>{errorData.messageHeader}</h2>
