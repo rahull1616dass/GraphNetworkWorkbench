@@ -1,55 +1,51 @@
 <script lang="ts">
-  loadNetwork
-  import { onMount } from "svelte"
-  import MiserablesData from "../../../../data/MiserablesVisSpec"
-  import VisSpec from "../../../../data/VisSpec"
-  import { default as vegaEmbed } from "vega-embed"
-  import { updateVisSpec } from "../../../../util/visSpecUtil"
-  import {
-    networksList,
-    selectedNetworkIndex,
-  } from "../../../../stores"
-  import { ModalData } from "../../../../definitions/modalData"
-  import { HoverData } from "../../../../definitions/hoverData"
-  import PlotDetailModal from "./PlotDetailModal.svelte"
-  import { Link, Node } from "../../../../definitions/network"
-  import Hover from "./Hover.svelte"
-  import statsIcon from "../../../../assets/stats.svg"
-  import { HoverType } from "../../../../definitions/hoverType"
-  import { Toggle, Modal } from "carbon-components-svelte"
-  import CustomButton from "../../../common/CustomButton.svelte"
-  import { toCSVFile } from "../../../../util/networkParserUtil"
-  import { uploadNetworkToStorage } from "../../../../api/firebase"
-  import type { Network } from "../../../../definitions/network"
-  import { UploadedFileType } from "../../../../definitions/uploadedFileType"
-  import { ProgressBar } from "carbon-components-svelte"
-  import { ProgressBarData } from "../../../../definitions/progressBarData"
+  loadNetwork;
+  import { onMount } from "svelte";
+  import MiserablesData from "../../../../data/MiserablesVisSpec";
+  import VisSpec from "../../../../data/VisSpec";
+  import { default as vegaEmbed } from "vega-embed";
+  import { updateVisSpec } from "../../../../util/visSpecUtil";
+  import { networksList, selectedNetworkIndex } from "../../../../stores";
+  import { ModalData } from "../../../../definitions/modalData";
+  import { HoverData } from "../../../../definitions/hoverData";
+  import PlotDetailModal from "./PlotDetailModal.svelte";
+  import { Link, Node } from "../../../../definitions/network";
+  import Hover from "./Hover.svelte";
+  import statsIcon from "../../../../assets/stats.svg";
+  import { HoverType } from "../../../../definitions/hoverType";
+  import { Toggle, Modal } from "carbon-components-svelte";
+  import CustomButton from "../../../common/CustomButton.svelte";
+  import { toCSVFile } from "../../../../util/networkParserUtil";
+  import { uploadNetworkToStorage } from "../../../../api/firebase";
+  import type { Network } from "../../../../definitions/network";
+  import { UploadedFileType } from "../../../../definitions/uploadedFileType";
+  import { ProgressBar } from "carbon-components-svelte";
+  import { ProgressBarData } from "../../../../definitions/progressBarData";
 
   //import JSON from "json-strictify"
-  import cloneDeep from "lodash.clonedeep"
+  import cloneDeep from "lodash.clonedeep";
 
   function loadNetwork(isItemUpdated: boolean) {
     if (isItemUpdated) {
-      loadNetworkValues(currentNetwork)
+      loadNetworkValues(currentNetwork);
     } else {
-
       // No item in the Plot is updated by the user, reload the plot without updating VisSpec
       if ($networksList && $networksList.length > 0) {
-        console.log("changing to ", $selectedNetworkIndex)
+        console.log("changing to ", $selectedNetworkIndex);
         /*
         Note that structuredClone does not work on the svelte store.
         Same goes for JSON.stringify and JSON.parse which throws circular reference error.
         Hence the usage of lodash.clonedeep
         */
-        currentNetwork = cloneDeep($networksList[$selectedNetworkIndex])
-        loadNetworkValues(currentNetwork)
-      } else createVegaEmbed(MiserablesData)
+        currentNetwork = cloneDeep($networksList[$selectedNetworkIndex]);
+        loadNetworkValues(currentNetwork);
+      } else createVegaEmbed(MiserablesData);
     }
   }
 
   function loadNetworkValues(network: Network) {
-    updateVisSpec(network, VisSpec)
-    createVegaEmbed(VisSpec)
+    updateVisSpec(network, VisSpec);
+    createVegaEmbed(VisSpec);
   }
 
   function createNewVega() {
@@ -59,7 +55,7 @@
       { source: "C", target: "D", weight: 3 },
       { source: "D", target: "E", weight: 4 },
       { source: "E", target: "F", weight: 5 },
-    ]
+    ];
     // Create a new Vega view and initialize it with the edge data.
     const view = {
       // Use the directed-edge mark type to draw the edges.
@@ -72,19 +68,19 @@
 
       // Use the edge data for the visual marks.
       data: { values: edges },
-    }
-    createVegaEmbed(view)
+    };
+    createVegaEmbed(view);
   }
 
   function createVegaEmbed(embeddedNetwork: any) {
     vegaEmbed("#viz", embeddedNetwork, { actions: false })
       .then((result) => {
-        viz = result.view
+        viz = result.view;
         result.view.addEventListener("click", function (_, item) {
-          console.log("CLICK", item)
+          console.log("CLICK", item);
           if (!isEditMode) {
-            editModeRequiredModalData.isOpen = true
-            return
+            editModeRequiredModalData.isOpen = true;
+            return;
           }
           // @ts-ignore
           if (item.path !== undefined) {
@@ -92,7 +88,7 @@
               item.datum.source.datum.name,
               item.datum.target.datum.name,
               item.datum.value
-            )
+            );
           } else {
             detailedItem = new Node(
               item.datum.name,
@@ -100,18 +96,18 @@
               item.datum.group,
               item.datum.index,
               undefined
-            )
+            );
           }
-          hoverData = undefined
-          nodeDetailModalData.isOpen = true
-        })
+          hoverData = undefined;
+          nodeDetailModalData.isOpen = true;
+        });
         result.view.addEventListener("mouseover", function (event, item) {
-          console.log("MOUSEOVER", item)
+          console.log("MOUSEOVER", item);
           if (item != undefined && item.datum != undefined) {
             // @ts-ignore
             if (item != undefined && item.path != undefined) {
               // @ts-ignore
-              console.log(item.path)
+              console.log(item.path);
               hoverData = new HoverData(
                 HoverType.LINK,
                 new Link(
@@ -124,9 +120,9 @@
                 event.clientX,
                 // @ts-ignore
                 event.clientY
-              )
-             } else {
-               hoverData = new HoverData(
+              );
+            } else {
+              hoverData = new HoverData(
                 HoverType.NODE,
                 undefined,
                 new Node(
@@ -140,16 +136,16 @@
                 event.clientX,
                 // @ts-ignore
                 event.clientY
-               )
+              );
             }
           }
-        })
+        });
         result.view.addEventListener("mouseout", function (_, item) {
-          console.log("MOUSEOUT", item)
-          hoverData = undefined
-        })
+          console.log("MOUSEOUT", item);
+          hoverData = undefined;
+        });
       })
-      .catch((error) => console.log(error))
+      .catch((error) => console.log(error));
   }
 
   async function updateNetworkInFirebaseStorage() {
@@ -157,7 +153,7 @@
       UploadedFileType.NODE_FILE,
       Object.keys(new Node()),
       currentNetwork.nodes
-    )
+    );
     const edgeFile = toCSVFile(
       UploadedFileType.EDGE_FILE,
       Object.keys(new Link()),
@@ -168,38 +164,38 @@
           // @ts-ignore
           target: link.target.index,
           value: link.value,
-        }
+        };
       })
-    )
+    );
     await uploadNetworkToStorage(currentNetwork.metadata, nodeFile, edgeFile)
       .then(() => {
-        console.log("Uploaded network to storage")
-        $networksList[$selectedNetworkIndex] = currentNetwork
-        loadNetwork(true)
-        progressBarData.isPresent = false
+        console.log("Uploaded network to storage");
+        $networksList[$selectedNetworkIndex] = currentNetwork;
+        loadNetwork(true);
+        progressBarData.isPresent = false;
       })
       .catch((error) => {
-        progressBarData.isPresent = false
-        console.log("Error uploading network to storage", error)
-        uploadingNetworkErrorModalData.isOpen = true
-      })
+        progressBarData.isPresent = false;
+        console.log("Error uploading network to storage", error);
+        uploadingNetworkErrorModalData.isOpen = true;
+      });
   }
 
   // Run an onMount function to initialize the plot
   onMount(() => {
     // Anytime the networksList store value is updated, update the network
-    loadNetwork(false)
-  })
+    loadNetwork(false);
+  });
 
-  let viz = undefined
-  let currentNetwork: Network = undefined // Will be set in onMount()
-  let nodeDetailModalData: ModalData = new ModalData()
+  let viz = undefined;
+  let currentNetwork: Network = undefined; // Will be set in onMount()
+  let nodeDetailModalData: ModalData = new ModalData();
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
     undefined,
     "Error Uploading Network",
     `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
     false
-  )
+  );
 
   let editModeRequiredModalData: ModalData = new ModalData(
     undefined,
@@ -210,21 +206,21 @@
   Once complete, click the save button to save your changes.
   `,
     false
-  )
+  );
   let progressBarData: ProgressBarData = new ProgressBarData(
     false,
     "Updating the network..."
-  )
-  let hoverData: HoverData = undefined
-  let detailedItem: Node | Link = undefined
-  let isEditMode: boolean = false
+  );
+  let hoverData: HoverData = undefined;
+  let detailedItem: Node | Link = undefined;
+  let isEditMode: boolean = false;
 
   // Anytime the user updates a node or a link in the modal, update the network
   function updateItem(event: CustomEvent) {
-    let updatedItem: Node | Link = event.detail.updatedItem
-    console.log("updating item", updatedItem)
+    let updatedItem: Node | Link = event.detail.updatedItem;
+    console.log("updating item", updatedItem);
     if (updatedItem instanceof Node) {
-      currentNetwork.nodes[updatedItem.index] = updatedItem as Node
+      currentNetwork.nodes[updatedItem.index] = updatedItem as Node;
     } else if (updatedItem instanceof Link) {
       currentNetwork.links.forEach((link, index) => {
         if (
@@ -237,43 +233,41 @@
           ).equals(updatedItem as Link)
         ) {
           // @ts-ignore
-          currentNetwork.links[index].value = updatedItem.value
+          currentNetwork.links[index].value = updatedItem.value;
         }
-      })
+      });
     }
-    loadNetwork(true)
+    loadNetwork(true);
   }
 
-  export let index: number = undefined
-  let placeholder: string = "Please select a network from the list"
+  let index: number = undefined;
+  let placeholder: string = "Please select a network from the list";
 
-  function selected (index: number) {
+  function selected(index: number) {
     if (typeof index !== "number") {
-      return
+      return;
     }
-    $selectedNetworkIndex = index
-    loadNetwork()
-    return
+    $selectedNetworkIndex = index;
+    loadNetwork(false);
+    return;
   }
 </script>
 
-
 <div class="dropdown">
-
-  <select class="selectDropdown" bind:value={index} on:click={() => selected(index)}>
-    {#if placeholder}
-    <option >{placeholder}</option>
-    {/if}
+  <select
+    class="selectDropdown"
+    bind:value={index}
+    on:click={() => selected(index)}
+  >
+      <option>{placeholder}</option>
     {#each $networksList as network, index}
-        <option class="optionDropdown" value={index} >
-            {network.metadata.name} ---
-            Nodes: {network.nodes.length} , Edges: {network.links.length} 
-        </option>
+      <option class="optionDropdown" value={index}>
+        {network.metadata.name} --- Nodes: {network.nodes.length} , Edges: {network
+          .links.length}
+      </option>
     {/each}
   </select>
-  
-  
-  </div>
+</div>
 
 <main>
   <div class="content">
@@ -294,16 +288,16 @@
         <CustomButton
           type={"secondary"}
           on:click={async () => {
-            isEditMode = false
-            progressBarData.isPresent = true
-            updateNetworkInFirebaseStorage()
+            isEditMode = false;
+            progressBarData.isPresent = true;
+            updateNetworkInFirebaseStorage();
           }}>Save Changes</CustomButton
         >
         <CustomButton
           type={"secondary"}
           on:click={() => {
-            isEditMode = false
-            loadNetwork(false)
+            isEditMode = false;
+            loadNetwork(false);
           }}>Discard</CustomButton
         >
       {/if}
@@ -405,45 +399,44 @@
   }
 
   .dropdown {
-        position: flex;
-        width: 50%;
-        background-color: whitesmoke;
-        margin-left: 25%;
-        margin-top: 1%;
+    position: flex;
+    width: 50%;
+    background-color: whitesmoke;
+    margin-left: 25%;
+    margin-top: 1%;
+  }
+  .selectDropdown {
+    width: 95%;
+    height: 100%;
+    font-family: var(font-family);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--lightblack);
+    color-scheme: #4a4a56;
+    background-color: white;
+    padding: 1%;
+    margin: 2%;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  .optionDropdown {
+    font-family: var(font-family);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--lightblack);
+    color-scheme: #4a4a56;
+    background-color: white;
+    cursor: pointer;
+    cursor:hover {
+      background-color: red;
     }
-    .selectDropdown {
-        width: 95%;
-        height: 100%;
-        font-family: var(font-family);
-        font-size: 16px;
-        font-weight: 800;
-        color: var(--lightblack);
-        color-scheme: #4a4a56;
-        background-color: white;
-        padding: 1%;
-        margin: 2%;
-        cursor: pointer;
-        transition: background-color 0.2s ease-in-out;
-    }
-    .optionDropdown {
-
-        font-family: var(font-family);
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--lightblack);
-        color-scheme: #4a4a56;
-        background-color: white;
-        cursor: pointer;
-        cursor:hover {
-            background-color: red;
-        }
-    }
-    hr {
-        display: block;
-        margin: 1em;
-        width: 90%;
-        content: "";
-        margin-left: 5%;
-        background-color: whitesmoke;
-    }
+  }
+  hr {
+    display: block;
+    margin: 1em;
+    width: 90%;
+    content: "";
+    margin-left: 5%;
+    background-color: whitesmoke;
+  }
 </style>
