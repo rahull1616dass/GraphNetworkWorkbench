@@ -1,76 +1,59 @@
 <script lang="ts">
-  import { Dropdown, ProgressBar } from "carbon-components-svelte"
-  import { ProgressBarData } from "../../../definitions/progressBarData"
-  import { Task } from "../../../definitions/task"
-  import { TaskType } from "../../../definitions/taskType"
-  import CustomButton from "../../common/CustomButton.svelte"
-  import { MenuItem } from "../../../definitions/menuItem"
-  import NetworkSelector from "../../common/NetworkSelector.svelte"
-  import { setExperimentTask, getExperimentTasks } from "../../../api/firebase"
-  import { MLModelType } from "../../../definitions/mlModelType"
+  import { Dropdown, ProgressBar } from "carbon-components-svelte";
+  import { ProgressBarData } from "../../../definitions/progressBarData";
+  import { Task } from "../../../definitions/task";
+  import { TaskType } from "../../../definitions/taskType";
+  import CustomButton from "../../common/CustomButton.svelte";
+  import { MenuItem } from "../../../definitions/menuItem";
+  import DropdownSelector from "../../common/DropdownSelector.svelte";
+  import { setExperimentTask, getExperimentTasks } from "../../../api/firebase";
+  import { MLModelType } from "../../../definitions/mlModelType";
+  import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType";
   import {
     networksList,
     selectedNetworkIndex,
     selectedModelType,
     selectedTaskType,
     selectedMenuItem,
-  } from "../../../stores"
-  import { fade, slide, scale } from "svelte/transition"
-
-  let networkIndex: number = undefined
-  let task: TaskType
-  let model: MLModelType
-
-  let placeholderModel: string = "Select a model"
-  let placeholderTask: string = "Select a task"
-  let unique = {} // every {} is unique, {} === {} evaluates to false
+  } from "../../../stores";
+  import { fade, slide, scale } from "svelte/transition";
 
   // These values should be set by UI Elements later on
-  let trainPercentage: number = 0.8
-  let epochs: number = 100
-  let learningRate: number = 0.01
-  let seed: number = 42
-  let hiddenLayers = [{ first: true, checked: false, size: 10 }]
-  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
+  let trainPercentage: number = 0.8;
+  let epochs: number = 100;
+  let learningRate: number = 0.01;
+  let seed: number = 42;
+  let hiddenLayers = [{ first: true, checked: false, size: 10 }];
+  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
 
   function randomize() {
-    seed = Math.floor(Math.random() * 10000)
+    seed = Math.floor(Math.random() * 10000);
   }
 
   function openModal() {
-    return
+    return;
   }
 
   function startNewExperiment() {
-    $selectedMenuItem = MenuItem.PLOT
+    $selectedMenuItem = MenuItem.PLOT;
     //$selectedMenuItem = MenuItem.EXPERIMENTS;
-  }
-
-  function handleEpoch(event) {
-    epochs = event.target.value
-  }
-  function handleLearningRate(event) {
-    learningRate = event.target.value
-  }
-  function handleTrainingPercentage(event) {
-    trainPercentage = event.target.value
   }
 
   let progressBarData: ProgressBarData = new ProgressBarData(
     false,
     "Training..."
-  )
+  );
 
   function add() {
     hiddenLayers = hiddenLayers.concat({
       first: false,
       checked: false,
       size: 10,
-    })
+    });
   }
 
   function clear() {
-    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first)
+    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first);
   }
 
   async function createTask() {
@@ -83,32 +66,23 @@
       learningRate,
       hiddenLayerSizes,
       seed
-    )
-    const networkId = $networksList[$selectedNetworkIndex].metadata.id
+    );
+    const networkId = $networksList[$selectedNetworkIndex].metadata.id;
     await getExperimentTasks(networkId)
       .then((tasks) => {
-        console.log("Tasks", tasks)
+        console.log("Tasks", tasks);
         tasks.forEach((task) => {
           if (task.equals(taskToBeCreated)) {
-            console.log("Task already exists")
-            return
+            console.log("Task already exists");
+            return;
           }
-        })
-        setTaskDocument(networkId, taskToBeCreated)
+        });
+        setTaskDocument(networkId, taskToBeCreated);
       })
       .catch((error) => {
-        console.log("Error getting tasks list", error)
-      })
+        console.log("Error getting tasks list", error);
+      });
   }
-  let modelTypes: MLModelType[] = [
-    MLModelType.GCN,
-    MLModelType.DeepWalk,
-    MLModelType.GIN,
-  ]
-  let taskTypes: TaskType[] = [
-    TaskType.NODE_CLASSIFICATION,
-    TaskType.EDGE_CLASSIFICATION,
-  ]
 
   async function setTaskDocument(
     networkId: string,
@@ -117,14 +91,14 @@
     return new Promise((resolve, reject) => {
       setExperimentTask(networkId, taskToBeCreated)
         .then((task) => {
-          console.log("Task created", task)
-          resolve()
+          console.log("Task created", task);
+          resolve();
         })
         .catch((error) => {
-          console.log("Error creating task", error)
-          reject()
-        })
-    })
+          console.log("Error creating task", error);
+          reject();
+        });
+    });
   }
 </script>
 
@@ -138,52 +112,27 @@
     </CustomButton>
   </div>
   <div class="background">
-    
-
     <hr />
 
     <div>
-      
       <li class="Model">
-        
-          <NetworkSelector />
-        
-        <div>
-          <select class="selectModel">
-            {#each modelTypes as model}
-              <option
-                class="optionDropdown"
-                value={model}
-                on:click={() => ($selectedModelType = model)}
-              >
-                {model}
-              </option>
-            {/each}
-          </select>
-        </div>
-        <div>
-          <select
-            class="selectModel"
-            bind:value={task}
-            on:click={() => ($selectedTaskType = task)}
-          >
-            {#if placeholderModel}
-              <option>{placeholderTask}</option>
-            {/if}
-            {#each taskTypes as task, _}
-              <option
-                class="optionDropdown"
-                value={task}
-                on:click={() => ($selectedTaskType = task)}
-              >
-                {task}
-              </option>
-            {/each}
-          </select>
-        </div>
-  
+        <DropdownSelector
+          placeholder={"Select a Network"}
+          type={dropdownSelectorType.NETWORK}
+        />
+
+        <DropdownSelector
+          placeholder={"Select a Model"}
+          type={dropdownSelectorType.MLMODEL}
+        />
+
+        <DropdownSelector
+          placeholder={"Select a Task"}
+          type={dropdownSelectorType.TASK}
+        />
+
         <hr />
-        
+
         <div>Configurable Parameters:</div>
 
         <div>
@@ -221,9 +170,10 @@
             />
           </li>
         </div>
-        
+
         <div>
-          <li>Training Percentage
+          <li>
+            Training Percentage
             {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
               <CustomButton
                 type={"secondary"}
@@ -233,7 +183,7 @@
               >
             {/if}
           </li>
-          
+
           <li class="range">
             <input
               type="range"
@@ -255,13 +205,15 @@
         </div>
 
         <div>
-          <li>Seed
+          <li>
+            Seed
             <CustomButton
               type={"secondary"}
               inverse={false}
               on:click={() => randomize()}
               fontsize={8}>Randomize</CustomButton
-            ></li>
+            >
+          </li>
           <li class="range">
             <input
               type="range"
@@ -383,15 +335,6 @@
     margin-left: 10%;
     align-items: left;
   }
-  .dropdown {
-    position: flex;
-    width: 50%;
-    margin-left: 25%;
-    margin-top: 1%;
-    background-color: whitesmoke;
-    border-radius: 15px;
-    box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.1);
-  }
   .Model {
     position: center;
     width: 55%;
@@ -404,31 +347,6 @@
     background-color: whitesmoke;
   }
 
-  .selectModel {
-    width: 60%;
-    height: 100%;
-    font-family: var(font-family);
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--wueblue);
-    background-color: white;
-    padding: 1%;
-    margin: 2%;
-    cursor: pointer;
-    border-radius: 10px;
-    box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.2);
-  }
-  .optionDropdown {
-    font-family: var(font-family);
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--lightblack);
-    background-color: white;
-    cursor: pointer;
-    cursor:hover {
-      background-color: red;
-    }
-  }
   .slider {
     -webkit-appearance: none; /* Override default CSS styles */
     appearance: none;
