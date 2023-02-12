@@ -5,7 +5,6 @@
   import { TaskType } from "../../../definitions/taskType";
   import CustomButton from "../../common/CustomButton.svelte";
   import { MenuItem } from "../../../definitions/menuItem";
-  import CustomizeTrainingData from "../../common/CustomizeTrainingData.svelte";
   import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte";
   import DropdownSelector from "../../common/DropdownSelector.svelte";
   import { setExperimentTask, getExperimentTasks } from "../../../api/firebase";
@@ -174,14 +173,17 @@
           <li>
             Training Percentage
             {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
-            <PlotDatasetSplitter bind:open={isCustomizeModalOpen} seed={seed} trainPercentage={trainPercentage}  />
+              <PlotDatasetSplitter
+                bind:open={isCustomizeModalOpen}
+                {seed}
+                {trainPercentage}
+              />
               <CustomButton
                 type={"secondary"}
                 inverse={false}
                 fontsize={8}
-                on:click={() => 
-                isCustomizeModalOpen=!isCustomizeModalOpen
-                }>Customize</CustomButton
+                on:click={() => (isCustomizeModalOpen = !isCustomizeModalOpen)}
+                >Customize</CustomButton
               >
             {/if}
           </li>
