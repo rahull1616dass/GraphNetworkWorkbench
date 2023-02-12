@@ -5,6 +5,8 @@
   import { TaskType } from "../../../definitions/taskType";
   import CustomButton from "../../common/CustomButton.svelte";
   import { MenuItem } from "../../../definitions/menuItem";
+  import CustomizeTrainingData from "../../common/CustomizeTrainingData.svelte";
+  import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte";
   import DropdownSelector from "../../common/DropdownSelector.svelte";
   import { setExperimentTask, getExperimentTasks } from "../../../api/firebase";
   import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType";
@@ -25,12 +27,10 @@
   let hiddenLayers = [{ first: true, checked: false, size: 10 }];
   $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
 
+  let isCustomizeModalOpen = false;
+
   function randomize() {
     seed = Math.floor(Math.random() * 10000);
-  }
-
-  function openModal() {
-    return;
   }
 
   function startNewExperiment() {
@@ -174,11 +174,14 @@
           <li>
             Training Percentage
             {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+            <PlotDatasetSplitter bind:open={isCustomizeModalOpen} seed={seed} trainPercentage={trainPercentage}  />
               <CustomButton
                 type={"secondary"}
                 inverse={false}
                 fontsize={8}
-                on:click={() => openModal()}>Customize</CustomButton
+                on:click={() => 
+                isCustomizeModalOpen=!isCustomizeModalOpen
+                }>Customize</CustomButton
               >
             {/if}
           </li>
@@ -316,6 +319,7 @@
     margin-left: 25%;
     margin-right: 20%;
     margin-top: 1%;
+    width: 55%;
   }
   .newExperiment {
     display: flex;
