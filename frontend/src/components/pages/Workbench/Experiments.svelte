@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Dropdown, ProgressBar } from "carbon-components-svelte";
+  import { ProgressBar } from "carbon-components-svelte";
   import { ProgressBarData } from "../../../definitions/progressBarData";
   import { Task } from "../../../definitions/task";
   import { TaskType } from "../../../definitions/taskType";
@@ -7,7 +7,11 @@
   import { MenuItem } from "../../../definitions/menuItem";
   import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte";
   import DropdownSelector from "../../common/DropdownSelector.svelte";
-  import { setExperimentTask, getExperimentTasks, uploadNetworkToStorage } from "../../../api/firebase";
+  import {
+    setExperimentTask,
+    getExperimentTasks,
+    uploadNetworkToStorage,
+  } from "../../../api/firebase";
   import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType";
   import { Node, Link, type Network } from "../../../definitions/network";
   import {
@@ -18,12 +22,9 @@
     selectedMenuItem,
   } from "../../../stores";
   import { fade, slide, scale } from "svelte/transition";
-  import { updateVisSpec } from "../../../util/visSpecUtil";
-  import VisSpec from "../../../data/VisSpec";
   import { UploadedFileType } from "../../../definitions/uploadedFileType";
   import { toCSVFile } from "../../../util/networkParserUtil";
   import { ModalData } from "../../../definitions/modalData";
-  import { log } from "vega";
 
   // These values should be set by UI Elements later on
   let trainPercentage: number = 0.8;
@@ -69,10 +70,9 @@
   }
 
   function saveSplitClicked(event: CustomEvent) {
-    currentNetwork = event.detail.data;
+    currentNetwork = event.detail.network;
     console.log("Current Network", currentNetwork);
     updateNetworkInFirebaseStorage(currentNetwork);
-
   }
   // function loadNetworkValues(network: Network) {
   //   updateVisSpec(network, VisSpec);
@@ -229,7 +229,6 @@
           <li>
             Training Percentage
             {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
-              
               <CustomButton
                 type={"secondary"}
                 inverse={false}

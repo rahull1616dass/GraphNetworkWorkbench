@@ -116,11 +116,11 @@
 </script>
 
 {#if open}
-  <CustomModal on:close={() => (open = false)} >
+  <CustomModal on:close={() => (open = false)}>
     <h4 slot="header">Customize Train/Test Split</h4>
     <div slot="body">
       <div id="viz" />
-      <PlotPrediction/>
+      <PlotPrediction />
       {#if hoverData !== undefined}
         <Hover {hoverData} />
       {/if}
@@ -131,7 +131,7 @@
         type={"secondary"}
         inverse={false}
         on:click={() => {
-          dispatcher("saveSplitClicked", currentNetwork);
+          dispatcher("saveSplitClicked", { network: currentNetwork });
           open = false;
         }}
       >
