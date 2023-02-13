@@ -1,6 +1,6 @@
 ## Interactive Graph Learning Workbench
 
-### The task:
+### Task
 
 An interactive user interface/webpage with following minimal functionalities:
 
@@ -12,3 +12,7 @@ An interactive user interface/webpage with following minimal functionalities:
     - Visualise learned representations
     - Compare predictions for different models/hyperparameter values
     - Interactive manipulation of node or edge features
+
+### Workflow
+
+![Workflow](docs/workflow.png)
