@@ -2,11 +2,11 @@
 </script>
 
 <div class="CardView">
-  <slot class="header" />
+  <slot name="header" />
   <hr />
-  <slot class="body" />
+  <slot name="body" />
   <hr />
-  <slot class="footer" />
+  <slot name="footer" />
 </div>
 
 <style lang="scss">

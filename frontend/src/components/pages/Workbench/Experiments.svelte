@@ -1,81 +1,81 @@
 <script lang="ts">
-  import { ProgressBar } from "carbon-components-svelte"
-  import { ProgressBarData } from "../../../definitions/progressBarData"
-  import { Task } from "../../../definitions/task"
-  import { TaskType } from "../../../definitions/taskType"
-  import CustomButton from "../../common/CustomButton.svelte"
-  import { MenuItem } from "../../../definitions/menuItem"
-  import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte"
-  import DropdownSelector from "../../common/DropdownSelector.svelte"
+  import { ProgressBar } from "carbon-components-svelte";
+  import { ProgressBarData } from "../../../definitions/progressBarData";
+  import { Task } from "../../../definitions/task";
+  import { TaskType } from "../../../definitions/taskType";
+  import CustomButton from "../../common/CustomButton.svelte";
+  import { MenuItem } from "../../../definitions/menuItem";
+  import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte";
+  import DropdownSelector from "../../common/DropdownSelector.svelte";
   import {
     setExperimentTask,
     getExperimentTasks,
     uploadNetworkToStorage,
-  } from "../../../api/firebase"
-  import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType"
-  import { Node, Link, type Network } from "../../../definitions/network"
+  } from "../../../api/firebase";
+  import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType";
+  import { Node, Link, type Network } from "../../../definitions/network";
   import {
     networksList,
     selectedNetworkIndex,
     selectedModelType,
     selectedTaskType,
     selectedMenuItem,
-  } from "../../../stores"
-  import { fade, slide, scale } from "svelte/transition"
-  import { UploadedFileType } from "../../../definitions/uploadedFileType"
-  import { toCSVFile } from "../../../util/networkParserUtil"
-  import { ModalData } from "../../../definitions/modalData"
-  import ExperimentResults from "../../common/ExperimentResults.svelte"
+  } from "../../../stores";
+  import { fade, slide, scale } from "svelte/transition";
+  import { UploadedFileType } from "../../../definitions/uploadedFileType";
+  import { toCSVFile } from "../../../util/networkParserUtil";
+  import { ModalData } from "../../../definitions/modalData";
+  import ExperimentResults from "../../common/ExperimentResults.svelte";
 
   // These values should be set by UI Elements later on
-  let trainPercentage: number = 0.8
-  let epochs: number = 100
-  let learningRate: number = 0.01
-  let seed: number = 42
-  let hiddenLayers = [{ first: true, checked: false, size: 10 }]
-  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
+  let trainPercentage: number = 0.8;
+  let epochs: number = 100;
+  let learningRate: number = 0.01;
+  let seed: number = 42;
+  let hiddenLayers = [{ first: true, checked: false, size: 10 }];
+  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
 
-  let isCustomizeModalOpen: boolean = false
-  let currentNetwork: Network = undefined
+  let isCustomizeModalOpen: boolean = false;
+  let currentNetwork: Network = undefined;
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
     undefined,
     "Error Uploading Network",
     `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
     false
-  )
+  );
 
-  let isResultsPageOpen: boolean = false
+  let isResultsPageOpen: boolean = false;
 
   function randomize() {
-    seed = Math.floor(Math.random() * 10000)
+    seed = Math.floor(Math.random() * 10000);
   }
 
   function startNewExperiment() {
-    isResultsPageOpen = false
-    $selectedTaskType = undefined
-    $selectedModelType = undefined
+    isResultsPageOpen = false;
+    $selectedTaskType = undefined;
+    $selectedModelType = undefined;
   }
 
   let progressBarData: ProgressBarData = new ProgressBarData(
     false,
     "Training..."
-  )
+  );
 
   function add() {
     hiddenLayers = hiddenLayers.concat({
       first: false,
       checked: false,
       size: 10,
-    })
+    });
   }
 
   function clear() {
-    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first)
+    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first);
   }
 
   function saveSplitClicked(event: CustomEvent) {
-    currentNetwork = event.detail.network
-    console.log("Current Network", currentNetwork)
+    currentNetwork = event.detail.network;
+    console.log("Current Network", currentNetwork);
   }
 
   async function updateNetworkInFirebaseStorage(currentNetwork) {
@@ -83,7 +83,7 @@
       UploadedFileType.NODE_FILE,
       Object.keys(new Node()),
       currentNetwork.nodes
-    )
+    );
     const edgeFile = toCSVFile(
       UploadedFileType.EDGE_FILE,
       Object.keys(new Link()),
@@ -94,20 +94,20 @@
           // @ts-ignore
           target: link.target.index,
           value: link.value,
-        }
+        };
       })
-    )
+    );
     await uploadNetworkToStorage(currentNetwork.metadata, nodeFile, edgeFile)
       .then(() => {
-        console.log("Uploaded network to storage")
-        $networksList[$selectedNetworkIndex] = currentNetwork
-        progressBarData.isPresent = false
+        console.log("Uploaded network to storage");
+        $networksList[$selectedNetworkIndex] = currentNetwork;
+        progressBarData.isPresent = false;
       })
       .catch((error) => {
-        progressBarData.isPresent = false
-        console.log("Error uploading network to storage", error)
-        uploadingNetworkErrorModalData.isOpen = true
-      })
+        progressBarData.isPresent = false;
+        console.log("Error uploading network to storage", error);
+        uploadingNetworkErrorModalData.isOpen = true;
+      });
   }
   async function createTask() {
     const taskToBeCreated = new Task(
@@ -119,22 +119,22 @@
       learningRate,
       hiddenLayerSizes,
       seed
-    )
-    const networkId = $networksList[$selectedNetworkIndex].metadata.id
+    );
+    const networkId = $networksList[$selectedNetworkIndex].metadata.id;
     await getExperimentTasks(networkId)
       .then((tasks) => {
-        console.log("Tasks", tasks)
+        console.log("Tasks", tasks);
         tasks.forEach((task) => {
           if (task.equals(taskToBeCreated)) {
-            console.log("Task already exists")
-            return
+            console.log("Task already exists");
+            return;
           }
-        })
-        setTaskDocument(networkId, taskToBeCreated)
+        });
+        setTaskDocument(networkId, taskToBeCreated);
       })
       .catch((error) => {
-        console.log("Error getting tasks list", error)
-      })
+        console.log("Error getting tasks list", error);
+      });
   }
 
   async function setTaskDocument(
@@ -144,14 +144,14 @@
     return new Promise((resolve, reject) => {
       setExperimentTask(networkId, taskToBeCreated)
         .then((task) => {
-          console.log("Task created", task)
-          resolve()
+          console.log("Task created", task);
+          resolve();
         })
         .catch((error) => {
-          console.log("Error creating task", error)
-          reject()
-        })
-    })
+          console.log("Error creating task", error);
+          reject();
+        });
+    });
   }
 </script>
 
@@ -331,8 +331,8 @@
                 trainPercentage === 0 ||
                 trainPercentage === 1}
               on:click={() => {
-                createTask()
-                isResultsPageOpen = true
+                createTask();
+                isResultsPageOpen = true;
               }}>Create Task</CustomButton
             >
           </div>
@@ -349,7 +349,7 @@
         type={"secondary"}
         inverse={false}
         on:click={() => {
-          startNewExperiment()
+          startNewExperiment();
         }}
         >Start New Experiment
       </CustomButton>
