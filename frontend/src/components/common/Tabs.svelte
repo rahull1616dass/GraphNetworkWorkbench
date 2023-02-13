@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte"
   import logo from "../../assets/logo.svg"
   import { selectedMenuItem } from "../../stores"
   import { MenuItem } from "../../definitions/menuItem"

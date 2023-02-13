@@ -3,11 +3,11 @@
   export let flat = false;
   export let inverse = false;
   export let disabled = false;
-  export let fontsize = 16;
+  export let fontsize = 120;
 </script>
 
 
-<button class:flat class:inverse class={type} class:disabled on:click style="font-size: {fontsize + 'px'}">
+<button class:flat class:inverse class={type} class:disabled on:click style="font-size: {fontsize + '%'}">
   <slot />
 </button>
 

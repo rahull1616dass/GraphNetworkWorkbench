@@ -14,6 +14,7 @@
   import CustomButton from "./CustomButton.svelte";
   import { createEventDispatcher } from "svelte";
   import CustomModal from "./CustomModal.svelte";
+  import PlotPrediction from "./PlotPrediction.svelte";
 
   export let open: boolean = false;
   export let seed: number = 0;
@@ -115,10 +116,11 @@
 </script>
 
 {#if open}
-  <CustomModal on:close={() => (open = false)}>
+  <CustomModal on:close={() => (open = false)} >
     <h4 slot="header">Customize Train/Test Split</h4>
     <div slot="body">
       <div id="viz" />
+      <PlotPrediction/>
       {#if hoverData !== undefined}
         <Hover {hoverData} />
       {/if}
@@ -129,7 +131,8 @@
         type={"secondary"}
         inverse={false}
         on:click={() => {
-          dispatcher("onSaveSplitClicked", currentNetwork);
+          dispatcher("saveSplitClicked", currentNetwork);
+          open = false;
         }}
       >
         Save
@@ -142,7 +145,7 @@
           loadNetwork(true);
         }}
       >
-        Cancel
+        Discard Changes
       </CustomButton>
     </div>
   </CustomModal>

@@ -7,8 +7,9 @@
   import { MenuItem } from "../../../definitions/menuItem";
   import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte";
   import DropdownSelector from "../../common/DropdownSelector.svelte";
-  import { setExperimentTask, getExperimentTasks } from "../../../api/firebase";
+  import { setExperimentTask, getExperimentTasks, uploadNetworkToStorage } from "../../../api/firebase";
   import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType";
+  import { Node, Link, type Network } from "../../../definitions/network";
   import {
     networksList,
     selectedNetworkIndex,
@@ -17,6 +18,12 @@
     selectedMenuItem,
   } from "../../../stores";
   import { fade, slide, scale } from "svelte/transition";
+  import { updateVisSpec } from "../../../util/visSpecUtil";
+  import VisSpec from "../../../data/VisSpec";
+  import { UploadedFileType } from "../../../definitions/uploadedFileType";
+  import { toCSVFile } from "../../../util/networkParserUtil";
+  import { ModalData } from "../../../definitions/modalData";
+  import { log } from "vega";
 
   // These values should be set by UI Elements later on
   let trainPercentage: number = 0.8;
@@ -27,6 +34,13 @@
   $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
 
   let isCustomizeModalOpen = false;
+  let currentNetwork: Network = undefined;
+  let uploadingNetworkErrorModalData: ModalData = new ModalData(
+    undefined,
+    "Error Uploading Network",
+    `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
+    false
+  );
 
   function randomize() {
     seed = Math.floor(Math.random() * 10000);
@@ -54,6 +68,48 @@
     hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first);
   }
 
+  function saveSplitClicked(event: CustomEvent) {
+    currentNetwork = event.detail.data;
+    console.log("Current Network", currentNetwork);
+    updateNetworkInFirebaseStorage(currentNetwork);
+
+  }
+  // function loadNetworkValues(network: Network) {
+  //   updateVisSpec(network, VisSpec);
+  //   createVegaEmbed(VisSpec);
+  // }
+
+  async function updateNetworkInFirebaseStorage(currentNetwork) {
+    const nodeFile = toCSVFile(
+      UploadedFileType.NODE_FILE,
+      Object.keys(new Node()),
+      currentNetwork.nodes
+    );
+    const edgeFile = toCSVFile(
+      UploadedFileType.EDGE_FILE,
+      Object.keys(new Link()),
+      currentNetwork.links.map((link) => {
+        return {
+          // @ts-ignore
+          source: link.source.index,
+          // @ts-ignore
+          target: link.target.index,
+          value: link.value,
+        };
+      })
+    );
+    await uploadNetworkToStorage(currentNetwork.metadata, nodeFile, edgeFile)
+      .then(() => {
+        console.log("Uploaded network to storage");
+        $networksList[$selectedNetworkIndex] = currentNetwork;
+        progressBarData.isPresent = false;
+      })
+      .catch((error) => {
+        progressBarData.isPresent = false;
+        console.log("Error uploading network to storage", error);
+        uploadingNetworkErrorModalData.isOpen = true;
+      });
+  }
   async function createTask() {
     const taskToBeCreated = new Task(
       undefined, // This will be set by the backend
@@ -173,18 +229,20 @@
           <li>
             Training Percentage
             {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
-              <PlotDatasetSplitter
-                bind:open={isCustomizeModalOpen}
-                {seed}
-                {trainPercentage}
-              />
+              
               <CustomButton
                 type={"secondary"}
                 inverse={false}
-                fontsize={8}
+                fontsize={60}
                 on:click={() => (isCustomizeModalOpen = !isCustomizeModalOpen)}
                 >Customize</CustomButton
               >
+              <PlotDatasetSplitter
+                bind:open={isCustomizeModalOpen}
+                on:saveSplitClicked={saveSplitClicked}
+                {seed}
+                {trainPercentage}
+              />
             {/if}
           </li>
 
@@ -215,7 +273,7 @@
               type={"secondary"}
               inverse={false}
               on:click={() => randomize()}
-              fontsize={8}>Randomize</CustomButton
+              fontsize={60}>Randomize</CustomButton
             >
           </li>
           <li class="range">
@@ -254,7 +312,7 @@
               <CustomButton
                 type={"secondary"}
                 inverse={false}
-                fontsize={8}
+                fontsize={100}
                 on:click={() => add()}>Add New Layer</CustomButton
               >
 
@@ -262,7 +320,7 @@
               <CustomButton
                 type={"delete"}
                 inverse={false}
-                fontsize={8}
+                fontsize={100}
                 on:click={() => clear()}>Delete Selected Layer</CustomButton
               >
             </div>
