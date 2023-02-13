@@ -1,47 +1,46 @@
 <script lang="ts">
-  import { selectedNetworkIndex, networksList } from "../../stores";
-  import { default as vegaEmbed } from "vega-embed";
-  import VisSpec from "../../data/VisSpec";
-  import { updateVisSpec, setColorKey } from "../../util/visSpecUtil";
-  import { onMount } from "svelte";
-  import { train_test_split } from "../../util/experimentUtil";
-  import type { Network } from "../../definitions/network";
-  import { Node, Link } from "../../definitions/network";
-  import cloneDeep from "lodash.clonedeep";
-  import { HoverData } from "../../definitions/hoverData";
-  import Hover from "../pages/Workbench/Plot/Hover.svelte";
-  import { HoverType } from "../../definitions/hoverType";
-  import CustomButton from "./CustomButton.svelte";
-  import { createEventDispatcher } from "svelte";
-  import CustomModal from "./CustomModal.svelte";
-  import PlotPrediction from "./PlotPrediction.svelte";
+  import { selectedNetworkIndex, networksList } from "../../stores"
+  import { default as vegaEmbed } from "vega-embed"
+  import VisSpec from "../../data/VisSpec"
+  import { updateVisSpec, setColorKey } from "../../util/visSpecUtil"
+  import { onMount } from "svelte"
+  import { train_test_split } from "../../util/experimentUtil"
+  import type { Network } from "../../definitions/network"
+  import { Node, Link } from "../../definitions/network"
+  import cloneDeep from "lodash.clonedeep"
+  import { HoverData } from "../../definitions/hoverData"
+  import Hover from "../pages/Workbench/Plot/Hover.svelte"
+  import { HoverType } from "../../definitions/hoverType"
+  import CustomButton from "./CustomButton.svelte"
+  import { createEventDispatcher } from "svelte"
+  import CustomModal from "./CustomModal.svelte"
+  import PlotPrediction from "./PlotPrediction.svelte"
 
-  export let open: boolean = false;
-  export let seed: number = 0;
-  export let trainPercentage: number = 0.8;
+  export let seed: number = 0
+  export let trainPercentage: number = 0.8
 
-  let hoverData: HoverData = undefined;
-  let currentNetwork: Network = undefined;
-  const dispatcher = createEventDispatcher();
+  let hoverData: HoverData = undefined
+  let currentNetwork: Network = undefined
+  const dispatcher = createEventDispatcher()
 
   // Run an onMount function to initialize the plot
   onMount(() => {
-    loadNetwork(true);
-  });
+    loadNetwork(true)
+  })
 
   function loadNetwork(isFirstLoad: boolean = false) {
     if (isFirstLoad) {
-      currentNetwork = cloneDeep($networksList[$selectedNetworkIndex]);
-      currentNetwork = train_test_split(currentNetwork, seed, trainPercentage);
+      currentNetwork = cloneDeep($networksList[$selectedNetworkIndex])
+      currentNetwork = train_test_split(currentNetwork, seed, trainPercentage)
     }
-    updateVisSpec(currentNetwork, VisSpec);
+    updateVisSpec(currentNetwork, VisSpec)
     if (isFirstLoad) {
-      setColorKey(VisSpec, "is_train");
+      setColorKey(VisSpec, "is_train")
     }
     vegaEmbed("#viz", VisSpec, { actions: false })
       .then((result) => {
         result.view.addEventListener("click", function (_, item) {
-          console.log("CLICK", item);
+          console.log("CLICK", item)
           // @ts-ignore
           if (item.path !== undefined) {
             // Link clicked, pass
@@ -50,30 +49,30 @@
               `For node ${item.datum.name} is_train = ${
                 currentNetwork.nodes[item.datum.index].is_train
               }`
-            );
-            let newValue: number;
+            )
+            let newValue: number
             // See experimentUtils.ts for the meaning of the values
             if (item.datum.is_train === 1) {
-              newValue = 2;
+              newValue = 2
             } else {
-              newValue = 1;
+              newValue = 1
             }
-            currentNetwork.nodes[item.datum.index].is_train = newValue;
+            currentNetwork.nodes[item.datum.index].is_train = newValue
             console.log(
               `For node ${item.datum.name} is_train = ${
                 currentNetwork.nodes[item.datum.index].is_train
               }`
-            );
-            loadNetwork(false);
+            )
+            loadNetwork(false)
           }
-        });
+        })
         result.view.addEventListener("mouseover", function (event, item) {
-          console.log("MOUSEOVER", item);
+          console.log("MOUSEOVER", item)
           if (item != undefined && item.datum != undefined) {
             // @ts-ignore
             if (item != undefined && item.path != undefined) {
               // @ts-ignore
-              console.log(item.path);
+              console.log(item.path)
               hoverData = new HoverData(
                 HoverType.LINK,
                 new Link(
@@ -86,7 +85,7 @@
                 event.clientX,
                 // @ts-ignore
                 event.clientY
-              );
+              )
             } else {
               hoverData = new HoverData(
                 HoverType.NODE,
@@ -102,54 +101,51 @@
                 event.clientX,
                 // @ts-ignore
                 event.clientY
-              );
+              )
             }
           }
-        });
+        })
         result.view.addEventListener("mouseout", function (_, item) {
-          console.log("MOUSEOUT", item);
-          hoverData = undefined;
-        });
+          console.log("MOUSEOUT", item)
+          hoverData = undefined
+        })
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
   }
 </script>
 
-{#if open}
-  <CustomModal on:close={() => (open = false)}>
-    <h4 slot="header">Customize Train/Test Split</h4>
-    <div slot="body">
-      <div id="viz" />
-      
-      {#if hoverData !== undefined}
-        <Hover {hoverData} />
-      {/if}
-    </div>
+<CustomModal on:close={() => console.log("cancel") }>
+  <h4 slot="header">Customize Train/Test Split</h4>
+  <div slot="body">
+    <div id="viz" />
 
-    <div slot="footer">
-      <CustomButton
-        type={"secondary"}
-        inverse={false}
-        on:click={() => {
-          dispatcher("saveSplitClicked", { network: currentNetwork });
-          open = false;
-        }}
-      >
-        Save
-      </CustomButton>
+    {#if hoverData !== undefined}
+      <Hover {hoverData} />
+    {/if}
+  </div>
 
-      <CustomButton
-        type={"delete"}
-        inverse={false}
-        on:click={() => {
-          loadNetwork(true);
-        }}
-      >
-        Discard Changes
-      </CustomButton>
-    </div>
-  </CustomModal>
-{/if}
+  <div slot="footer">
+    <CustomButton
+      type={"secondary"}
+      inverse={false}
+      on:click={() => {
+        dispatcher("saveSplitClicked", { network: currentNetwork })
+      }}
+    >
+      Save
+    </CustomButton>
+
+    <CustomButton
+      type={"delete"}
+      inverse={false}
+      on:click={() => {
+        loadNetwork(true)
+      }}
+    >
+      Discard Changes
+    </CustomButton>
+  </div>
+</CustomModal>
 
 <style lang="scss">
   .viz {
