@@ -47,7 +47,7 @@
   let isResultsPageOpen: boolean = false;
 
   function randomize() {
-    seed = Math.floor(Math.random() * 10000);
+    seed = Math.floor(Math.random() * 10000); 
   }
 
   function startNewExperiment() {
@@ -76,7 +76,6 @@
   function saveSplitClicked(event: CustomEvent) {
     currentNetwork = event.detail.network;
     console.log("Current Network", currentNetwork);
-    updateNetworkInFirebaseStorage(currentNetwork);
   }
 
   async function updateNetworkInFirebaseStorage(currentNetwork) {

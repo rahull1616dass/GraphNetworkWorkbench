@@ -120,7 +120,7 @@
     <h4 slot="header">Customize Train/Test Split</h4>
     <div slot="body">
       <div id="viz" />
-      <PlotPrediction />
+      
       {#if hoverData !== undefined}
         <Hover {hoverData} />
       {/if}
