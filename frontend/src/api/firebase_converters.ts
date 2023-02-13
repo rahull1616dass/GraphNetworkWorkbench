@@ -27,6 +27,7 @@ export const tasksConverter = {
       learning_rate: task.learningRate,
       hidden_layer_sizes: task.hiddenLayerSizes,
       seed: task.seed,
+      index: task.index,
     };
   },
   fromFirestore: function (snapshot, options) {

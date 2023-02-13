@@ -10,7 +10,8 @@ export class Task {
     public trainPercentage: number = undefined,
     public learningRate: number = undefined,
     public hiddenLayerSizes: number[] = undefined,
-    public seed: number = undefined
+    public seed: number = undefined,
+    public index: number = undefined
   ) {}
 
   public equals(other: Task): boolean {
