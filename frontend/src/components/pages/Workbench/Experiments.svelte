@@ -25,6 +25,7 @@
   import { UploadedFileType } from "../../../definitions/uploadedFileType";
   import { toCSVFile } from "../../../util/networkParserUtil";
   import { ModalData } from "../../../definitions/modalData";
+  import ExperimentResults from "../../common/ExperimentResults.svelte";
 
   // These values should be set by UI Elements later on
   let trainPercentage: number = 0.8;
@@ -34,7 +35,7 @@
   let hiddenLayers = [{ first: true, checked: false, size: 10 }];
   $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
 
-  let isCustomizeModalOpen = false;
+  let isCustomizeModalOpen: boolean = false;
   let currentNetwork: Network = undefined;
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
     undefined,
@@ -43,13 +44,16 @@
     false
   );
 
+  let isResultsPageOpen: boolean = false;
+
   function randomize() {
     seed = Math.floor(Math.random() * 10000);
   }
 
   function startNewExperiment() {
-    $selectedMenuItem = MenuItem.PLOT;
-    //$selectedMenuItem = MenuItem.EXPERIMENTS;
+    isResultsPageOpen = false;
+    $selectedTaskType = undefined;
+    $selectedModelType = undefined;
   }
 
   let progressBarData: ProgressBarData = new ProgressBarData(
@@ -74,10 +78,6 @@
     console.log("Current Network", currentNetwork);
     updateNetworkInFirebaseStorage(currentNetwork);
   }
-  // function loadNetworkValues(network: Network) {
-  //   updateVisSpec(network, VisSpec);
-  //   createVegaEmbed(VisSpec);
-  // }
 
   async function updateNetworkInFirebaseStorage(currentNetwork) {
     const nodeFile = toCSVFile(
@@ -157,197 +157,208 @@
 </script>
 
 <div transition:fade>
-  <div class="newExperiment">
-    <CustomButton
-      type={"secondary"}
-      inverse={false}
-      on:click={() => startNewExperiment()}
-      >Start New Experiment
-    </CustomButton>
-  </div>
-  <div class="background">
-    <hr />
+  {#if !isResultsPageOpen}
+    <div class="background">
+      <div>
+        <li class="Model">
+          <DropdownSelector
+            placeholder={"Select a Network"}
+            type={dropdownSelectorType.NETWORK}
+          />
 
-    <div>
-      <li class="Model">
-        <DropdownSelector
-          placeholder={"Select a Network"}
-          type={dropdownSelectorType.NETWORK}
-        />
+          <DropdownSelector
+            placeholder={"Select a Model"}
+            type={dropdownSelectorType.MLMODEL}
+          />
 
-        <DropdownSelector
-          placeholder={"Select a Model"}
-          type={dropdownSelectorType.MLMODEL}
-        />
+          <DropdownSelector
+            placeholder={"Select a Task"}
+            type={dropdownSelectorType.TASK}
+          />
 
-        <DropdownSelector
-          placeholder={"Select a Task"}
-          type={dropdownSelectorType.TASK}
-        />
+          <hr />
 
-        <hr />
+          <div>Configurable Parameters:</div>
 
-        <div>Configurable Parameters:</div>
+          <div>
+            <li>Epochs</li>
+            <li class="range">
+              <input
+                type="range"
+                bind:value={epochs}
+                min="0"
+                max="1000"
+                step="10"
+                class="slider"
+              />
+              <input type="number" bind:value={epochs} class="inputNumber" />
+            </li>
+          </div>
+          <div>
+            <li>Learning Rate</li>
+            <li class="range">
+              <input
+                type="range"
+                bind:value={learningRate}
+                min="0"
+                max="0.4"
+                step="0.001"
+                class="slider"
+              />
+              <input
+                type="number"
+                bind:value={learningRate}
+                min="0"
+                max="0.4"
+                step="0.001"
+                class="inputNumber"
+              />
+            </li>
+          </div>
 
-        <div>
-          <li>Epochs</li>
-          <li class="range">
-            <input
-              type="range"
-              bind:value={epochs}
-              min="0"
-              max="1000"
-              step="10"
-              class="slider"
-            />
-            <input type="number" bind:value={epochs} class="inputNumber" />
-          </li>
-        </div>
-        <div>
-          <li>Learning Rate</li>
-          <li class="range">
-            <input
-              type="range"
-              bind:value={learningRate}
-              min="0"
-              max="0.4"
-              step="0.001"
-              class="slider"
-            />
-            <input
-              type="number"
-              bind:value={learningRate}
-              min="0"
-              max="0.4"
-              step="0.001"
-              class="inputNumber"
-            />
-          </li>
-        </div>
+          <div>
+            <li>
+              Training Percentage
+              {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+                <CustomButton
+                  type={"secondary"}
+                  inverse={false}
+                  fontsize={60}
+                  on:click={() =>
+                    (isCustomizeModalOpen = !isCustomizeModalOpen)}
+                  >Customize</CustomButton
+                >
+                <PlotDatasetSplitter
+                  bind:open={isCustomizeModalOpen}
+                  on:saveSplitClicked={saveSplitClicked}
+                  {seed}
+                  {trainPercentage}
+                />
+              {/if}
+            </li>
 
-        <div>
-          <li>
-            Training Percentage
-            {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+            <li class="range">
+              <input
+                type="range"
+                bind:value={trainPercentage}
+                min="0"
+                max="1"
+                step="0.05"
+                class="slider"
+              />
+              <input
+                type="number"
+                bind:value={trainPercentage}
+                min="0"
+                max="1"
+                step="0.05"
+                class="inputNumber"
+              />
+            </li>
+          </div>
+
+          <div>
+            <li>
+              Seed
               <CustomButton
                 type={"secondary"}
                 inverse={false}
-                fontsize={60}
-                on:click={() => (isCustomizeModalOpen = !isCustomizeModalOpen)}
-                >Customize</CustomButton
+                on:click={() => randomize()}
+                fontsize={60}>Randomize</CustomButton
               >
-              <PlotDatasetSplitter
-                bind:open={isCustomizeModalOpen}
-                on:saveSplitClicked={saveSplitClicked}
-                {seed}
-                {trainPercentage}
+            </li>
+            <li class="range">
+              <input
+                type="range"
+                bind:value={seed}
+                min="0"
+                max="1000"
+                step="10"
+                class="slider"
               />
-            {/if}
-          </li>
+              <input type="number" bind:value={seed} class="inputNumber" />
+            </li>
+          </div>
 
-          <li class="range">
-            <input
-              type="range"
-              bind:value={trainPercentage}
-              min="0"
-              max="1"
-              step="0.05"
-              class="slider"
-            />
-            <input
-              type="number"
-              bind:value={trainPercentage}
-              min="0"
-              max="1"
-              step="0.05"
-              class="inputNumber"
-            />
-          </li>
-        </div>
+          <div>
+            <li>Add/Delete Hidden Layers</li>
+            <li class="hiddenLayers">
+              {#each hiddenLayers as hiddenLayer, index}
+                <div class:checked={hiddenLayer.checked}>
+                  <label for="hiddenLayer">Hidden Layer {index + 1}</label>
+                  <input type="checkbox" bind:checked={hiddenLayer.checked} />
+                  <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    step="1"
+                    class="slider"
+                    bind:value={hiddenLayer.size}
+                  />
+                  {hiddenLayer.size}
+                </div>
+              {/each}
 
-        <div>
-          <li>
-            Seed
+              <div class="hiddenLayerButtons">
+                <CustomButton
+                  type={"secondary"}
+                  inverse={false}
+                  fontsize={100}
+                  on:click={() => add()}>Add New Layer</CustomButton
+                >
+
+                -
+                <CustomButton
+                  type={"delete"}
+                  inverse={false}
+                  fontsize={100}
+                  on:click={() => clear()}>Delete Selected Layer</CustomButton
+                >
+              </div>
+            </li>
+          </div>
+
+          <hr />
+
+          <div class="createTask">
             <CustomButton
               type={"secondary"}
               inverse={false}
-              on:click={() => randomize()}
-              fontsize={60}>Randomize</CustomButton
+              disabled={$selectedModelType === undefined ||
+                $selectedTaskType === undefined ||
+                epochs === 0 ||
+                learningRate === 0.0 ||
+                trainPercentage === 0 ||
+                trainPercentage === 1}
+              on:click={() => {
+                createTask();
+                isResultsPageOpen = true;
+              }}>Create Task</CustomButton
             >
-          </li>
-          <li class="range">
-            <input
-              type="range"
-              bind:value={seed}
-              min="0"
-              max="1000"
-              step="10"
-              class="slider"
-            />
-            <input type="number" bind:value={seed} class="inputNumber" />
-          </li>
-        </div>
+          </div>
+        </li>
 
-        <div>
-          <li>Add/Delete Hidden Layers</li>
-          <li class="hiddenLayers">
-            {#each hiddenLayers as hiddenLayer, index}
-              <div class:checked={hiddenLayer.checked}>
-                <label for="hiddenLayer">Hidden Layer {index + 1}</label>
-                <input type="checkbox" bind:checked={hiddenLayer.checked} />
-                <input
-                  type="range"
-                  min="1"
-                  max="20"
-                  step="1"
-                  class="slider"
-                  bind:value={hiddenLayer.size}
-                />
-                {hiddenLayer.size}
-              </div>
-            {/each}
+        <li class="Modal" />
+      </div>
 
-            <div class="hiddenLayerButtons">
-              <CustomButton
-                type={"secondary"}
-                inverse={false}
-                fontsize={100}
-                on:click={() => add()}>Add New Layer</CustomButton
-              >
-
-              -
-              <CustomButton
-                type={"delete"}
-                inverse={false}
-                fontsize={100}
-                on:click={() => clear()}>Delete Selected Layer</CustomButton
-              >
-            </div>
-          </li>
-        </div>
-
-        <hr />
-
-        <div class="createTask">
-          <CustomButton
-            type={"secondary"}
-            inverse={false}
-            disabled={$selectedModelType === undefined ||
-              $selectedTaskType === undefined ||
-              epochs === 0 ||
-              learningRate === 0.0 ||
-              trainPercentage === 0 ||
-              trainPercentage === 1}
-            on:click={() => createTask()}>Create Task</CustomButton
-          >
-        </div>
-      </li>
-
-      <li class="Modal" />
+      <hr />
+    </div>
+  {:else}
+    <div class="newExperiment">
+      <CustomButton
+        type={"secondary"}
+        inverse={false}
+        on:click={() => {
+          startNewExperiment();
+        }}
+        >Start New Experiment
+      </CustomButton>
     </div>
 
     <hr />
-  </div>
+
+    <ExperimentResults />
+  {/if}
 </div>
 
 <style lang="scss">
