@@ -1,5 +1,5 @@
-import { Metadata } from "../definitions/network";
-import { Task } from "../definitions/task";
+import { Metadata } from "../definitions/network"
+import { Task } from "../definitions/task"
 
 export const metadataConverter = {
   toFirestore: function (metadata: Metadata) {
@@ -8,13 +8,13 @@ export const metadataConverter = {
       name: metadata.name,
       description: metadata.description,
       color: metadata.color,
-    };
+    }
   },
   fromFirestore: function (snapshot, options) {
-    const data = snapshot.data(options);
-    return new Metadata(data.id, data.name, data.description, data.color);
+    const data = snapshot.data(options)
+    return new Metadata(data.id, data.name, data.description, data.color)
   },
-};
+}
 
 export const tasksConverter = {
   toFirestore: function (task: Task) {
@@ -27,11 +27,10 @@ export const tasksConverter = {
       learning_rate: task.learningRate,
       hidden_layer_sizes: task.hiddenLayerSizes,
       seed: task.seed,
-      index: task.index,
-    };
+    }
   },
   fromFirestore: function (snapshot, options) {
-    const data = snapshot.data(options);
+    const data = snapshot.data(options)
     return new Task(
       data.id,
       data.mlModelType,
@@ -41,6 +40,6 @@ export const tasksConverter = {
       data.learning_rate,
       data.hidden_layer_sizes,
       data.seed
-    );
+    )
   },
-};
+}
