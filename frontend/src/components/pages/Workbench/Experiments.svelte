@@ -110,6 +110,7 @@
         uploadingNetworkErrorModalData.isOpen = true
       })
   }
+  
   async function createTask() {
     const taskToBeCreated = new Task(
       undefined, // This will be set by the backend

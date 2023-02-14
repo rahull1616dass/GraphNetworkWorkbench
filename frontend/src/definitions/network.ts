@@ -1,9 +1,27 @@
+import { toCSVFile } from "../util/networkParserUtil"
+import { UploadedFileType } from "./uploadedFileType"
+
 export class Network{
     constructor(
         public metadata: Metadata = new Metadata(),
         public nodes: Node[] = [],
         public links: Link[] = []
     ){}
+
+    public toFiles(): Record<string, File> {
+        return {
+            nodes: toCSVFile(
+                UploadedFileType.NODE_FILE,
+                Object.keys(new Node()),
+                this.nodes
+              ),
+            links: toCSVFile(
+                UploadedFileType.EDGE_FILE,
+                Object.keys(new Link()),
+                this.links
+              )
+        }
+    }
 }
 
 

@@ -21,6 +21,7 @@ import {
   uploadBytes,
   getBlob,
   deleteObject,
+  type StorageReference,
 } from "firebase/storage"
 import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
@@ -72,9 +73,19 @@ function getNetworkPath(networkId: string): string {
   return `Users/${get(authUserStore).uid}/Networks/${networkId}`
 }
 
-function getStorageRefs(networkId: string): any {
+function getStorageRefs(networkId: string, taskId: string = undefined): Record<string, StorageReference> {
+  /*
+  Returns the storage references for the nodes and edges files of a network.
+  If taskId is true, the storage references for the task files are returned.
+  */
   const storage = getStorage(app)
   const networkPath = getNetworkPath(networkId)
+  if (taskId !== undefined) {
+    return {
+      nodesFileRef: ref(storage, `${networkPath}/Tasks/${taskId}/nodes.csv`),
+      edgesFileRef: ref(storage, `${networkPath}/Tasks/${taskId}/edges.csv`),
+    }
+  }
   return {
     nodesFileRef: ref(storage, `${networkPath}/nodes.csv`),
     edgesFileRef: ref(storage, `${networkPath}/edges.csv`),
@@ -103,10 +114,11 @@ export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
 export async function uploadNetworkToStorage(
   networkMetadata: Metadata,
   nodesFile: File,
-  edgesFile: File
+  edgesFile: File,
+  taskId: string = undefined
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const storagePaths = getStorageRefs(networkMetadata.id)
+    const storagePaths = getStorageRefs(networkMetadata.id, taskId)
     uploadBytes(storagePaths.nodesFileRef, nodesFile)
       .then((nodesFileSnapshot) => {
         console.log(`Uploaded nodes file for network ${networkMetadata.id}`)

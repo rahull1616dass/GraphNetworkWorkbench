@@ -207,19 +207,8 @@
     index was missing and it was added by the client. In these cases, the user's file
     is not the same as the network that we want to upload.
     */
-    await uploadNetworkToStorage(
-      newNetwork.metadata,
-      toCSVFile(
-        UploadedFileType.NODE_FILE,
-        Object.keys(new Node()),
-        newNetwork.nodes
-      ),
-      toCSVFile(
-        UploadedFileType.EDGE_FILE,
-        Object.keys(new Link()),
-        newNetwork.links
-      )
-    )
+    let files: Record<string, File> = newNetwork.toFiles()
+    await uploadNetworkToStorage(newNetwork.metadata,files.nodes, files.links)
       .then((url) => {
         console.log(`Network uploaded to ${url}`)
         //TODO Newline does not render in the modal currently.
