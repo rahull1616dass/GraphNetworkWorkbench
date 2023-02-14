@@ -9,6 +9,7 @@ import {
   query,
   getDocs,
   initializeFirestore,
+  DocumentReference,
 } from "firebase/firestore"
 import {
   getAuth,
@@ -27,12 +28,9 @@ import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
 import { authUserStore, loginUserStore, networksList } from "../stores"
 import { get } from "svelte/store"
-import { Network, type Metadata, Node, Link } from "../definitions/network"
+import { Network, Metadata, Node, Link } from "../definitions/network"
 import { metadataConverter, tasksConverter } from "./firebase_converters"
-import {
-  blobToFile,
-  parseNetwork,
-} from "../util/networkParserUtil"
+import { blobToFile, parseNetwork } from "../util/networkParserUtil"
 import type { Task } from "../definitions/task"
 
 export const app: FirebaseApp = initializeApp(firebaseConfig)
@@ -46,6 +44,24 @@ const enum Database {
   TASKS = "Tasks",
 }
 
+// ---- Authentication ----
+async function setUserDocument(user: LoginUser): Promise<void> {
+  return new Promise((resolve, reject) => {
+    setDoc(doc(db, Database.USERS, user.uid), {
+      // Explicitly set the fields rather than using the spread operator
+      // to avoid setting the passwords to the document
+      email: user.email,
+      uid: user.uid,
+    })
+      .then(() => {
+        resolve()
+      })
+      .catch((error) => {
+        console.log(`Error setting user.id: ${user.uid} document. ${error}`)
+        reject(error)
+      })
+  })
+}
 export async function registerUser(loginUser: LoginUser): Promise<void> {
   return new Promise((resolve, reject) => {
     createUserWithEmailAndPassword(
@@ -67,31 +83,6 @@ export async function registerUser(loginUser: LoginUser): Promise<void> {
       })
   })
 }
-
-function getNetworkPath(networkId: string): string {
-  if (networkId === undefined) return `Users/${get(authUserStore).uid}/Networks`
-  return `Users/${get(authUserStore).uid}/Networks/${networkId}`
-}
-
-function getStorageRefs(networkId: string, taskId: string = undefined): Record<string, StorageReference> {
-  /*
-  Returns the storage references for the nodes and edges files of a network.
-  If taskId is true, the storage references for the task files are returned.
-  */
-  const storage = getStorage(app)
-  const networkPath = getNetworkPath(networkId)
-  if (taskId !== undefined) {
-    return {
-      nodesFileRef: ref(storage, `${networkPath}/Tasks/${taskId}/nodes.csv`),
-      edgesFileRef: ref(storage, `${networkPath}/Tasks/${taskId}/edges.csv`),
-    }
-  }
-  return {
-    nodesFileRef: ref(storage, `${networkPath}/nodes.csv`),
-    edgesFileRef: ref(storage, `${networkPath}/edges.csv`),
-  }
-}
-
 export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
   return new Promise((resolve, reject) => {
     signInWithEmailAndPassword(
@@ -110,28 +101,65 @@ export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
       })
   })
 }
+// ---- Authentication ----
 
+// ---- Networks ----
+function getNetworkPath(networkId: string): string {
+  if (networkId === undefined) return `Users/${get(authUserStore).uid}/Networks`
+  return `Users/${get(authUserStore).uid}/Networks/${networkId}`
+}
+function getStorageRefs(
+  networkId: string,
+  taskId: string | undefined = undefined
+): Record<string, StorageReference> {
+  /*
+  Returns the storage references for the nodes and edges files of a network.
+  If taskId is true, the storage references for the task files are returned.
+  */
+  const storage = getStorage(app)
+  const networkPath = getNetworkPath(networkId)
+  if (taskId !== undefined) {
+    return {
+      nodesFileRef: ref(storage, `${networkPath}/Tasks/${taskId}/nodes.csv`),
+      edgesFileRef: ref(storage, `${networkPath}/Tasks/${taskId}/edges.csv`),
+    }
+  }
+  return {
+    nodesFileRef: ref(storage, `${networkPath}/nodes.csv`),
+    edgesFileRef: ref(storage, `${networkPath}/edges.csv`),
+  }
+}
 export async function uploadNetworkToStorage(
-  networkMetadata: Metadata,
+  networkMetadata: Metadata = undefined,
   nodesFile: File,
   edgesFile: File,
-  taskId: string = undefined
+  taskId: string | undefined = undefined,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const storagePaths = getStorageRefs(networkMetadata.id, taskId)
     uploadBytes(storagePaths.nodesFileRef, nodesFile)
-      .then((nodesFileSnapshot) => {
+      .then(() => {
         console.log(`Uploaded nodes file for network ${networkMetadata.id}`)
         uploadBytes(storagePaths.edgesFileRef, edgesFile)
-          .then((edgesFileSnapshot) => {
+          .then(() => {
             console.log(`Uploaded edges file for network ${networkMetadata.id}`)
-            saveNetworkDocument(networkMetadata)
-              .then(() => {
-                resolve()
-              })
-              .catch((error) => {
-                reject(error)
-              })
+            /*
+            If the network is being uploaded for a task, the network metadata
+            is not saved to the database, as this is not a network creation task.
+            The assumption is that the document for this network under
+            Users/{uid}/Networks/{networkId} already exists.
+            */
+            if (taskId !== undefined) {
+              resolve()
+            } else {
+              saveNetworkDocument(networkMetadata)
+                .then(() => {
+                  resolve()
+                })
+                .catch((error) => {
+                  reject(error)
+                })
+            }
           })
           .catch((error) => {
             reject(error)
@@ -142,7 +170,6 @@ export async function uploadNetworkToStorage(
       })
   })
 }
-
 async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
   return new Promise((resolve, reject) => {
     setDoc(
@@ -157,7 +184,6 @@ async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
       })
   })
 }
-
 export async function getNetworks() {
   const networksQuery = query(collection(db, getNetworkPath(undefined)))
   await getDocs(networksQuery).then((querySnapshot) => {
@@ -170,7 +196,6 @@ export async function getNetworks() {
     })
   })
 }
-
 export async function getNetworkFromStorage(
   metadata: Metadata
 ): Promise<Network> {
@@ -209,50 +234,6 @@ export async function getNetworkFromStorage(
       })
   })
 }
-
-export async function setExperimentTask(
-  networkId: string,
-  task: Task
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    addDoc(
-      collection(db, `${getNetworkPath(networkId)}/${Database.TASKS}`),
-      tasksConverter.toFirestore(task)
-    )
-      .then(() => {
-        resolve()
-      })
-      .catch((error) => {
-        console.log(
-          `Error setting experiment task for network ${networkId}. ${error}`
-        )
-        reject(error)
-      })
-  })
-}
-
-export async function getExperimentTasks(networkId: string): Promise<Task[]> {
-  return new Promise((resolve, reject) => {
-    const tasksQuery = query(
-      collection(db, getNetworkPath(networkId), Database.TASKS)
-    )
-    getDocs(tasksQuery)
-      .then((querySnapshot) => {
-        let tasks: Task[] = []
-        querySnapshot.forEach((doc) => {
-          tasks.push(tasksConverter.fromFirestore(doc, undefined))
-        })
-        resolve(tasks)
-      })
-      .catch((error) => {
-        console.log(
-          `Error getting experiment tasks for network ${networkId}. ${error}`
-        )
-        reject(error)
-      })
-  })
-}
-
 export async function deleteNetwork(networkId: string): Promise<void> {
   return new Promise((resolve, reject) => {
     deleteDoc(doc(db, getNetworkPath(networkId))).then(() => {
@@ -286,21 +267,54 @@ export async function deleteNetwork(networkId: string): Promise<void> {
     })
   })
 }
+// ---- Network ----
 
-async function setUserDocument(user: LoginUser): Promise<void> {
+// ---- Experiments/Tasks ----
+export async function setExperimentTask(
+  network: Network,
+  task: Task
+): Promise<void> {
   return new Promise((resolve, reject) => {
-    setDoc(doc(db, Database.USERS, user.uid), {
-      // Explicitly set the fields rather than using the spread operator
-      // to avoid setting the passwords to the document
-      email: user.email,
-      uid: user.uid,
-    })
-      .then(() => {
+    let files = network.toFiles()
+    addDoc(
+      collection(
+        db,
+        `${getNetworkPath(network.metadata.id)}/${Database.TASKS}`
+      ),
+      tasksConverter.toFirestore(task)
+    )
+      .then((doc: DocumentReference) => {
+        uploadNetworkToStorage(network.metadata, files.nodes, files.links, doc.id)
         resolve()
       })
       .catch((error) => {
-        console.log(`Error setting user.id: ${user.uid} document. ${error}`)
+        console.log(
+          `Error setting experiment task for network ${network.metadata.id}. ${error}`
+        )
         reject(error)
       })
   })
 }
+
+export async function getExperimentTasks(networkId: string): Promise<Task[]> {
+  return new Promise((resolve, reject) => {
+    const tasksQuery = query(
+      collection(db, getNetworkPath(networkId), Database.TASKS)
+    )
+    getDocs(tasksQuery)
+      .then((querySnapshot) => {
+        let tasks: Task[] = []
+        querySnapshot.forEach((doc) => {
+          tasks.push(tasksConverter.fromFirestore(doc, undefined))
+        })
+        resolve(tasks)
+      })
+      .catch((error) => {
+        console.log(
+          `Error getting experiment tasks for network ${networkId}. ${error}`
+        )
+        reject(error)
+      })
+  })
+}
+// ---- Experiments/Tasks ----

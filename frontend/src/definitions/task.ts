@@ -1,5 +1,6 @@
 import type { MLModelType } from "./mlModelType";
 import type { TaskType } from "./taskType";
+import type { Timestamp } from "firebase/firestore";
 
 export class Task {
   constructor(
@@ -11,7 +12,7 @@ export class Task {
     public learningRate: number = undefined,
     public hiddenLayerSizes: number[] = undefined,
     public seed: number = undefined,
-   // public index: number = undefined
+    public createdAt: Timestamp = undefined,
   ) {}
 
   public equals(other: Task): boolean {

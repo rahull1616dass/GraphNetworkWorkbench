@@ -122,8 +122,7 @@
       hiddenLayerSizes,
       seed
     )
-    const networkId = $networksList[$selectedNetworkIndex].metadata.id
-    await getExperimentTasks(networkId)
+    await getExperimentTasks($networksList[$selectedNetworkIndex].metadata.id)
       .then((tasks) => {
         console.log("Tasks", tasks)
         tasks.forEach((task) => {
@@ -132,7 +131,7 @@
             return
           }
         })
-        setTaskDocument(networkId, taskToBeCreated)
+        setTaskDocument($networksList[$selectedNetworkIndex], taskToBeCreated)
       })
       .catch((error) => {
         console.log("Error getting tasks list", error)
@@ -140,11 +139,11 @@
   }
 
   async function setTaskDocument(
-    networkId: string,
+    network: Network,
     taskToBeCreated: Task
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      setExperimentTask(networkId, taskToBeCreated)
+      setExperimentTask(network, taskToBeCreated)
         .then((task) => {
           console.log("Task created", task)
           resolve()
