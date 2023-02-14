@@ -114,8 +114,8 @@
       undefined, // This will be set by the backend
       $selectedModelType,
       $selectedTaskType,
-      trainPercentage,
       epochs,
+      trainPercentage,
       learningRate,
       hiddenLayerSizes,
       seed
