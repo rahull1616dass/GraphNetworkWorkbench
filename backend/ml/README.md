@@ -59,4 +59,15 @@ See details about CI/CD in [.gitlab-ci.yml](../../.gitlab-ci.yml) and in [deploy
 
 ![Main workflow](./docs/architecture.png)
 
+### Gitlab-runner
+
+To run a gitlab runner on the host you want you will need to
+
+- move `deployment/gitlab_runner` directory on the host
+- create `deployment/gitlab_runner/gitlab_runner_config` directory which is the volume for configs
+- move config for docker runner to `deployment/gitlab_runner/gitlab_runner_config/config.toml`
+- run the container with runner
+```shell
+cd deployment/gitlab_runner && docker-compose up --build -d
+```
 

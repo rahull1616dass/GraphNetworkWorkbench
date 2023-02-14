@@ -1,3 +1,4 @@
+apt update && apt install openssh-client rsync -y
 mkdir -p ~/.ssh
 echo "${VINGILOT_PRIVATE_KEY}" > ~/.ssh/uni_wuerzburg_cluster
 chmod 600 ~/.ssh/uni_wuerzburg_cluster
