@@ -75,6 +75,7 @@
 
   function saveSplitClicked(event: CustomEvent) {
     currentNetwork = event.detail.network
+    isCustomizeModalOpen = false
     console.log("Current Network", currentNetwork)
   }
 
