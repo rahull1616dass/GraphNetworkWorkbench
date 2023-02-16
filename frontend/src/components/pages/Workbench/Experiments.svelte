@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte"
+  import { ExperimentState } from "../../../definitions/experimentState"
   import { ProgressBar } from "carbon-components-svelte"
   import { ProgressBarData } from "../../../definitions/progressBarData"
   import { Task } from "../../../definitions/task"
@@ -21,13 +21,16 @@
     selectedModelType,
     selectedTaskType,
     selectedMenuItem,
-    defaultSeed
+    defaultSeed,
   } from "../../../stores"
   import { fade, slide, scale } from "svelte/transition"
   import { UploadedFileType } from "../../../definitions/uploadedFileType"
   import { toCSVFile } from "../../../util/networkParserUtil"
   import { ModalData } from "../../../definitions/modalData"
   import ExperimentResults from "../../common/ExperimentResults.svelte"
+  import { delay } from "../../../util/generalUtil"
+
+  let experimentState: ExperimentState = ExperimentState.CREATE
 
   // These values should be set by UI Elements later on
   let trainPercentage: number = 0.8
@@ -45,24 +48,24 @@
     `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
     false
   )
+
+  /*
+  progressBarData.isPresent = true by default since the page is being controlled by ExperimentState enum anyway
+  */
   let progressBarData: ProgressBarData = new ProgressBarData(
-    false,
+    true,
     "Training..."
   )
-
-  let isResultsPageOpen: boolean = false
-
 
   function randomize() {
     seed = Math.floor(Math.random() * 10000)
   }
 
   function startNewExperiment() {
-    isResultsPageOpen = false
+    experimentState = ExperimentState.CREATE
     $selectedTaskType = undefined
     $selectedModelType = undefined
   }
-
 
   function addHiddenLayer() {
     hiddenLayers = hiddenLayers.concat({
@@ -81,8 +84,10 @@
     isCustomizeModalOpen = false
     console.log("Current Network", currentNetwork)
   }
-  
+
   async function createTask() {
+    experimentState = ExperimentState.PROGRESS
+    await delay(2000) // To simulate task being run. TODO: Remove this later on.
     const taskToBeCreated = new Task(
       undefined, // This will be set by the backend
       $selectedModelType,
@@ -102,33 +107,27 @@
             return
           }
         })
-        setTaskDocument($networksList[$selectedNetworkIndex], taskToBeCreated)
+        setExperimentTask($networksList[$selectedNetworkIndex], taskToBeCreated)
+          .then((task) => {
+            console.log("Task created", task)
+            experimentState = ExperimentState.RESULT
+          })
+          .catch((error) => {
+            experimentState = ExperimentState.ERROR
+            console.log(`Error creating task ${taskToBeCreated}`, error)
+          })
       })
       .catch((error) => {
-        console.log("Error getting tasks list", error)
+        experimentState = ExperimentState.ERROR
+        console.log(
+          `Error retrieving tasks for network ${$networksList[$selectedNetworkIndex]}: ${error}`
+        )
       })
-  }
-
-  async function setTaskDocument(
-    network: Network,
-    taskToBeCreated: Task
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      setExperimentTask(network, taskToBeCreated)
-        .then((task) => {
-          console.log("Task created", task)
-          resolve()
-        })
-        .catch((error) => {
-          console.log("Error creating task", error)
-          reject()
-        })
-    })
   }
 </script>
 
 <div transition:fade>
-  {#if !isResultsPageOpen}
+  {#if experimentState === ExperimentState.CREATE}
     <div class="background">
       <div>
         <li class="Model">
@@ -284,7 +283,8 @@
                   type={"delete"}
                   inverse={false}
                   fontsize={100}
-                  on:click={() => clearHiddenLayer()}>Delete Selected Layer</CustomButton
+                  on:click={() => clearHiddenLayer()}
+                  >Delete Selected Layer</CustomButton
                 >
               </div>
             </li>
@@ -304,7 +304,6 @@
                 trainPercentage === 1}
               on:click={() => {
                 createTask()
-                isResultsPageOpen = true
               }}>Create Task</CustomButton
             >
           </div>
@@ -312,10 +311,13 @@
 
         <li class="Modal" />
       </div>
-
       <hr />
     </div>
-  {:else}
+  {:else if experimentState === ExperimentState.PROGRESS}
+    <div class="progress_bar">
+      <ProgressBar helperText={progressBarData.text} />
+    </div>
+  {:else if experimentState === ExperimentState.RESULT}
     <div class="newExperiment">
       <CustomButton
         type={"secondary"}
@@ -326,10 +328,10 @@
         >Start New Experiment
       </CustomButton>
     </div>
-
     <hr />
-
     <ExperimentResults />
+  {:else if experimentState === ExperimentState.ERROR}
+    <p>Error</p>
   {/if}
 </div>
 

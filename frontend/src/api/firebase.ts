@@ -35,6 +35,7 @@ import { metadataConverter, tasksConverter } from "./firebase_converters"
 import { blobToFile, parseNetwork } from "../util/networkParserUtil"
 import type { Task } from "../definitions/task"
 
+
 export const app: FirebaseApp = initializeApp(firebaseConfig)
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true, // this line
