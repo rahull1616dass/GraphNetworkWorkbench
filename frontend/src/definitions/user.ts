@@ -4,5 +4,6 @@ export class LoginUser {
         public email: string = "",
         public password: string = "",
         public passwordConfirm: string = "",
+        public defaultSeed: number = 42,
     ) { }
 }

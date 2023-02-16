@@ -4,7 +4,9 @@ import {
   collection,
   setDoc,
   addDoc,
+  updateDoc,
   deleteDoc,
+  getDoc,
   doc,
   query,
   getDocs,
@@ -26,7 +28,7 @@ import {
 } from "firebase/storage"
 import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
-import { authUserStore, loginUserStore, networksList } from "../stores"
+import { authUserStore, loginUserStore, networksList, defaultSeed as defaultSeedStore } from "../stores"
 import { get } from "svelte/store"
 import { Network, Metadata, Node, Link } from "../definitions/network"
 import { metadataConverter, tasksConverter } from "./firebase_converters"
@@ -62,6 +64,21 @@ async function setUserDocument(user: LoginUser): Promise<void> {
       })
   })
 }
+
+export async function getDefaultSeed(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    getDoc(doc(db, Database.USERS, get(authUserStore).uid))
+      .then((doc) => {
+        if (doc.exists()) {
+          resolve(doc.data().defaultSeed)
+        } else {
+          reject(`No such document for user ${get(authUserStore).uid}!`)
+        }
+      })
+      .catch((error) => reject(error))
+  })
+}
+
 export async function registerUser(loginUser: LoginUser): Promise<void> {
   return new Promise((resolve, reject) => {
     createUserWithEmailAndPassword(
@@ -105,8 +122,11 @@ export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
 
 // ---- Networks ----
 function getNetworkPath(networkId: string): string {
-  if (networkId === undefined) return `Users/${get(authUserStore).uid}/Networks`
-  return `Users/${get(authUserStore).uid}/Networks/${networkId}`
+  if (networkId === undefined)
+    return `${Database.USERS}/${get(authUserStore).uid}/${Database.NETWORKS}`
+  return `${Database.USERS}/${get(authUserStore).uid}/${
+    Database.NETWORKS
+  }/${networkId}`
 }
 function getStorageRefs(
   networkId: string,
@@ -120,8 +140,14 @@ function getStorageRefs(
   const networkPath = getNetworkPath(networkId)
   if (taskId !== undefined) {
     return {
-      nodesFileRef: ref(storage, `${networkPath}/Tasks/${taskId}/nodes.csv`),
-      edgesFileRef: ref(storage, `${networkPath}/Tasks/${taskId}/edges.csv`),
+      nodesFileRef: ref(
+        storage,
+        `${networkPath}/${Database.TASKS}/${taskId}/nodes.csv`
+      ),
+      edgesFileRef: ref(
+        storage,
+        `${networkPath}/${Database.TASKS}/${taskId}/edges.csv`
+      ),
     }
   }
   return {
@@ -133,7 +159,7 @@ export async function uploadNetworkToStorage(
   networkMetadata: Metadata = undefined,
   nodesFile: File,
   edgesFile: File,
-  taskId: string | undefined = undefined,
+  taskId: string | undefined = undefined
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const storagePaths = getStorageRefs(networkMetadata.id, taskId)
@@ -284,15 +310,20 @@ export async function setExperimentTask(
       tasksConverter.toFirestore(task)
     )
       .then((doc: DocumentReference) => {
-        uploadNetworkToStorage(network.metadata, files.nodes, files.links, doc.id)
-        resolve()
-      })
-      .catch((error) => {
-        console.log(
-          `Error setting experiment task for network ${network.metadata.id}. ${error}`
+        uploadNetworkToStorage(
+          network.metadata,
+          files.nodes,
+          files.links,
+          doc.id
         )
-        reject(error)
+          .then(() => {
+            updateDefaultSeed(task.seed)
+              .then(() => resolve())
+              .catch((error) => reject(error))
+          })
+          .catch((error) => reject(error))
       })
+      .catch((error) => reject(error))
   })
 }
 
@@ -313,6 +344,21 @@ export async function getExperimentTasks(networkId: string): Promise<Task[]> {
         console.log(
           `Error getting experiment tasks for network ${networkId}. ${error}`
         )
+        reject(error)
+      })
+  })
+}
+
+async function updateDefaultSeed(seed: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    updateDoc(doc(db, `${Database.USERS}/${get(authUserStore).uid}`), {
+      defaultSeed: seed,
+    })
+      .then(() => {
+        defaultSeedStore.set(seed)
+        resolve()
+      })
+      .catch((error) => {
         reject(error)
       })
   })

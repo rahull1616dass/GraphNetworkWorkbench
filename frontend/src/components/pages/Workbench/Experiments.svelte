@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte"
   import { ProgressBar } from "carbon-components-svelte"
   import { ProgressBarData } from "../../../definitions/progressBarData"
   import { Task } from "../../../definitions/task"
@@ -13,13 +14,14 @@
     uploadNetworkToStorage,
   } from "../../../api/firebase"
   import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType"
-  import { Node, Link, type Network } from "../../../definitions/network"
+  import type { Network } from "../../../definitions/network"
   import {
     networksList,
     selectedNetworkIndex,
     selectedModelType,
     selectedTaskType,
     selectedMenuItem,
+    defaultSeed
   } from "../../../stores"
   import { fade, slide, scale } from "svelte/transition"
   import { UploadedFileType } from "../../../definitions/uploadedFileType"
@@ -31,7 +33,7 @@
   let trainPercentage: number = 0.8
   let epochs: number = 100
   let learningRate: number = 0.01
-  let seed: number = 42
+  let seed: number = $defaultSeed
   let hiddenLayers = [{ first: true, checked: false, size: 10 }]
   $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
 
@@ -43,8 +45,13 @@
     `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
     false
   )
+  let progressBarData: ProgressBarData = new ProgressBarData(
+    false,
+    "Training..."
+  )
 
   let isResultsPageOpen: boolean = false
+
 
   function randomize() {
     seed = Math.floor(Math.random() * 10000)
@@ -56,12 +63,8 @@
     $selectedModelType = undefined
   }
 
-  let progressBarData: ProgressBarData = new ProgressBarData(
-    false,
-    "Training..."
-  )
 
-  function add() {
+  function addHiddenLayer() {
     hiddenLayers = hiddenLayers.concat({
       first: false,
       checked: false,
@@ -69,7 +72,7 @@
     })
   }
 
-  function clear() {
+  function clearHiddenLayer() {
     hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first)
   }
 
@@ -77,38 +80,6 @@
     currentNetwork = event.detail.network
     isCustomizeModalOpen = false
     console.log("Current Network", currentNetwork)
-  }
-
-  async function updateNetworkInFirebaseStorage(currentNetwork) {
-    const nodeFile = toCSVFile(
-      UploadedFileType.NODE_FILE,
-      Object.keys(new Node()),
-      currentNetwork.nodes
-    )
-    const edgeFile = toCSVFile(
-      UploadedFileType.EDGE_FILE,
-      Object.keys(new Link()),
-      currentNetwork.links.map((link) => {
-        return {
-          // @ts-ignore
-          source: link.source.index,
-          // @ts-ignore
-          target: link.target.index,
-          value: link.value,
-        }
-      })
-    )
-    await uploadNetworkToStorage(currentNetwork.metadata, nodeFile, edgeFile)
-      .then(() => {
-        console.log("Uploaded network to storage")
-        $networksList[$selectedNetworkIndex] = currentNetwork
-        progressBarData.isPresent = false
-      })
-      .catch((error) => {
-        progressBarData.isPresent = false
-        console.log("Error uploading network to storage", error)
-        uploadingNetworkErrorModalData.isOpen = true
-      })
   }
   
   async function createTask() {
@@ -305,7 +276,7 @@
                   type={"secondary"}
                   inverse={false}
                   fontsize={100}
-                  on:click={() => add()}>Add New Layer</CustomButton
+                  on:click={() => addHiddenLayer()}>Add New Layer</CustomButton
                 >
 
                 -
@@ -313,7 +284,7 @@
                   type={"delete"}
                   inverse={false}
                   fontsize={100}
-                  on:click={() => clear()}>Delete Selected Layer</CustomButton
+                  on:click={() => clearHiddenLayer()}>Delete Selected Layer</CustomButton
                 >
               </div>
             </li>

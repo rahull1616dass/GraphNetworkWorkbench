@@ -67,3 +67,4 @@ loginUserStore.subscribe((newLoginUser) => {
     localStorage.removeItem("loginUser")
   }
 })
+export const defaultSeed: Writable<number> = writable(42)
