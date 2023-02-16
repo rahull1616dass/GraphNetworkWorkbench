@@ -1,5 +1,6 @@
 import { Metadata } from "../definitions/network"
 import { Task } from "../definitions/task"
+import { ExperimentState } from "../definitions/experimentState"
 
 export const metadataConverter = {
   toFirestore: function (metadata: Metadata) {
@@ -27,6 +28,9 @@ export const tasksConverter = {
       learning_rate: task.learningRate,
       hidden_layer_sizes: task.hiddenLayerSizes,
       seed: task.seed,
+      createdAt: task.createdAt,
+      // @ts-ignore
+      state: ExperimentState[task.state],
     }
   },
   fromFirestore: function (snapshot, options) {
@@ -39,7 +43,9 @@ export const tasksConverter = {
       data.train_percentage,
       data.learning_rate,
       data.hidden_layer_sizes,
-      data.seed
+      data.seed,
+      data.createdAt,
+      data.state
     )
   },
 }

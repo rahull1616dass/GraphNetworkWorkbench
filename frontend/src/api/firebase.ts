@@ -12,6 +12,8 @@ import {
   getDocs,
   initializeFirestore,
   DocumentReference,
+  onSnapshot,
+  Timestamp,
 } from "firebase/firestore"
 import {
   getAuth,
@@ -28,13 +30,18 @@ import {
 } from "firebase/storage"
 import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
-import { authUserStore, loginUserStore, networksList, defaultSeed as defaultSeedStore } from "../stores"
+import {
+  authUserStore,
+  loginUserStore,
+  networksList,
+  defaultSeed as defaultSeedStore,
+} from "../stores"
 import { get } from "svelte/store"
 import { Network, Metadata, Node, Link } from "../definitions/network"
 import { metadataConverter, tasksConverter } from "./firebase_converters"
 import { blobToFile, parseNetwork } from "../util/networkParserUtil"
 import type { Task } from "../definitions/task"
-
+import { ExperimentState } from "../definitions/experimentState"
 
 export const app: FirebaseApp = initializeApp(firebaseConfig)
 export const db = initializeFirestore(app, {
@@ -45,6 +52,10 @@ const enum Database {
   USERS = "Users",
   NETWORKS = "Networks",
   TASKS = "Tasks",
+}
+
+export function getCurrentTimestamp(): Timestamp {
+  return Timestamp.now()
 }
 
 // ---- Authentication ----
@@ -300,7 +311,7 @@ export async function deleteNetwork(networkId: string): Promise<void> {
 export async function setExperimentTask(
   network: Network,
   task: Task
-): Promise<void> {
+): Promise<string> {
   return new Promise((resolve, reject) => {
     let files = network.toFiles()
     addDoc(
@@ -310,16 +321,16 @@ export async function setExperimentTask(
       ),
       tasksConverter.toFirestore(task)
     )
-      .then((doc: DocumentReference) => {
+      .then((taskDoc: DocumentReference) => {
         uploadNetworkToStorage(
           network.metadata,
           files.nodes,
           files.links,
-          doc.id
+          taskDoc.id
         )
           .then(() => {
             updateDefaultSeed(task.seed)
-              .then(() => resolve())
+              .then(() => resolve(taskDoc.id))
               .catch((error) => reject(error))
           })
           .catch((error) => reject(error))
@@ -362,6 +373,38 @@ async function updateDefaultSeed(seed: number): Promise<void> {
       .catch((error) => {
         reject(error)
       })
+  })
+}
+
+export async function listenForExperimentResult(
+  networkId: string,
+  taskId: string
+): Promise<Task> {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onSnapshot(
+      doc(db, getNetworkPath(networkId), Database.TASKS, taskId),
+      (doc) => {
+        // @ts-ignore
+        const currentState: ExperimentState = ExperimentState[doc.data().state]
+        if (
+          [
+            ExperimentState.PROGRESS,
+            ExperimentState.RESULT,
+            ExperimentState.ERROR,
+          ].includes(currentState)
+        ) {
+          if (ExperimentState.PROGRESS === currentState) {
+            console.log(`Experiment ${taskId} is in progress. Keep calm and carry on.`)
+            return
+          } else {
+            unsubscribe()
+            resolve(tasksConverter.fromFirestore(doc, undefined))
+          }
+        } else {
+          reject(`Invalid experiment state: ${doc.data().state}`)
+        }
+      }
+    )
   })
 }
 // ---- Experiments/Tasks ----

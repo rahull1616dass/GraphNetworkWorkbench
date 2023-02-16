@@ -1,6 +1,7 @@
 import type { MLModelType } from "./mlModelType";
 import type { TaskType } from "./taskType";
-import type { Timestamp } from "firebase/firestore";
+import type { Timestamp } from "firebase/firestore"
+import type { ExperimentState } from "./experimentState"
 
 export class Task {
   constructor(
@@ -13,6 +14,7 @@ export class Task {
     public hiddenLayerSizes: number[] = undefined,
     public seed: number = undefined,
     public createdAt: Timestamp = undefined,
+    public state: ExperimentState = undefined,
   ) {}
 
   public equals(other: Task): boolean {

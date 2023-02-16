@@ -11,7 +11,8 @@
   import {
     setExperimentTask,
     getExperimentTasks,
-    uploadNetworkToStorage,
+    getCurrentTimestamp,
+    listenForExperimentResult,
   } from "../../../api/firebase"
   import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType"
   import type { Network } from "../../../definitions/network"
@@ -54,7 +55,7 @@
   */
   let progressBarData: ProgressBarData = new ProgressBarData(
     true,
-    "Training..."
+    "Creating experiment..."
   )
 
   function randomize() {
@@ -96,8 +97,11 @@
       trainPercentage,
       learningRate,
       hiddenLayerSizes,
-      seed
+      seed,
+      getCurrentTimestamp(),
+      ExperimentState.PROGRESS
     )
+
     await getExperimentTasks($networksList[$selectedNetworkIndex].metadata.id)
       .then((tasks) => {
         console.log("Tasks", tasks)
@@ -108,9 +112,21 @@
           }
         })
         setExperimentTask($networksList[$selectedNetworkIndex], taskToBeCreated)
-          .then((task) => {
-            console.log("Task created", task)
-            experimentState = ExperimentState.RESULT
+          .then((taskDocId) => {
+            console.log(`Task created with id: ${taskDocId}`)
+            progressBarData.text = "Experiment created. Running..."
+            listenForExperimentResult(
+              $networksList[$selectedNetworkIndex].metadata.id,
+              taskDocId
+            ).then((resultTask: Task) => {
+              progressBarData.isPresent = false
+              console.log("Result", resultTask)
+              // @ts-ignore
+              experimentState = ExperimentState[resultTask.state]
+            }).catch((error) => {
+              experimentState = ExperimentState.ERROR
+              console.log(`Error listening for experiment result: ${error}`)
+            })
           })
           .catch((error) => {
             experimentState = ExperimentState.ERROR
