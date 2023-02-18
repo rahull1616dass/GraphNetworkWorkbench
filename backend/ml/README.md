@@ -33,6 +33,8 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 RABBITMQ_HOST=localhost
 RABBITMQ_PORT=5672
+RABBITMQ_USER=guest
+RABBITMQ_PASSWORD=guest
 ```
 
 start task manager workers
@@ -70,4 +72,17 @@ To run a gitlab runner on the host you want you will need to
 ```shell
 cd deployment/gitlab_runner && docker-compose up --build -d
 ```
-
+- if you start the runner at first time you will need to attach the service
+```shell
+docker-compose exec gitlab-runner bash
+```
+- then you will need to register the runner in the interactive tty by following the instructions
+```shell
+gitlab-runner register
+```
+It will create a file `deployment/gitlab_runner/gitlab_runner_config/config.toml`
+You will need to restart the service
+```shell
+docker-compose down
+docker-compose up --build -d
+```
