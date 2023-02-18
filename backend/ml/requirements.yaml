@@ -3,6 +3,7 @@ channels:
   - nvidia
   - pyg
   - conda-forge
+  - zeroae
   - defaults
 dependencies:
   - python=3.10.8=haa1d7c7_0
