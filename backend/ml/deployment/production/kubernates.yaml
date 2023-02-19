@@ -34,6 +34,10 @@ spec:
             value: "rabbitmq-service"
           - name: RABBITMQ_PORT
             value: "5672"
+          - name: RABBITMQ_USER
+            value: "guest"
+          - name: RABBITMQ_PASSWORD
+            value: "guest"
         command: ["celery", "-A", "task_manager.tasks", "worker"]
         volumeMounts:
           - mountPath: /workspace
@@ -86,6 +90,10 @@ spec:
             value: "rabbitmq-service"
           - name: RABBITMQ_PORT
             value: "5672"
+          - name: RABBITMQ_USER
+            value: "guest"
+          - name: RABBITMQ_PASSWORD
+            value: "guest"
         command: ["uvicorn", "app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
         ports:
         - name: http
