@@ -30,6 +30,9 @@
   import { ModalData } from "../../../definitions/modalData"
   import ExperimentResults from "../../common/ExperimentResults.svelte"
   import { delay } from "../../../util/generalUtil"
+  import { onMount } from "svelte"
+  import { DataTable } from "carbon-components-svelte"
+    import { metadataConverter } from "../../../api/firebase_converters"
 
   let experimentState: ExperimentState = ExperimentState.CREATE
 
@@ -42,7 +45,7 @@
   $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
 
   let isCustomizeModalOpen: boolean = false
-  let currentNetwork: Network = undefined
+  let currentNetwork: Network = $networksList[$selectedNetworkIndex]
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
     undefined,
     "Error Uploading Network",
@@ -57,6 +60,7 @@
     true,
     "Creating experiment..."
   )
+
 
   function randomize() {
     seed = Math.floor(Math.random() * 10000)
@@ -332,6 +336,24 @@
   {:else if experimentState === ExperimentState.PROGRESS}
     <div class="progress_bar">
       <ProgressBar helperText={progressBarData.text} />
+    </div>
+    <div class="progress_table">
+      <DataTable
+      headers={[
+        { key: "parameter", value: "Parameter" },
+        { key: "value", value: "Value" },
+      ]}
+        rows={[
+          { id: 0, parameter: "Dataset", value: currentNetwork.metadata.name },
+          { id: 1, parameter: "Model", value: $selectedModelType },
+          { id: 2, parameter: "Task type", value: $selectedTaskType },
+          { id: 3, parameter: "Epochs", value: epochs },
+          { id: 4, parameter: "Learning Rate", value: learningRate },
+          { id: 5, parameter: "Training Percentage", value: trainPercentage },
+          { id: 6, parameter: "Seed", value: seed },
+          { id: 7, parameter: "Hidden Layer Sizes", value: hiddenLayerSizes.join(", ") },
+        ]}
+      ></DataTable>
     </div>
   {:else if experimentState === ExperimentState.RESULT}
     <div class="newExperiment">

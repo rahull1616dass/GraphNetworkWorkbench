@@ -22,9 +22,9 @@
     TaskType.EDGE_CLASSIFICATION,
   ];
 
-  let networkIndex: number = undefined;
-  let task: TaskType;
-  let model: MLModelType;
+  let networkIndex: number = $selectedNetworkIndex
+  let task: TaskType = $selectedTaskType
+  let model: MLModelType = $selectedModelType
 </script>
 
 {#if type === dropdownSelectorType.NETWORK}
