@@ -1,7 +1,6 @@
 import torch
 import mlflow
 import torch.nn
-import numpy as np
 from tqdm import tqdm
 from torch.optim import Adam
 from torch_geometric.data import Data
@@ -10,15 +9,9 @@ from torch.nn import BCEWithLogitsLoss
 import torch_geometric.transforms as T
 from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import negative_sampling
-from mlflow.store.artifact.local_artifact_repo import LocalArtifactRepository
 
 from core.types import MLTask
 from core.logging_helpers import timeit
-
-
-artifacts_dir = "./mlflow"
-repository = LocalArtifactRepository(artifacts_dir)
-mlflow.set_experiment("trial")
 
 
 class Net(torch.nn.Module):
@@ -46,11 +39,13 @@ class LinkPredictor:
         self.criterion = BCEWithLogitsLoss()
 
     def train(self, train_data: Data, val_data: Data, epochs: int = 100):
-        loss, val_acc = [], []
-        for _ in tqdm(range(1, epochs + 1), desc="Training epochs"):
-            loss += [self.__train_iter(train_data)]
-            val_acc += [self.test(val_data)]
-        return loss, val_acc
+        for every_step in tqdm(range(1, epochs + 1), desc="Training epochs"):
+
+            loss = self.__train_iter(train_data)
+            mlflow.log_metric("loss", loss, every_step)
+
+            val_acc = self.test(val_data)
+            mlflow.log_metric("val_roc_auc_score", val_acc, every_step)
 
     def __train_iter(self, train_data: Data):
         self.model.train()
@@ -93,7 +88,9 @@ class LinkPredictor:
 
 @timeit
 def predict_edges(data: Data, task: MLTask):
-    with mlflow.start_run():
+    mlflow.set_experiment("Link Prediction")
+
+    with mlflow.start_run() as current_run:
         mlflow.log_params(task.dict(exclude={"nodes_file_url", "edges_file_url"}))
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -107,9 +104,19 @@ def predict_edges(data: Data, task: MLTask):
         ])
         train_data, val_data, test_data = transform(data)
         predictor = LinkPredictor(data.num_features, device, learning_rate=0.001)
-        train_loss, val_roc_auc_score = predictor.train(train_data, val_data, epochs=task.epochs)
+
+        predictor.train(train_data, val_data, epochs=task.epochs)
+
+        all_loss_metrics = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "loss")
+        losses = list(map(lambda metric: metric.value, all_loss_metrics))
+
+        all_val_acc = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "val_roc_auc_score")
+        val_roc_auc_score = list(map(lambda metric: metric.value, all_val_acc))
+
         test_roc_auc_score = predictor.test(test_data)
+        mlflow.log_metric("test_roc_ayc_score", test_roc_auc_score)
+
         predictions = predictor.predict(test_data)
 
         mlflow.log_metric("test_roc_auc_curve", test_roc_auc_score)
-    return train_loss, val_roc_auc_score, test_roc_auc_score, predictions.tolist()
+    return losses, val_roc_auc_score, test_roc_auc_score, predictions.tolist()
