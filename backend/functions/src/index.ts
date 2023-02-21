@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import * as functions from "firebase-functions"
 import { GetSignedUrlResponse, GetSignedUrlConfig } from "@google-cloud/storage"
+const cors = require("cors")({ origin: true });
 
 /*
  * import fetch from "node-fetch"
@@ -106,3 +107,54 @@ exports.onTaskCreated = functions.firestore
       console.log(err)
     }
   })
+  exports.getNetworks = functions.https.onRequest((req, res) => {
+    cors(req, res, () => {
+      axios
+        .get("https://networks.skewed.de/api/nets")
+        .then(response => {
+          res.send(response.data);
+        })
+        .catch(error => {
+          res.status(500).send(error);
+        });
+    });
+  });
+
+  exports.getNetowrkDescription = functions.https.onRequest((req, res) => {
+    cors(req, res, () => {
+      const { networkName } = req.query;
+      console.log(networkName)
+      axios
+        .get(`https://networks.skewed.de/api/net/${networkName}`)
+        .then(response => {
+          res.send(response.data);
+        })
+        .catch(error => {
+          res.status(500).send(error);
+        });
+    });
+  });
+
+  exports.downloadNetworkFile = functions.https.onRequest((req, res) => {
+    cors(req, res, () => {
+      const { networkName } = req.query;
+      const fileUrl = `https://networks.skewed.de/net/${networkName}/files/${networkName}.csv.zip`;
+    axios({
+      method: "get",
+      url: fileUrl,
+      responseType: "stream"
+    })
+      .then(response => {
+        res.set("Content-Type", "application/zip");
+        res.set(
+          "Content-Disposition",
+          `attachment; filename=${networkName}.csv.zip`
+        );
+        response.data.pipe(res);
+      })
+      .catch(error => {
+        console.error(error);
+        res.status(500).send(error);
+      });
+    });
+  });

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Endpoints } from "../../../definitions/constants"
   import { onMount } from "svelte"
   import { netzschleuderNetworkNames } from "../../../stores"
   import { SideNavItems } from "carbon-components-svelte"
@@ -29,18 +28,13 @@
     on top of the import pages
     */
     $selectedMenuItem = MenuItem.FROM_WEB
-    console.log(`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCHELEUDER_NETS}`)
-    //const response = await request(`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCHELEUDER_NETS}`)
     netzschleuderNetworkNames.set(
-      await request("https://networks.skewed.de/api/nets")
+      await request("https://us-central1-graphlearningworkbench.cloudfunctions.net/getNetworks")
     )
   })
 
   async function onFetchNetwork(event) {
-
-
-
-    fetch(`https://networks.skewed.de/net/${event.detail.networkName}/files/${event.detail.networkName}.csv.zip`)
+    fetch(`https://us-central1-graphlearningworkbench.cloudfunctions.net/downloadNetworkFile?networkName=${event.detail.networkName}`)
     .then(response => response.blob())
     .then(blob =>{
       return JSZip.loadAsync(blob)
@@ -65,9 +59,10 @@
     })
     .then(url => {
       console.log(`Network uploaded to ${url}`)
+      uploadedNetwotk = true
     })
   }
-
+let uploadedNetwotk: boolean
   function UploadTheData(nodes, edges, network){
     console.log(nodes)
     console.log(edges)
@@ -131,8 +126,9 @@
         <div class="networks">
           {#each filteredItems as networkName}
             <FetchableAccordionItem
+              isNetworkUploaded={uploadedNetwotk}
               title={networkName}
-              endpoint={`${Endpoints.NETZSCHELEUDER}${Endpoints.NETZSCLEUDER_NET}${networkName}`}
+              endpoint={`https://us-central1-graphlearningworkbench.cloudfunctions.net/getNetowrkDescription?networkName=${networkName}`}
               on:fetchNetwork={onFetchNetwork}
             />
           {/each}

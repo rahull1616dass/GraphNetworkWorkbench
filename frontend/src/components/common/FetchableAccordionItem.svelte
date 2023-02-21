@@ -5,14 +5,19 @@
   import { AccordionItem, Button } from "carbon-components-svelte"
   import request from "../../api/request"
   import { createEventDispatcher } from "svelte"
+  import { getAuth } from "firebase/auth"  
+  import { checkIfNetworkExistTask, getExperimentTasks } from "../../api/firebase"
+
 
   export let title: string
   export let endpoint: string
   let content = undefined
-
+  export let isNetworkUploaded: boolean
   const dispatch = createEventDispatcher()
 
   const onAccordionClick = async (event: MouseEvent) => {
+    isNetworkUploaded = await checkIfNetworkExistTask(title)
+
     if (content == undefined) {
       content = await request(endpoint)
     }
@@ -35,11 +40,20 @@
         {content.description}
       </div>
       <div class="import_button">
+      {#if (isNetworkUploaded == true)}
+      <Button
+          on:click={() => {console.log('network imported');
+          }}
+          size="small"
+        on:click>Network Imported</Button>
+      {:else}
         <Button
           on:click={() => dispatch("fetchNetwork", { networkName: title, content: content })}
           size="small"
-          on:click>Import Network</Button
-        >
+        on:click>Import Network</Button>
+      {/if}
+      
+        
       </div>
     </div>
   {:else}

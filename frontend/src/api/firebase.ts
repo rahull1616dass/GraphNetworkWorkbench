@@ -73,6 +73,10 @@ function getNetworkPath(networkId: string): string {
   return `Users/${get(authUserStore).uid}/Networks/${networkId}`
 }
 
+function getUserPath(): string {
+  return `Users/${get(authUserStore).uid}`
+}
+
 function getStorageRefs(networkId: string): any {
   const storage = getStorage(app)
   const networkPath = getNetworkPath(networkId)
@@ -271,6 +275,30 @@ export async function getExperimentTasks(networkId: string): Promise<Task[]> {
         tasks.push(tasksConverter.fromFirestore(doc, undefined))
       })
       resolve(tasks)
+    }).catch((error) => {
+      console.log(`Error getting experiment tasks for network ${networkId}. ${error}`)
+      reject(error)
+    })
+  })
+}
+
+export async function checkIfNetworkExistTask(networkId: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const tasksQuery = query(
+      collection(
+        db,
+        getUserPath(),
+        Database.NETWORKS
+      )
+    )
+    getDocs(tasksQuery)
+    .then((querySnapshot) => {
+      let IsExist: boolean
+      querySnapshot.forEach((doc) => {
+        if(!IsExist)
+          IsExist = doc.id === networkId
+      })
+      resolve(IsExist)
     }).catch((error) => {
       console.log(`Error getting experiment tasks for network ${networkId}. ${error}`)
       reject(error)
