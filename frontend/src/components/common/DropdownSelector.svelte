@@ -32,7 +32,9 @@
     <select
       class="select"
       bind:value={networkIndex}
-      on:click={() => ($selectedNetworkIndex = networkIndex)}
+      on:change={() => {
+      $selectedNetworkIndex = networkIndex
+      console.log(`Selected network index changed too: ${$selectedNetworkIndex}`)}}
     >
       <option>{placeholder}</option>
       {#each $networksList as network, networkIndex}
@@ -48,7 +50,7 @@
     <select
       class="select"
       bind:value={model}
-      on:click={() => ($selectedModelType = model)}
+      on:change={() => ($selectedModelType = model)}
     >
       <option>{placeholder}</option>
       {#each modelTypes as model}
@@ -63,7 +65,7 @@
     <select
       class="select"
       bind:value={task}
-      on:click={() => ($selectedTaskType = task)}
+      on:change={() => ($selectedTaskType = task)}
     >
       <option>{placeholder}</option>
       {#each taskTypes as task, _}

@@ -32,9 +32,11 @@
   import { delay } from "../../../util/generalUtil"
   import { onMount } from "svelte"
   import { DataTable } from "carbon-components-svelte"
-    import { metadataConverter } from "../../../api/firebase_converters"
+  import { metadataConverter } from "../../../api/firebase_converters"
 
-  let experimentState: ExperimentState = ExperimentState.CREATE
+  let experimentState: ExperimentState
+  let currentNetwork: Network = $networksList[$selectedNetworkIndex]
+  let currentTask: Task = undefined
 
   // These values should be set by UI Elements later on
   let trainPercentage: number = 0.8
@@ -43,9 +45,15 @@
   let seed: number = $defaultSeed
   let hiddenLayers = [{ first: true, checked: false, size: 10 }]
   $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
+  
+  $: {
+    currentNetwork = $networksList[$selectedNetworkIndex]
+    checkForAlreadyRunningExperiments()
+  }
+  
 
   let isCustomizeModalOpen: boolean = false
-  let currentNetwork: Network = $networksList[$selectedNetworkIndex]
+
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
     undefined,
     "Error Uploading Network",
@@ -58,9 +66,10 @@
   */
   let progressBarData: ProgressBarData = new ProgressBarData(
     true,
-    "Creating experiment..."
+    "Fetching experiments..."
   )
 
+  //onMount(() => checkForAlreadyRunningExperiments())
 
   function randomize() {
     seed = Math.floor(Math.random() * 10000)
@@ -119,18 +128,7 @@
           .then((taskDocId) => {
             console.log(`Task created with id: ${taskDocId}`)
             progressBarData.text = "Experiment created. Running..."
-            listenForExperimentResult(
-              $networksList[$selectedNetworkIndex].metadata.id,
-              taskDocId
-            ).then((resultTask: Task) => {
-              progressBarData.isPresent = false
-              console.log("Result", resultTask)
-              // @ts-ignore
-              experimentState = ExperimentState[resultTask.state]
-            }).catch((error) => {
-              experimentState = ExperimentState.ERROR
-              console.log(`Error listening for experiment result: ${error}`)
-            })
+            listenAndHandleExperimentResult(taskDocId)
           })
           .catch((error) => {
             experimentState = ExperimentState.ERROR
@@ -143,6 +141,36 @@
           `Error retrieving tasks for network ${$networksList[$selectedNetworkIndex]}: ${error}`
         )
       })
+  }
+
+  async function listenAndHandleExperimentResult(taskDocId: string) {
+    listenForExperimentResult(
+      $networksList[$selectedNetworkIndex].metadata.id,
+      taskDocId
+    )
+      .then((resultTask: Task) => {
+        progressBarData.isPresent = false
+        console.log("Result", resultTask)
+        // @ts-ignore
+        experimentState = ExperimentState[resultTask.state]
+      })
+      .catch((error) => {
+        experimentState = ExperimentState.ERROR
+        console.log(`Error listening for experiment result: ${error}`)
+      })
+  }
+
+  async function checkForAlreadyRunningExperiments(){
+    console.log("Checking for already running experiments")
+    experimentState = ExperimentState.PROGRESS
+    getExperimentTasks(currentNetwork.metadata.id).then((tasks: Task[]) => {
+      let runningTask: Task = tasks.find(
+        // @ts-ignore
+        (task) => ExperimentState[task.state] === ExperimentState.PROGRESS
+      )
+      if (runningTask) listenAndHandleExperimentResult(runningTask.id)
+      else experimentState = ExperimentState.CREATE
+    })
   }
 </script>
 
@@ -339,10 +367,10 @@
     </div>
     <div class="progress_table">
       <DataTable
-      headers={[
-        { key: "parameter", value: "Parameter" },
-        { key: "value", value: "Value" },
-      ]}
+        headers={[
+          { key: "parameter", value: "Parameter" },
+          { key: "value", value: "Value" },
+        ]}
         rows={[
           { id: 0, parameter: "Dataset", value: currentNetwork.metadata.name },
           { id: 1, parameter: "Model", value: $selectedModelType },
@@ -351,9 +379,13 @@
           { id: 4, parameter: "Learning Rate", value: learningRate },
           { id: 5, parameter: "Training Percentage", value: trainPercentage },
           { id: 6, parameter: "Seed", value: seed },
-          { id: 7, parameter: "Hidden Layer Sizes", value: hiddenLayerSizes.join(", ") },
+          {
+            id: 7,
+            parameter: "Hidden Layer Sizes",
+            value: hiddenLayerSizes.join(", "),
+          },
         ]}
-      ></DataTable>
+      />
     </div>
   {:else if experimentState === ExperimentState.RESULT}
     <div class="newExperiment">
