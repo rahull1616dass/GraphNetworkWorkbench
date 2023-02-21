@@ -1,4 +1,1 @@
-Flask
-gunicorn
-numpy
-pillow
+fastapi-healthchecks==1.0.6

@@ -1,7 +1,7 @@
-import { FileExtension } from "../../../../definitions/fileExtension"
+import { FileExtension } from "../definitions/fileExtension"
 import Papa from "papaparse"
 import type ParseResult from "papaparse"
-import { UploadedFileType } from "../../../../definitions/uploadedFileType"
+import { UploadedFileType } from "../definitions/uploadedFileType"
 
 export async function parseNetwork(file: File): Promise<ParseResult> {
   let fileExtension: string = file.name.split(".").pop()
@@ -53,6 +53,7 @@ async function parseCSV(file: File): Promise<ParseResult> {
     console.log("my name is in promise" + file.name)
     Papa.parse(file, {
       header: true,
+      skipEmptyLines: true,
       dynamicTyping: true,
       complete: (results) => {
         // Log the results of PapaParse

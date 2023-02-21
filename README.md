@@ -1,6 +1,6 @@
 ## Interactive Graph Learning Workbench
 
-### The task:
+### Task
 
 An interactive user interface/webpage with following minimal functionalities:
 
@@ -13,19 +13,6 @@ An interactive user interface/webpage with following minimal functionalities:
     - Compare predictions for different models/hyperparameter values
     - Interactive manipulation of node or edge features
 
-# Working with Anaconda
+### Workflow
 
-The backend with all the PyTorch/PyTorch Geometric modules installed is available as a conda environment out of the box. To use it, run:
-```bash
-conda env create --file backend/backend_env.yml
-```
-
-The environment with the modules it uses can be exported via:
-```bash
-conda env export --no-builds > environment.yml
-```
-
-To create the environment from the exported file, run:
-```bash
-conda env create -f environment.yml
-```
+![Workflow](docs/workflow.png)

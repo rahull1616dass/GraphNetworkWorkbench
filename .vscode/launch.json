@@ -11,7 +11,8 @@
             "name": "Launch Chrome against localhost",
             "url": "http://localhost:5173",
             "webRoot": "${cwd}/frontend/src"
-        },
+        }
+        /*,
         {
             "name": "Python: Current File",
             "type": "python",
@@ -19,6 +20,6 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
-        }
+        }*/
     ]
 }

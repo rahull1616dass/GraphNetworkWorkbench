@@ -1,47 +1,108 @@
 <script lang="ts">
-  import { Dropdown, ProgressBar } from "carbon-components-svelte"
+  import { ExperimentState } from "../../../definitions/experimentState"
+  import { ProgressBar } from "carbon-components-svelte"
   import { ProgressBarData } from "../../../definitions/progressBarData"
   import { Task } from "../../../definitions/task"
   import { TaskType } from "../../../definitions/taskType"
-  import { setExperimentTask, getExperimentTasks } from "../../../api/firebase"
   import CustomButton from "../../common/CustomButton.svelte"
-  import { MLModelType } from "../../../definitions/mlModelType";
-  import { networksList, selectedNetworkIndex, selectedModelType } from "../../../stores";
+  import { MenuItem } from "../../../definitions/menuItem"
+  import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte"
+  import DropdownSelector from "../../common/DropdownSelector.svelte"
+  import {
+    setExperimentTask,
+    getExperimentTasks,
+    getCurrentTimestamp,
+    listenForExperimentResult,
+  } from "../../../api/firebase"
+  import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType"
+  import type { Network } from "../../../definitions/network"
+  import {
+    networksList,
+    selectedNetworkIndex,
+    selectedModelType,
+    selectedTaskType,
+    selectedMenuItem,
+    defaultSeed,
+  } from "../../../stores"
+  import { fade, slide, scale } from "svelte/transition"
+  import { UploadedFileType } from "../../../definitions/uploadedFileType"
+  import { toCSVFile } from "../../../util/networkParserUtil"
+  import { ModalData } from "../../../definitions/modalData"
+  import ExperimentResults from "../../common/ExperimentResults.svelte"
+  import { delay } from "../../../util/generalUtil"
 
-  export let networkIndex: number = undefined
-  let placeholderNetwork: string = "Select a network"
-  let placeholderModel: string = "Select a model"
+  let experimentState: ExperimentState = ExperimentState.CREATE
 
   // These values should be set by UI Elements later on
   let trainPercentage: number = 0.8
   let epochs: number = 100
   let learningRate: number = 0.01
+  let seed: number = $defaultSeed
+  let hiddenLayers = [{ first: true, checked: false, size: 10 }]
+  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
 
-  function handleEpoch(event) {
-    epochs = event.target.value;
-  }
-  function handleLearningRate(event) {
-    learningRate = event.target.value;
-  }
-  function handleTrainingPercentage(event) {
-    trainPercentage = event.target.value;
-  }
-  
-
-  let progressBarData: ProgressBarData = new ProgressBarData(
-    false,
-    "Training..."
+  let isCustomizeModalOpen: boolean = false
+  let currentNetwork: Network = undefined
+  let uploadingNetworkErrorModalData: ModalData = new ModalData(
+    undefined,
+    "Error Uploading Network",
+    `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
+    false
   )
 
+  /*
+  progressBarData.isPresent = true by default since the page is being controlled by ExperimentState enum anyway
+  */
+  let progressBarData: ProgressBarData = new ProgressBarData(
+    true,
+    "Creating experiment..."
+  )
+
+  function randomize() {
+    seed = Math.floor(Math.random() * 10000)
+  }
+
+  function startNewExperiment() {
+    experimentState = ExperimentState.CREATE
+    $selectedTaskType = undefined
+    $selectedModelType = undefined
+  }
+
+  function addHiddenLayer() {
+    hiddenLayers = hiddenLayers.concat({
+      first: false,
+      checked: false,
+      size: 10,
+    })
+  }
+
+  function clearHiddenLayer() {
+    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first)
+  }
+
+  function saveSplitClicked(event: CustomEvent) {
+    currentNetwork = event.detail.network
+    isCustomizeModalOpen = false
+    console.log("Current Network", currentNetwork)
+  }
+
   async function createTask() {
+    experimentState = ExperimentState.PROGRESS
+    await delay(2000) // To simulate task being run. TODO: Remove this later on.
     const taskToBeCreated = new Task(
       undefined, // This will be set by the backend
-      TaskType.NODE_CLASSIFICATION,
+      $selectedModelType,
+      $selectedTaskType,
+      epochs,
       trainPercentage,
-      epochs
+      learningRate,
+      hiddenLayerSizes,
+      seed,
+      getCurrentTimestamp(),
+      ExperimentState.PROGRESS
     )
-    const networkId = $networksList[$selectedNetworkIndex].metadata.id
-    await getExperimentTasks(networkId)
+
+    await getExperimentTasks($networksList[$selectedNetworkIndex].metadata.id)
       .then((tasks) => {
         console.log("Tasks", tasks)
         tasks.forEach((task) => {
@@ -50,270 +111,365 @@
             return
           }
         })
-        setTaskDocument(networkId, taskToBeCreated)
+        setExperimentTask($networksList[$selectedNetworkIndex], taskToBeCreated)
+          .then((taskDocId) => {
+            console.log(`Task created with id: ${taskDocId}`)
+            progressBarData.text = "Experiment created. Running..."
+            listenForExperimentResult(
+              $networksList[$selectedNetworkIndex].metadata.id,
+              taskDocId
+            ).then((resultTask: Task) => {
+              progressBarData.isPresent = false
+              console.log("Result", resultTask)
+              // @ts-ignore
+              experimentState = ExperimentState[resultTask.state]
+            }).catch((error) => {
+              experimentState = ExperimentState.ERROR
+              console.log(`Error listening for experiment result: ${error}`)
+            })
+          })
+          .catch((error) => {
+            experimentState = ExperimentState.ERROR
+            console.log(`Error creating task ${taskToBeCreated}`, error)
+          })
       })
       .catch((error) => {
-        console.log("Error getting tasks list", error)
+        experimentState = ExperimentState.ERROR
+        console.log(
+          `Error retrieving tasks for network ${$networksList[$selectedNetworkIndex]}: ${error}`
+        )
       })
-  }
-  let modelTypes: MLModelType[] = [MLModelType.GCN, MLModelType.DeepWalk, MLModelType.GIN]
-
-  async function setTaskDocument(
-    networkId: string,
-    taskToBeCreated: Task
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      setExperimentTask(networkId, taskToBeCreated)
-        .then((task) => {
-          console.log("Task created", task)
-          resolve()
-        })
-        .catch((error) => {
-          console.log("Error creating task", error)
-          reject()
-        })
-    })
   }
 </script>
 
-<div class="background">
+<div transition:fade>
+  {#if experimentState === ExperimentState.CREATE}
+    <div class="background">
+      <div>
+        <li class="Model">
+          <DropdownSelector
+            placeholder={"Select a Network"}
+            type={dropdownSelectorType.NETWORK}
+          />
 
+          <DropdownSelector
+            placeholder={"Select a Model"}
+            type={dropdownSelectorType.MLMODEL}
+          />
 
-<div class="dropdown">
+          <DropdownSelector
+            placeholder={"Select a Task"}
+            type={dropdownSelectorType.TASK}
+          />
 
-<select class="selectNetwork" bind:value={networkIndex}>
-    {#if placeholderNetwork}
-    <option >{placeholderNetwork}</option>
-    {/if}
-    {#each $networksList as network, networkIndex}
-        <option class="optionDropdown" value={networkIndex} on:click={() => $selectedNetworkIndex=networkIndex}>
-            {network.metadata.name} ---
-            Nodes: {network.nodes.length} , Edges: {network.links.length} 
-        </option>
-    {/each}
-      
-</select>
+          <hr />
 
-</div>
+          <div>Configurable Parameters:</div>
 
-<hr/>
+          <div>
+            <li>Epochs</li>
+            <li class="range">
+              <input
+                type="range"
+                bind:value={epochs}
+                min="0"
+                max="1000"
+                step="10"
+                class="slider"
+              />
+              <input type="number" bind:value={epochs} class="inputNumber" />
+            </li>
+          </div>
+          <div>
+            <li>Learning Rate</li>
+            <li class="range">
+              <input
+                type="range"
+                bind:value={learningRate}
+                min="0"
+                max="0.4"
+                step="0.001"
+                class="slider"
+              />
+              <input
+                type="number"
+                bind:value={learningRate}
+                min="0"
+                max="0.4"
+                step="0.001"
+                class="inputNumber"
+              />
+            </li>
+          </div>
 
-<div>
-<li class="Model">
+          <div>
+            <li>
+              Training Percentage
+              {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+                <CustomButton
+                  type={"secondary"}
+                  inverse={false}
+                  fontsize={60}
+                  on:click={() =>
+                    (isCustomizeModalOpen = !isCustomizeModalOpen)}
+                  >Customize</CustomButton
+                >
+              {/if}
+              {#if isCustomizeModalOpen}
+                <PlotDatasetSplitter
+                  on:saveSplitClicked={saveSplitClicked}
+                  {seed}
+                  {trainPercentage}
+                />
+              {/if}
+            </li>
 
-    <div>
-        <select class="selectModel" >
-            {#if placeholderModel}
-            <option >{placeholderModel}</option>
-            {/if}
-            {#each modelTypes as model}
-                <option class="optionDropdown" value={model} on:click={() => $selectedModelType=model}>
-                    {model} 
-                </option>
-            {/each}
-        </select>
-    </div>
-    
-    <hr/>
+            <li class="range">
+              <input
+                type="range"
+                bind:value={trainPercentage}
+                min="0"
+                max="1"
+                step="0.05"
+                class="slider"
+              />
+              <input
+                type="number"
+                bind:value={trainPercentage}
+                min="0"
+                max="1"
+                step="0.05"
+                class="inputNumber"
+              />
+            </li>
+          </div>
 
-    <div>
-        Configurable Parameters:
-    </div>
+          <div>
+            <li>
+              Seed
+              <CustomButton
+                type={"secondary"}
+                inverse={false}
+                on:click={() => randomize()}
+                fontsize={60}>Randomize</CustomButton
+              >
+            </li>
+            <li class="range">
+              <input
+                type="range"
+                bind:value={seed}
+                min="0"
+                max="1000"
+                step="10"
+                class="slider"
+              />
+              <input type="number" bind:value={seed} class="inputNumber" />
+            </li>
+          </div>
 
-    <div>
-        <li>
-            Epochs
+          <div>
+            <li>Add/Delete Hidden Layers</li>
+            <li class="hiddenLayers">
+              {#each hiddenLayers as hiddenLayer, index}
+                <div class:checked={hiddenLayer.checked}>
+                  <label for="hiddenLayer">Hidden Layer {index + 1}</label>
+                  <input type="checkbox" bind:checked={hiddenLayer.checked} />
+                  <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    step="1"
+                    class="slider"
+                    bind:value={hiddenLayer.size}
+                  />
+                  {hiddenLayer.size}
+                </div>
+              {/each}
+
+              <div class="hiddenLayerButtons">
+                <CustomButton
+                  type={"secondary"}
+                  inverse={false}
+                  fontsize={100}
+                  on:click={() => addHiddenLayer()}>Add New Layer</CustomButton
+                >
+
+                -
+                <CustomButton
+                  type={"delete"}
+                  inverse={false}
+                  fontsize={100}
+                  on:click={() => clearHiddenLayer()}
+                  >Delete Selected Layer</CustomButton
+                >
+              </div>
+            </li>
+          </div>
+
+          <hr />
+
+          <div class="createTask">
+            <CustomButton
+              type={"secondary"}
+              inverse={false}
+              disabled={$selectedModelType === undefined ||
+                $selectedTaskType === undefined ||
+                epochs === 0 ||
+                learningRate === 0.0 ||
+                trainPercentage === 0 ||
+                trainPercentage === 1}
+              on:click={() => {
+                createTask()
+              }}>Create Task</CustomButton
+            >
+          </div>
         </li>
-        <li class="range">
-            <input type="range" min="0" max="1000" value="100" step="10" class="slider" on:input={handleEpoch}>
-            {epochs}
-        </li>
+
+        <li class="Modal" />
+      </div>
+      <hr />
     </div>
-    <div>
-        <li>
-            Learning Rate	
-        </li>
-        <li class="range">
-            <input type="range" min="0.00" max="0.4" value="0.01" step="0.001" class="slider" on:input={handleLearningRate}>
-            {learningRate}
-        </li>
+  {:else if experimentState === ExperimentState.PROGRESS}
+    <div class="progress_bar">
+      <ProgressBar helperText={progressBarData.text} />
     </div>
-    <div>
-        <li>
-            Training Percentage	
-        </li>
-        <li class="range">
-            <input type="range" min="0" max="1" value="0.8" step="0.05" class="slider" on:input={handleTrainingPercentage}>
-            {trainPercentage}
-        </li>
+  {:else if experimentState === ExperimentState.RESULT}
+    <div class="newExperiment">
+      <CustomButton
+        type={"secondary"}
+        inverse={false}
+        on:click={() => {
+          startNewExperiment()
+        }}
+        >Start New Experiment
+      </CustomButton>
     </div>
-
-    <div class="createTask">
-        {#if progressBarData.isPresent}
-        <ProgressBar helperText={progressBarData.text} />
-      {:else}
-        <CustomButton 
-        type={"secondary"} 
-        inverse={false} 
-        disabled={epochs === 0 || epochs === 1000 || learningRate === 0.00 || learningRate === 0.4 || trainPercentage === 0 || trainPercentage === 1} 
-        on:click={() => createTask()}>Create Task</CustomButton>
-      {/if}
-    </div>
-
-</li>
-
-</div>
-
-<hr/>
-
-
-
-
+    <hr />
+    <ExperimentResults />
+  {:else if experimentState === ExperimentState.ERROR}
+    <p>Error</p>
+  {/if}
 </div>
 
 <style lang="scss">
-    .tooltip {
-        // position: flex;
-        // top: 55%;
-        // left: 30%;
-        // transform: translateX(-10%);
-        // padding: 1px;
-        // background-color: white;
-        // border: 1px solid gray;
-        // border-radius: 5px;
-        z-index: 1;
-    }
-    .background {
-        color: var(--wueblue);
-        font-weight: 600;
-    }	
-    .range{
-        width: 80%;
-        margin-left: 2%;
-        align-items: left;
-    }
-    .dropdown {
-        position: flex;
-        width: 50%;
-        margin-left: 25%;
-        margin-top: 1%;
-        background-color: whitesmoke;
-        border-radius: 15px;
-        box-shadow: 1px 2px 3px rgba(0,0,0,0.1);
-    }
-    .Model {
-        position: center;
-        width: 35%;
-        margin-left: 5%;
-        margin-top: 1%;
-        margin-bottom: 3%;
-        border-radius: 15px;
-        // border: whitesmoke 4px inset;
-        box-shadow: 2px 3px 4px rgba(0,0,0,0.2);
-        background-color: whitesmoke;
-    }
-    .selectNetwork {
-        width: 95%;
-        height: 100%;
-        font-family: var(font-family);
-        font-size: 16px;
-        font-weight: 800;
-        color: var(--lightblack);
-        background-color: white;
-        padding: 1%;
-        margin: 2%;
-        cursor: pointer;
-        border-radius: 10px;
-        box-shadow: 2px 3px 4px rgba(0,0,0,0.2);
-    }
-    .selectModel {
-        width: 60%;
-        height: 100%;
-        font-family: var(font-family);
-        font-size: 16px;
-        font-weight: 800;
-        color: var(--wueblue);
-        background-color: white;
-        padding: 1%;
-        margin: 2%;
-        cursor: pointer;
-        border-radius: 10px;
-        box-shadow: 2px 3px 4px rgba(0,0,0,0.2);
-    }
-    .optionDropdown {
+  .inputNumber {
+    width: 15%;
+    padding: 1%;
+    //background-color: whitesmoke;
+    border-radius: 15px;
+    box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.1);
+  }
+  .customizeButton {
+    display: flex;
+    justify-content: center;
+    margin-top: 2%;
+    font-size: small;
+  }
+  .hiddenLayerButtons {
+    display: flex;
+    justify-content: center;
+    //flex-direction: row;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    font-size: small;
+  }
+  .hiddenLayers {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 25%;
+    margin-right: 20%;
+    margin-top: 1%;
+    width: 55%;
+  }
+  .newExperiment {
+    display: flex;
+    justify-content: center;
+    margin-top: 1%;
+  }
+  .tooltip {
+    z-index: 1;
+  }
+  .background {
+    color: var(--wueblue);
+    font-weight: 600;
+  }
+  .range {
+    width: 80%;
+    margin-left: 10%;
+    align-items: left;
+  }
+  .Model {
+    position: center;
+    width: 55%;
+    margin-left: 22%;
+    margin-top: 1%;
+    margin-bottom: 3%;
+    border-radius: 15px;
+    // border: whitesmoke 4px inset;
+    box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.2);
+    background-color: whitesmoke;
+  }
 
-        font-family: var(font-family);
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--lightblack);
-        background-color: white;
-        cursor: pointer;
-        cursor:hover {
-            background-color: red;
-        }
-    }
-    .slider {
-        -webkit-appearance: none;  /* Override default CSS styles */
-        appearance: none;
-        width: 75%; /* Full-width */
-        background: white; /* Grey background */
-        opacity: 1; 
-        -webkit-transition: .2s; 
-        transition: opacity .2s;
-        border-radius: 15px;
-        border: 1px solid var(--wueblue);
-        box-shadow: 2px 3px 4px rgba(0,0,0,0.2);
+  .slider {
+    -webkit-appearance: none; /* Override default CSS styles */
+    appearance: none;
+    width: 75%; /* Full-width */
+    background: white; /* Grey background */
+    opacity: 1;
+    -webkit-transition: 0.2s;
+    transition: opacity 0.2s;
+    border-radius: 15px;
+    border: 1px solid var(--wueblue);
+    box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.2);
+  }
+  .slider:hover {
+    opacity: 0.9;
+  }
 
-    }
-    .slider:hover {
-        opacity: 0.9;
-    }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: var(--wueblue);
+    cursor: pointer;
+    border-radius: 15px;
+  }
 
-    .slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 15px;
-        height: 15px;
-        background: var(--wueblue);
-        cursor: pointer;
-        border-radius: 15px;
-    }
-
-    .slider::-moz-range-thumb {
-        width: 15px;
-        height: 15px;
-        background: var(--wueblue);
-        cursor: pointer;
-    }
-    hr {
-        display: block;
-        margin: 1em;
-        width: 90%;
-        height: 1px;
-        content: "";
-        margin-left: 5%;
-        background-color: whitesmoke;
-    }
+  .slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    background: var(--wueblue);
+    cursor: pointer;
+  }
+  hr {
+    display: block;
+    margin: 1em;
+    width: 90%;
+    height: 1px;
+    content: "";
+    margin-left: 5%;
+    background-color: whitesmoke;
+  }
 
   option:hover {
     background-color: var(--wueblue);
     color: black;
   }
-  p{
+  p {
     margin-top: 1%;
     margin-bottom: 1%;
     margin-right: 25%;
   }
-    li{
-        margin-left: 5%;
-        margin-top: 2%;
-        margin-bottom: 2%;
-        margin-right: 25%;
-    }
-    .createTask {
-        display: block;
-        margin-bottom: 8%;
-        padding-top: 55%;
-    }
-
+  li {
+    margin-left: 15%;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    margin-right: 25%;
+  }
+  .createTask {
+    display: block;
+    margin-bottom: 8%;
+    padding-top: 5%;
+  }
 </style>

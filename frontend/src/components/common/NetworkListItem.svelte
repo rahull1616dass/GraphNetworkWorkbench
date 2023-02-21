@@ -2,6 +2,8 @@
   import { createEventDispatcher } from "svelte"
   import type { Network } from "../../definitions/network"
   import networkIcon from "../../assets/network.svg"
+  import deleteIcon from "../../assets/delete.svg"
+  import ImageButton from "./ImageButton.svelte"
 
   const dispatch = createEventDispatcher()
 
@@ -32,6 +34,11 @@
       <img src={networkIcon} class="network_icon" alt="Network Icon" />
       {network.nodes.length} nodes, {network.links.length} edges
     </div>
+  <div class="delete">
+    <ImageButton on:click={() => {
+      dispatch("deleteItem", { selectedIndex: index })
+    }} defaultImageSource={deleteIcon} />
+  </div>
   </div>
 </div>
 
@@ -51,8 +58,14 @@
       color: white;
     }
   }
+
+  .delete{
+    margin-left: auto;
+    margin-right: 10px;
+  }
   
   .content{
+    display: flex;
     text-align: left;
   }
   .network_color {

@@ -6,7 +6,7 @@
   import { Accordion } from "carbon-components-svelte"
   import request from "../../../api/request"
   import decompressResponse from "decompress-response"
-  import { parseReadableStream } from "./UploadNetwork/networkParser"
+  import { parseReadableStream } from "../../../util/networkParserUtil"
   import { parse } from "vega"
   import { selectedMenuItem } from "../../../stores"
   import { MenuItem } from "../../../definitions/menuItem"
@@ -15,9 +15,6 @@
   import { uploadNetworkToStorage } from "../../../api/firebase"
   import { Network } from "../../../definitions/network"
   import type { Link, Metadata, Node } from "../../../definitions/network"
-    import Networks from "../Workbench/Networks.svelte";
-    import { UploadedFileType } from "../../../definitions/uploadedFileType"
-    import UploadNetwork from "./UploadNetwork/UploadNetwork.svelte";
 
 
   onMount(async () => {

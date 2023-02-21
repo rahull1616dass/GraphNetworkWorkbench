@@ -1,11 +1,9 @@
 <script lang="ts">
   import { GraphFormatConverter } from "graph-format-converter"
   import { XMLParser } from "fast-xml-parser"
-  import { parseNetwork } from "./networkParser"
+  import { parseNetwork, toCSVFile } from "../../../../util/networkParserUtil"
   import type ParseResult from "papaparse"
-  import type { Link, Metadata } from "../../../../definitions/network"
-  import type { Node } from "../../../../definitions/network"
-  import { Network } from "../../../../definitions/network"
+  import { Network, Node, Link } from "../../../../definitions/network"
   import { ModalData } from "../../../../definitions/modalData"
   import { MenuItem } from "../../../../definitions/menuItem"
   import {
@@ -20,6 +18,8 @@
     TextInput,
     FileUploader,
     ProgressBar,
+    Accordion,
+    AccordionItem,
   } from "carbon-components-svelte"
   import { Palette } from "@untemps/svelte-palette"
   import cryptoRandomString from "crypto-random-string"
@@ -58,7 +58,6 @@
 
   let isUploadSuccessful = false
 
-
   $: if (edgeFiles.length > 0) {
     let edgeFile = edgeFiles[0]
     console.log(`Selected edge file: ${edgeFile.name}: ${edgeFile.size} bytes`)
@@ -77,17 +76,94 @@
       console.log(`Parsed network: ${parsedNetwork as ParseResult}`)
       switch (uploadedFileType) {
         case UploadedFileType.NODE_FILE:
+          if (!parsedNetwork.meta.fields.includes("name")) {
+            onInvalidFile(
+              `'name' field is required for nodes. Please create this column 
+            in your nodes file and assign a name to each node.
+            `,
+              UploadedFileType.NODE_FILE
+            )
+            return
+          }
+          if (!parsedNetwork.meta.fields.includes("index")) {
+            parsedNetwork.data.forEach((value, index) => {
+              value["index"] = index
+            })
+            parsedNetwork.meta.fields.push("index")
+          }
           newNetwork.nodes = <Node[]>(
             JSON.parse(JSON.stringify(parsedNetwork.data))
           )
+          checkForExtraField(newNetwork.nodes, UploadedFileType.NODE_FILE)
           break
         case UploadedFileType.EDGE_FILE:
+          let isFileValid = true
+          const requiredColumns = ["source", "target"]
+          requiredColumns.forEach((column) => {
+            if (!parsedNetwork.meta.fields.includes(column)) {
+              onInvalidFile(
+                `'${column}' field is required for edges. Please create this column and assign a 
+              ${column} to each edge.`,
+                UploadedFileType.EDGE_FILE
+              )
+              isFileValid = false
+              return
+            }
+            if (!isFileValid) return
+          })
           newNetwork.links = <Link[]>(
             JSON.parse(JSON.stringify(parsedNetwork.data))
           )
+          checkForExtraField(newNetwork.links, UploadedFileType.EDGE_FILE)
           break
       }
     })
+  }
+
+  function checkForExtraField(
+    list: Node[] | Link[],
+    uploadedFileType: UploadedFileType
+  ) {
+    list.forEach((element) => {
+      if (element.__parsed_extra !== undefined) {
+        switch (uploadedFileType) {
+          case UploadedFileType.NODE_FILE:
+            /*
+            onInvalidFile(
+              `The node ${element.name} has an extra column that is not part of the network. 
+              Please remove this column from the nodes file.`,
+              UploadedFileType.NODE_FILE
+            )
+            */
+            break
+          case UploadedFileType.EDGE_FILE:
+            onInvalidFile(
+              `The edge Index_${element.source} -> Index_${element.target} has an extra column that 
+              is not part of the network. Please remove this column from the edges file.`,
+              UploadedFileType.EDGE_FILE
+            )
+            break
+        }
+      }
+    })
+  }
+
+  function onInvalidFile(
+    messageBody: string,
+    uploadedFileType: UploadedFileType
+  ) {
+    modalData.messageBody = messageBody
+    modalData.isOpen = true
+    switch (uploadedFileType) {
+      case UploadedFileType.NODE_FILE:
+        nodeFiles = []
+        newNetwork.nodes = []
+        break
+      case UploadedFileType.EDGE_FILE:
+        edgeFiles = []
+        newNetwork.links = []
+        break
+    }
   }
 
   function onSaveButtonClicked() {
@@ -122,11 +198,17 @@
 
   async function uploadNetworkToFirebaseStorage() {
     progressBarData.text = "Saving network to the cloud..."
-    await uploadNetworkToStorage(
-      newNetwork.metadata,
-      nodeFiles[0],
-      edgeFiles[0]
-    )
+    /*
+    Why create the CSV file from scratch using the newNetwork object, rather than simply
+    uploading the files that the user uploaded? 
+    This is because the user may have uploaded a file that has extra 
+    columns that are not part of the network. We want to remove these
+    extra columns before uploading the network to Firebase Storage. Or it could be that the
+    index was missing and it was added by the client. In these cases, the user's file
+    is not the same as the network that we want to upload.
+    */
+    let files: Record<string, File> = newNetwork.toFiles()
+    await uploadNetworkToStorage(newNetwork.metadata,files.nodes, files.links)
       .then((url) => {
         console.log(`Network uploaded to ${url}`)
         //TODO Newline does not render in the modal currently.
@@ -156,6 +238,36 @@
 
 <main>
   <div class="root">
+    <div class="infobox">
+      <Accordion>
+        <AccordionItem title="File Format Guide">
+          Currently, only csv files are supported. It is required that the
+          network consists of two files: <br /> - nodes.csv <br />
+          - edges.csv <br />
+          Each file has to have a header row which contains the column names. There
+          are special column names, that may be required or may have a special function
+          assigned to them (see below). Other than that, the user is free to add
+          any number of additional columns with arbitrary names that will function
+          as node or edge features depending on the file. <br /> <br />
+          The nodes.csv file must contain either 'name' or 'index', or both. If the
+          nodes are not named, then the user must provide at least the index column
+          where each row is assigned a unique index from 0 to n-1 where n is the
+          number of nodes. If the name column is present, then the index column is
+          optional as this can be automatically generated from each row's position.
+          'name' is a special column and if present, it will be shown as the node's
+          name in the Visualize page when the node is hovered on. <br /> 'group'
+          is another special column that can be used to assign a group to each
+          node. Visualize page will then color the nodes according to their
+          group. <br /> <br /> The edges.csv file must contain the 'source' and 'target'
+          columns that specify which nodes the edge connects to. Currently only undirected
+          edges are supported in the Visualize Page, although the specific ordering
+          can be relevant for the machine learning algorithms that run on the network.
+          Note that 'source' and 'target' must be integers that correspond to the
+          indices of nodes as either explicitly specified in the nodes.csv file or
+          automatically generated from the nodes.csv file.
+        </AccordionItem>
+      </Accordion>
+    </div>
     <div class="metadata">
       <div class="metadata_title">
         <TextInput
@@ -196,12 +308,6 @@
               status="complete"
               bind:files={nodeFiles}
             />
-            <!--
-      {#if nodeFiles.length > 0}
-        <h2>Selected node file:</h2>
-        <p>{nodeFiles[0].name} ({nodeFiles[0].size} bytes)</p>
-      {/if}
-      -->
           </div>
 
           <div class="edges_file">
@@ -211,12 +317,6 @@
               status="complete"
               bind:files={edgeFiles}
             />
-            <!--
-      {#if edgeFiles.length > 0}
-        <h2>Selected edge file:</h2>
-        <p>{edgeFiles[0].name} ({edgeFiles[0].size} bytes)</p>
-      {/if}
-      -->
           </div>
 
           {#if progressBarData.isPresent}
@@ -254,6 +354,12 @@
   }
 
   .metadata {
+    margin: 1rem;
+  }
+
+  .infobox {
+    border: 1px solid #ccc;
+    padding: 1rem;
     margin: 1rem;
   }
 

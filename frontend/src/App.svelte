@@ -10,10 +10,9 @@
   import Reports from "./components/pages/Workbench/Reports.svelte"
   import FromWeb from "./components/pages/AddNetwork/FromWeb.svelte"
   import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte"
-  import Header from "./components/common/Header.svelte"
   import Footer from "./components/common/Footer.svelte"
   import Tabs from "./components/common/Tabs.svelte"
-  import CustomModal from "./components/common/CustomModal.svelte"
+  import Test from "./components/pages/Test.svelte"
   import Networks from "./components/pages/Workbench/Networks.svelte"
   import {
     selectedMenuItem,
@@ -21,19 +20,20 @@
     loginUserStore,
     networksList,
     selectedNetworkIndex,
-    fetchedNetworkOnce
+    fetchedNetworkOnce,
+    defaultSeed,
   } from "./stores"
   import { getAuth } from "firebase/auth"
   import {
     loginUser,
     getNetworks as getNetworksFromFirestore,
-    getProfileImage
+    getDefaultSeed,
   } from "./api/firebase"
   import { ProgressBarData } from "./definitions/progressBarData"
   import { ProgressBar, Button } from "carbon-components-svelte"
   import { onMount } from "svelte"
   import ImportModal from "./components/common/ImportModal.svelte"
-  import { ImportModalType }  from "./definitions/importModalType"
+  import { ImportModalType } from "./definitions/importModalType"
 
   /* ---- PAGE LOAD AND LOGIN ---- */
   let progressBarData: ProgressBarData = new ProgressBarData(true, "Loading...")
@@ -41,7 +41,6 @@
 
   // For some reason, the getNetworksFromFirestore() function is called multiple times on page load.
   // For now, this variable is used to prevent that. TODO: Find a better solution.
-
 
   onMount(() => {
     /*
@@ -65,177 +64,67 @@
     isLoggedIn = $authUserStore !== undefined //&& getAuth().currentUser !== null
     if (isLoggedIn && $networksList.length === 0) {
       progressBarData.text = "Fetching networks..."
-      if($fetchedNetworkOnce) return
+      if ($fetchedNetworkOnce) return
       $fetchedNetworkOnce = true
-      getNetworksFromFirestore()
-        .then(() => (progressBarData.isPresent = false))
-        .catch(() => (progressBarData.isPresent = false))
-      getProfileImage()
+      getNetworksFromFirestore().finally(() => {
+        progressBarData.isPresent = false
+      })
+      getDefaultSeed()
+        .then((seed) => {
+          if (seed !== undefined) $defaultSeed = seed
+        })
+        .catch((error) =>
+          console.log(`Error in getting default seed: ${error}`)
+        )
     }
   }
-
-  /* ---- My Networks ---- */
-  let isHoveringMyNetworks: boolean = false
-  let isHoveringNetworksList: boolean = false
-
-  // $: $selectedNetworkIndex, selectNetwork()
-
-  // function selectNetwork() {
-  //   if ($selectedNetworkIndex === undefined) return
-  //   isHoveringMyNetworks = false
-  //   isHoveringNetworksList = false
-  //   $selectedMenuItem = MenuItem.PLOT
-  // }
-
-  /* ---- Import Modal ---- */
-  let isImportModalOpen: boolean = false
-  let selectedImportType: ImportModalType = ImportModalType.NONE
-
-  let showModal = false
 </script>
 
 {#if progressBarData.isPresent}
   <div class="main_progress_bar">
     <ProgressBar helperText={progressBarData.text} />
   </div>
-{:else}
-    {#if isLoggedIn === true}
-    <ul id="menuLogin" class="mainUI">
-      <Tabs />
-      {#if $selectedMenuItem === MenuItem.HOME}
-        <Home />
-      {:else if $selectedMenuItem === MenuItem.NETWORKS}
-      <Networks/>
-      {:else if $selectedMenuItem === MenuItem.PLOT}
-      <Plot />
-      {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
-      <Experiments/>
-      {:else if $selectedMenuItem === MenuItem.REPORTS}
-      <Reports/>
-      {:else if $selectedMenuItem === MenuItem.PROFILE}
-      <Profile />
-      {:else if $selectedMenuItem === MenuItem.FROM_WEB}
-      <FromWeb />
-      {:else if $selectedMenuItem === MenuItem.FROM_PC}
-      <UploadNetwork />
-      {/if}
-    </ul>
-    {:else if isLoggedIn === false}
-      <Tabs />
-      {#if $selectedMenuItem === MenuItem.HOME}
-        <Home />
-      {:else if $selectedMenuItem === MenuItem.LOGIN}
-        <Login />
-      {:else if $selectedMenuItem === MenuItem.REGISTER}
-        <Register />
-      {/if}
-    {/if}
-{/if}
-
-
-<Footer />
-
-      <!---
-      <li>
-        <a href="/" on:click|preventDefault={performLogout}>Logout</a>
-      </li>
-      <li>
-        <div
-          class:menu_my_networks_open={isHoveringMyNetworks}
-          class:menu_my_networks={!isHoveringMyNetworks}
-          on:mouseenter={() => (isHoveringMyNetworks = true)}
-          on:mouseleave={() => /*(isHoveringMyNetworks = false)*/ null}
-        >
-          My Networks
-        </div>
-      </li>
-      {#if $selectedNetworkIndex !== undefined}
-        <li>
-          <a
-            href="/"
-            on:click|preventDefault={() => ($selectedMenuItem = MenuItem.PLOT)}
-            >Visualize</a
-          >
-        </li>
-        <li>
-          <a
-            href="/"
-            on:click|preventDefault={() =>
-              ($selectedMenuItem = MenuItem.EXPERIMENTS)}>Experiments</a
-          >
-        </li>
-        <li>
-          <a
-            href="/"
-            on:click|preventDefault={() =>
-              ($selectedMenuItem = MenuItem.REPORTS)}>Reports</a
-          >
-        </li>
-      {/if}
-    </ul>
-  {/if}
-  <div class="root">
+{:else if isLoggedIn === true}
+  <ul id="menuLogin" class="menuLogin">
+    <Tabs />
     {#if $selectedMenuItem === MenuItem.HOME}
       <Home />
-    {:else if $selectedMenuItem === MenuItem.LOGIN}
-      <Login />
-    {:else if $selectedMenuItem === MenuItem.REGISTER}
-      <Register />
+    {:else if $selectedMenuItem === MenuItem.NETWORKS}
+      <Networks />
     {:else if $selectedMenuItem === MenuItem.PLOT}
       <Plot />
     {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
       <Experiments />
     {:else if $selectedMenuItem === MenuItem.REPORTS}
       <Reports />
+    {:else if $selectedMenuItem === MenuItem.PROFILE}
+      <Profile />
+    {:else if $selectedMenuItem === MenuItem.FROM_WEB}
+      <FromWeb />
+    {:else if $selectedMenuItem === MenuItem.FROM_PC}
+      <UploadNetwork />
+    {:else if $selectedMenuItem === MenuItem.TEST}
+      <Test />
     {/if}
-  </div>
-  {#if isHoveringMyNetworks || isHoveringNetworksList}
-    <div
-      class="networks_list"
-      on:mouseenter={() => (isHoveringNetworksList = true)}
-      on:mouseleave={() => (isHoveringNetworksList = false)}
-    >
-      <div class="networks_list_header">
-        <p>Networks</p>
-        <Button
-          class="btn_networks_list_import"
-          on:click={() => {
-            isHoveringMyNetworks = false
-            isHoveringNetworksList = false
-            isImportModalOpen = true
-          }}
-          size="small"
-          on:click>Import Network</Button
-        >
-      </div>
-      <div class="networks_list_items" style="--height: {$networksList.length * 120}px;">
-        {#each $networksList as network, index}
-          <NetworkListItem
-            {network}
-            {index}
-            selected={$selectedNetworkIndex == index}
-            on:selectItem={(event) => {
-              $selectedNetworkIndex = event.detail.selectedIndex
-            }}
-          />
-        {/each}
-      </div>
-    </div>
+  </ul>
+{:else if isLoggedIn === false}
+  <Tabs />
+  {#if $selectedMenuItem === MenuItem.HOME}
+    <Home />
+  {:else if $selectedMenuItem === MenuItem.LOGIN}
+    <Login />
+  {:else if $selectedMenuItem === MenuItem.REGISTER}
+    <Register />
   {/if}
-  
-  <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
-  {#if selectedImportType === ImportModalType.FROM_WEB}
-    <FromWeb/>
-  {:else if selectedImportType === ImportModalType.UPLOAD}
-    <UploadNetwork/>
-  {/if}
-
 {/if}
--->
 
-
+<Footer />
 
 <style lang="scss">
+
+  .menuLogin{
+    height: 100%;
+  }
   .main_progress_bar {
     position: absolute;
     top: 100%;

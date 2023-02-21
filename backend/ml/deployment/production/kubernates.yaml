@@ -1,0 +1,254 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: celery-worker
+  namespace: studtarasov
+  annotations:
+    description: "Deployment of the graph learning workbench"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: celery-worker
+    spec:
+      containers:
+      - resources:
+          limits:
+            nvidia.com/gpu: "1"
+            cpu: "4"
+            memory: "8Gi"
+          requests:
+            nvidia.com/gpu: "1"
+            cpu: "4"
+            memory: "8Gi"
+        name: celery-worker
+        image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
+        imagePullPolicy: "Always"
+        env:
+          - name: REDIS_HOST
+            value: "redis-master"
+          - name: REDIS_PORT
+            value: "6379"
+          - name: RABBITMQ_HOST
+            value: "rabbitmq-service"
+          - name: RABBITMQ_PORT
+            value: "5672"
+          - name: RABBITMQ_USER
+            value: "guest"
+          - name: RABBITMQ_PASSWORD
+            value: "guest"
+        command: ["celery", "-A", "task_manager.tasks", "worker"]
+        volumeMounts:
+          - mountPath: /workspace
+            name: project-code-for-celery
+      priorityClassName: "research-high"
+      imagePullSecrets:
+      - name: lsx-registry
+      restartPolicy: "Always"
+      volumes:
+        - name: project-code-for-celery
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studtarasov
+            path: "/home/stud/tarasov/xtai_lab3/application"
+            secretRef:
+              name: ceph-secret
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: graph-learning-workbench
+  namespace: studtarasov
+  annotations:
+    description: "Deployment of the graph learning workbench"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: graph-learning-workbench
+    spec:
+      containers:
+      - resources:
+          limits:
+            cpu: "4"
+            memory: "8Gi"
+          requests:
+            cpu: "4"
+            memory: "8Gi"
+        name: graph-learning-workbench
+        image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtarasov/graph_learning_workbench:0.0.1
+        imagePullPolicy: "Always"
+        env:
+          - name: REDIS_HOST
+            value: "redis-master"
+          - name: REDIS_PORT
+            value: "6379"
+          - name: RABBITMQ_HOST
+            value: "rabbitmq-service"
+          - name: RABBITMQ_PORT
+            value: "5672"
+          - name: RABBITMQ_USER
+            value: "guest"
+          - name: RABBITMQ_PASSWORD
+            value: "guest"
+        command: ["uvicorn", "app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+        ports:
+        - name: http
+          containerPort: 8000
+        volumeMounts:
+          - mountPath: /workspace
+            name: project-code
+      priorityClassName: "research-high"
+      imagePullSecrets:
+      - name: lsx-registry
+      restartPolicy: "Always"
+      volumes:
+        - name: project-code
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studtarasov
+            path: "/home/stud/tarasov/xtai_lab3/application"
+            secretRef:
+              name: ceph-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graph-learning-workbench-service
+  namespace: studtarasov
+  annotations:
+    description: "Service for deployment of the graph learning workbench"
+spec:
+  type: NodePort
+  ports:
+  - port: 8000
+  selector:
+    name: graph-learning-workbench
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: redis
+    role: master
+    tier: backend
+  name: redis-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      role: master
+      tier: backend
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: redis
+        role: master
+        tier: backend
+    spec:
+      containers:
+      - image: redis
+        name: redis-master
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: redis
+    role: master
+    tier: backend
+  name: redis-master
+spec:
+  ports:
+  - port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: redis
+    role: master
+    tier: backend
+status:
+  loadBalancer: {}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: rabbitmq
+  name: rabbitmq
+  namespace: studtarasov
+spec:
+  minReadySeconds: 5
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: rabbitmq
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - image: rabbitmq
+        imagePullPolicy: Always
+        name: rabbitmq
+        ports:
+        - containerPort: 5671
+          protocol: TCP
+        - containerPort: 5672
+          protocol: TCP
+        - containerPort: 4369
+          protocol: TCP
+        - containerPort: 15672
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 100m
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+  namespace: studtarasov
+spec:
+  ports:
+  - name: ampq1
+    port: 5671
+    protocol: TCP
+    targetPort: 5671
+  - name: ampq2
+    port: 5672
+    protocol: TCP
+    targetPort: 5672
+  selector:
+    app: rabbitmq
