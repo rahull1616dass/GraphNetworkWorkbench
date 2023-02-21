@@ -14,7 +14,7 @@
  import { MenuItem } from "../../definitions/menuItem"
  import Home from "../pages/Home.svelte"
     import { debug } from "svelte/internal";
-import { UploadProfileImage } from "../../api/firebase"
+import { getProfileImage, UploadProfileImage } from "../../api/firebase"
 import { fetchedProfilePicture } from "../../stores"
 import { onMount } from "svelte"
 
@@ -64,6 +64,7 @@ import { onMount } from "svelte"
   }
 
   onMount(() => {
+    getProfileImage()
     fetchedProfilePicture.subscribe((image) => {
       if(image!=null)
         profileImage = URL.createObjectURL(image);
