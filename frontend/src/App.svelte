@@ -126,10 +126,14 @@
     height: 100%;
   }
   .main_progress_bar {
-    position: absolute;
-    top: 100%;
-    left: 100%;
-    transform: translate(-50%, -50%);
+    position: relative;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
   }
   .root {
     overflow: auto;
