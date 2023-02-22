@@ -26,6 +26,8 @@
   import { uploadNetworkToStorage } from "../../../../api/firebase"
   import { ProgressBarData } from "../../../../definitions/progressBarData"
   import { onMount } from "svelte"
+  import CustomInput from "../../../common/CustomInput.svelte"
+  import CustomButton from "../../../common/CustomButton.svelte"
 
   onMount(() => {
     /*
@@ -236,7 +238,7 @@
   */
 </script>
 
-<main>
+
   <div class="root">
     <div class="infobox">
       <Accordion>
@@ -301,22 +303,13 @@
               (newNetwork.metadata.color = color)}
           />
 
-          <div class="nodes_file">
-            <FileUploader
-              labelTitle="Upload nodes file"
-              buttonLabel="Add file"
-              status="complete"
-              bind:files={nodeFiles}
-            />
+
+          <div>
+            <CustomInput id="many"  bind:files={nodeFiles}>Upload Node File</CustomInput>
           </div>
 
-          <div class="edges_file">
-            <FileUploader
-              labelTitle="Upload edges file"
-              buttonLabel="Add file"
-              status="complete"
-              bind:files={edgeFiles}
-            />
+          <div>
+            <CustomInput id="many"  bind:files={edgeFiles}>Upload Edge File</CustomInput>
           </div>
 
           {#if progressBarData.isPresent}
@@ -325,7 +318,7 @@
             </div>
           {:else}
             <div class="save_button">
-              <Button on:click={onSaveButtonClicked}>Save Network</Button>
+              <CustomButton type={"secondary"} inverse={false} on:click={onSaveButtonClicked}>Save Network</CustomButton>
             </div>
           {/if}
           {#if modalData.isOpen}
@@ -343,14 +336,12 @@
       </div>
     </div>
   </div>
-</main>
+
 
 <style>
   .root {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    height: 100vh;
   }
 
   .metadata {
