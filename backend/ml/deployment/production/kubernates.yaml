@@ -21,7 +21,7 @@ spec:
             cpu: "4"
             memory: "4Gi"
         name: mlflow
-        image: jiankaiwang/mlflow
+        image: ghcr.io/mlflow/mlflow
         imagePullPolicy: "Always"
         env:
           - name: MLFLOW_TRACKING_URI
