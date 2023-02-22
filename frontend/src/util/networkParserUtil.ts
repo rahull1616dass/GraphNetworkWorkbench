@@ -45,6 +45,39 @@ export async function parseReadableStream(
     })
 }
 
+export function removeCSVColumns(csvData, columnsToRemove) {
+  const rows = csvData.split("\n").map(row => {
+    const cells = [];
+    let cell = "";
+    let insideQuote = false;
+    for (const char of row) {
+      if (char === '"') {
+        insideQuote = !insideQuote;
+      } else if (char === "," && !insideQuote) {
+        cells.push(cell);
+        cell = "";
+      } else {
+        cell += char;
+      }
+    }
+    cells.push(cell);
+    return cells;
+  });
+  const header = rows[0];
+  let indicesToRemove = [];
+  if (Array.isArray(columnsToRemove)) {
+    for (const col of columnsToRemove) {
+      const index = header.indexOf(col);
+      if (index !== -1) {
+        indicesToRemove.push(index);
+      }
+    }
+  }
+  return rows.map(row => {
+    return row.filter((_, i) => !indicesToRemove.includes(i));
+  }).map(row => row.join(",")).join("\n");
+}
+
 //Declare an async function that parses a CSV file and returns a promise
 async function parseCSV(file: File): Promise<ParseResult> {
   console.log("my name is " + file.name)

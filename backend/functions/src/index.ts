@@ -173,7 +173,7 @@ exports.getNetworks = functions.https.onRequest((req, res) => {
   })
 })
 
-exports.getNetowrkDescription = functions.https.onRequest((req, res) => {
+exports.getNetworkDescription = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
     const { networkName } = req.query
     console.log(networkName)

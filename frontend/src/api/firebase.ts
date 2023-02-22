@@ -149,31 +149,29 @@ export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
 }
 // ---- Authentication ----
 
-export async function UploadProfileImage(imageFile: File):Promise<void>
-{
-  return new Promise((resolve, reject)=> {
+export async function UploadProfileImage(imageFile: File): Promise<void> {
+  return new Promise((resolve, reject) => {
 
-  const storagePath = getImageStorageRefs('profile')
-  uploadBytes(storagePath['imageFileRef'], imageFile)
-  .then(() => {
-    console.log(`Uploaded image file to firebase`)
-    resolve()
-  }
-  )
-  .catch((error) => {
-    console.log(`Image upload error: ${error}`)
-    reject()
-  }
-  )
-})
+    const storagePath = getImageStorageRefs('profile')
+    uploadBytes(storagePath['imageFileRef'], imageFile)
+      .then(() => {
+        console.log(`Uploaded image file to firebase`)
+        resolve()
+      }
+      )
+      .catch((error) => {
+        console.log(`Image upload error: ${error}`)
+        reject()
+      }
+      )
+  })
 }
 // ---- Networks ----
 function getNetworkPath(networkId: string): string {
   if (networkId === undefined)
     return `${Database.USERS}/${get(authUserStore).uid}/${Database.NETWORKS}`
-  return `${Database.USERS}/${get(authUserStore).uid}/${
-    Database.NETWORKS
-  }/${networkId}`
+  return `${Database.USERS}/${get(authUserStore).uid}/${Database.NETWORKS
+    }/${networkId}`
 }
 function getStorageRefs(
   networkId: string,
@@ -259,17 +257,25 @@ async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
 }
 
 export async function getProfileImage() {
-  
+
   const storagePaths = getImageStorageRefs('profile')
   console.log(storagePaths)
   getBlob(storagePaths['imageFileRef']).then((image) => {
     fetchedProfilePicture.set(blobToFile(image, "profileImage.png"))
   })
-  .catch((error) => 
-  {
-    console.log("No file of profilePics")
-  }
-  )
+    .catch((error) => {
+      console.log("No file of profilePics")
+    }
+    )
+}
+
+export async function networkExists(networkId: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const networkDoc = doc(db, getNetworkPath(networkId))
+    getDoc(networkDoc)
+      .then((doc) => resolve(doc.exists()))
+      .catch((error) => reject(error))
+  })
 }
 
 export async function getNetworks() {
@@ -413,29 +419,6 @@ export async function getExperimentTasks(networkId: string): Promise<Task[]> {
   })
 }
 
-export async function checkIfNetworkExistTask(networkId: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const tasksQuery = query(
-      collection(
-        db,
-        getUserPath(),
-        Database.NETWORKS
-      )
-    )
-    getDocs(tasksQuery)
-    .then((querySnapshot) => {
-      let IsExist: boolean
-      querySnapshot.forEach((doc) => {
-        if(!IsExist)
-          IsExist = doc.id === networkId
-      })
-      resolve(IsExist)
-    }).catch((error) => {
-      console.log(`Error getting experiment tasks for network ${networkId}. ${error}`)
-      reject(error)
-    })
-  })
-}
 async function updateDefaultSeed(seed: number): Promise<void> {
   return new Promise((resolve, reject) => {
     updateDoc(doc(db, `${Database.USERS}/${get(authUserStore).uid}`), {
