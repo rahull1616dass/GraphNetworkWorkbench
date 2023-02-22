@@ -1,4 +1,5 @@
 import torch
+import mlflow
 import torch.nn
 from tqdm import tqdm
 from torch.optim import Adam
@@ -38,11 +39,13 @@ class LinkPredictor:
         self.criterion = BCEWithLogitsLoss()
 
     def train(self, train_data: Data, val_data: Data, epochs: int = 100):
-        loss, val_acc = [], []
-        for _ in tqdm(range(1, epochs + 1), desc="Training epochs"):
-            loss += [self.__train_iter(train_data)]
-            val_acc += [self.test(val_data)]
-        return loss, val_acc
+        for every_step in tqdm(range(1, epochs + 1), desc="Link prediction progress..."):
+
+            loss = self.__train_iter(train_data)
+            mlflow.log_metric("loss", loss, every_step)
+
+            val_acc = self.test(val_data)
+            mlflow.log_metric("val_roc_auc_score", val_acc, every_step)
 
     def __train_iter(self, train_data: Data):
         self.model.train()
@@ -67,7 +70,7 @@ class LinkPredictor:
         loss = self.criterion(out, edge_label)
         loss.backward()
         self.optimizer.step()
-        return loss.cpu().detach().numpy()
+        return loss.item()
 
     @torch.no_grad()
     def test(self, test_data: Data):
@@ -85,18 +88,35 @@ class LinkPredictor:
 
 @timeit
 def predict_edges(data: Data, task: MLTask):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    transform = T.Compose([
-        T.NormalizeFeatures(),
-        T.ToDevice(device),
-        T.RandomLinkSplit(
-            num_val=task.val_percentage,
-            num_test=1 - task.val_percentage - task.train_percentage,
-            is_undirected=False, add_negative_train_samples=False)
-    ])
-    train_data, val_data, test_data = transform(data)
-    predictor = LinkPredictor(data.num_features, device, learning_rate=0.001)
-    train_loss, val_roc_auc_score = predictor.train(train_data, val_data, epochs=task.epochs)
-    test_roc_auc_score = predictor.test(test_data)
-    predictions = predictor.predict(test_data)
-    return train_loss, val_roc_auc_score, test_roc_auc_score, predictions.tolist()
+    mlflow.set_experiment("Link Prediction")
+
+    with mlflow.start_run() as current_run:
+        mlflow.log_params(task.dict(exclude={"nodes_file_url", "edges_file_url"}))
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        transform = T.Compose([
+            T.NormalizeFeatures(),
+            T.ToDevice(device),
+            T.RandomLinkSplit(
+                num_val=task.val_percentage,
+                num_test=1 - task.val_percentage - task.train_percentage,
+                is_undirected=False, add_negative_train_samples=False)
+        ])
+        train_data, val_data, test_data = transform(data)
+        predictor = LinkPredictor(data.num_features, device, learning_rate=0.001)
+
+        predictor.train(train_data, val_data, epochs=task.epochs)
+
+        all_loss_metrics = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "loss")
+        losses = list(map(lambda metric: metric.value, all_loss_metrics))
+
+        all_val_acc = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "val_roc_auc_score")
+        val_roc_auc_score = list(map(lambda metric: metric.value, all_val_acc))
+
+        test_roc_auc_score = predictor.test(test_data)
+        mlflow.log_metric("test_roc_ayc_score", test_roc_auc_score)
+
+        predictions = predictor.predict(test_data)
+
+        mlflow.log_metric("test_roc_auc_curve", test_roc_auc_score)
+    return losses, val_roc_auc_score, test_roc_auc_score, predictions.tolist()

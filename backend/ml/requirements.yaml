@@ -21,3 +21,4 @@ dependencies:
   - uvicorn=0.20.0=py310hff52083_1
   - pyhumps=1.6.1=pyh9f0ad1d_1
   - aio-pika=8.3.0=py310hff52083_0
+  - mlflow=2.1.1=py310ha13cd29_0
