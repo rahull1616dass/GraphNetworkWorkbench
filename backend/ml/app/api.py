@@ -1,6 +1,6 @@
 """REST API"""
 from fastapi import APIRouter, Body
-from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.responses import RedirectResponse
 
 from core.logging_helpers import get_logger
 from app.workflows import (
@@ -39,13 +39,3 @@ async def node_classification(task: MLTask = Body()):
 @api.get("/")
 async def index():
     return RedirectResponse("/docs")
-
-
-@api.get("/n")
-def n():
-    return FileResponse("nodes.csv")
-
-
-@api.get("/e")
-def e():
-    return FileResponse("edges.csv")
