@@ -15,6 +15,7 @@ const cors = require("cors")({ origin: true });
  */
 import axios from "axios"
 import * as admin from "firebase-admin"
+import type { QueryDocumentSnapshot } from "firebase-functions/v1/firestore"
 
 admin.initializeApp()
 
@@ -22,15 +23,34 @@ const NETWORK_FILE_TYPE = {
   NODES: "nodes",
   EDGES: "edges",
 }
-const ML_SERVICE_URL = "https://get-prediction-i5wplx5u5a-oa.a.run.app"
+
+const ML_SERVICE_URL = "34.189.131.139:8000"
 const DB = {
   Users: "Users",
   Networks: "Networks",
   Tasks: "Tasks",
 }
 
+const taskType = {
+  NODE_CLASSIFICATION: "node_class",
+  EDGE_PREDICTION: "link_pred",
+}
+
+export const enum ExperimentState {
+  CREATE,
+  PROGRESS,
+  RESULT,
+  ERROR,
+}
+
+export const RESPONSE_CODE = {
+  SUCCESS: 200,
+  INTERNAL_SERVER_ERROR: 505,
+  UNPROCESSABLE_ENTITY: 422,
+}
+
 // Relevant: https://firebase.google.com/docs/storage/extend-with-functions
-export async function getNetworksFromStorage(
+export async function getNetworkDownloadUrls(
   userId: string,
   networkId: string
 ): Promise<Map<string, string>> {
@@ -39,7 +59,7 @@ export async function getNetworksFromStorage(
     Why go into the trouble of getting the file URLs here, rather than having them saved
     in the document anyway, when the file is being uploaded in the front-end?
     For security reasons. This way, the file URLs are temporary, and will expire after a certain time.
-    For this to work, the IAM Service Account 2323c   Credentials API needs to be enabled for the project via:
+    For this to work, the IAM Service Account Credentials API needs to be enabled for the project via:
     https://console.cloud.google.com/apis/api/iamcredentials.googleapis.com
     Afterwards, the Service Account Token Creator role needs to be added to the 
     Firebase Admin SDK Service Account.
@@ -80,65 +100,98 @@ exports.onTaskCreated = functions.firestore
   .document(
     `${DB.Users}/{userId}/${DB.Networks}/{networkId}/${DB.Tasks}/{taskId}`
   )
-  .onCreate(async (snap, context) => {
+  .onCreate(async (snap: QueryDocumentSnapshot, context: functions.EventContext) => {
     console.log(
-      `Starting task ${context.params.taskId} with task: ${
-        snap.data().taskType
+      `Starting task ${context.params.taskId} with task: ${snap.data().taskType
       }`
     )
+    if (snap.data().taskType !== taskType.NODE_CLASSIFICATION && snap.data().taskType !== taskType.EDGE_PREDICTION) {
+      console.log("Invalid task type")
+      writeToTaskDocument({
+        // @ts-ignore
+        state: ExperimentState[ExperimentState.ERROR]
+        , message: `Task type ${snap.data().taskType} is invalid.`
+      }, context)
+      return
+    }
     console.time("ML Service call")
     try {
-      const networkFiles = await getNetworksFromStorage(
+      const networkFileUrls = await getNetworkDownloadUrls(
         context.params.userId,
         context.params.networkId
       )
       const requestData = {
-        nodesFileUrl: networkFiles.get(NETWORK_FILE_TYPE.NODES),
-        edgesFileUrl: networkFiles.get(NETWORK_FILE_TYPE.EDGES),
+        nodesFileUrl: networkFileUrls.get(NETWORK_FILE_TYPE.NODES),
+        edgesFileUrl: networkFileUrls.get(NETWORK_FILE_TYPE.EDGES),
         task: snap.data(),
       }
-      console.log("Request data", requestData)
-      const taskResult = await axios.post(ML_SERVICE_URL, requestData, {
+      console.log(`ML Service Request Data: ${JSON.stringify(requestData)}`)
+      const taskResult = await axios.post(`${ML_SERVICE_URL}/${snap.data().taskType}`, requestData, {
         headers: { "Content-Type": "application/json" },
       })
       console.timeEnd("ML Service call")
-      console.log("ML Service response", taskResult.data)
+      console.log(`ML Service Response Data: ${JSON.stringify(taskResult)}`)
+      
+      if(Number(taskResult.headers["code"]) !== RESPONSE_CODE.SUCCESS) {
+        console.log("ML Service error")
+        // @ts-ignore
+        taskResult.data.state = ExperimentState[ExperimentState.ERROR]
+        writeToTaskDocument(taskResult.data, context)
+      }else{
+        // @ts-ignore
+        taskResult.data.state = ExperimentState[ExperimentState.RESULT]
+        writeToTaskDocument(taskResult.data, context)
+      }
     } catch (err) {
       console.log(err)
     }
   })
-  exports.getNetworks = functions.https.onRequest((req, res) => {
-    cors(req, res, () => {
-      axios
-        .get("https://networks.skewed.de/api/nets")
-        .then(response => {
-          res.send(response.data);
-        })
-        .catch(error => {
-          res.status(500).send(error);
-        });
-    });
-  });
 
-  exports.getNetowrkDescription = functions.https.onRequest((req, res) => {
-    cors(req, res, () => {
-      const { networkName } = req.query;
-      console.log(networkName)
-      axios
-        .get(`https://networks.skewed.de/api/net/${networkName}`)
-        .then(response => {
-          res.send(response.data);
-        })
-        .catch(error => {
-          res.status(500).send(error);
-        });
-    });
-  });
+function writeToTaskDocument(data: object, context: functions.EventContext) {
+  admin.firestore.collection(DB.Users)
+    .doc(context.params.userId)
+    .collection(DB.Networks)
+    .doc(context.params.networkId)
+    .collection(DB.Tasks)
+    .doc(context.params.taskId).update(data).then(() => {
+      console.log("Task document updated")
+    }).catch((err) => {
+      console.log(err)
+    })
+}
 
-  exports.downloadNetworkFile = functions.https.onRequest((req, res) => {
-    cors(req, res, () => {
-      const { networkName } = req.query;
-      const fileUrl = `https://networks.skewed.de/net/${networkName}/files/${networkName}.csv.zip`;
+exports.getNetworks = functions.https.onRequest((req, res) => {
+  cors(req, res, () => {
+    axios
+      .get("https://networks.skewed.de/api/nets")
+      .then(response => {
+        res.send(response.data);
+      })
+      .catch(error => {
+        res.status(500).send(error);
+      })
+  })
+})
+
+exports.getNetowrkDescription = functions.https.onRequest((req, res) => {
+  cors(req, res, () => {
+    const { networkName } = req.query
+    console.log(networkName)
+    axios
+      .get(`https://networks.skewed.de/api/net/${networkName}`)
+      .then(response => {
+        res.send(response.data)
+      })
+      .catch(error => {
+        res.status(500).send(error)
+      })
+  })
+})
+
+exports.downloadNetworkFile = functions.https.onRequest((req, res) => {
+  cors(req, res, () => {
+    const { networkName } = req.query;
+    const fileUrl = `https://networks.skewed.de/net/${networkName}/files/${networkName}.csv.zip`;
     axios({
       method: "get",
       url: fileUrl,
@@ -149,12 +202,12 @@ exports.onTaskCreated = functions.firestore
         res.set(
           "Content-Disposition",
           `attachment; filename=${networkName}.csv.zip`
-        );
-        response.data.pipe(res);
+        )
+        response.data.pipe(res)
       })
       .catch(error => {
         console.error(error);
-        res.status(500).send(error);
-      });
-    });
-  });
+        res.status(500).send(error)
+      })
+  })
+})

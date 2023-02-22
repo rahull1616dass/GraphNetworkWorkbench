@@ -19,7 +19,7 @@
   ];
   let taskTypes: TaskType[] = [
     TaskType.NODE_CLASSIFICATION,
-    TaskType.EDGE_CLASSIFICATION,
+    TaskType.EDGE_PREDICTION,
   ];
 
   let networkIndex: number = undefined;
