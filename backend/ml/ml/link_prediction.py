@@ -39,7 +39,7 @@ class LinkPredictor:
         self.criterion = BCEWithLogitsLoss()
 
     def train(self, train_data: Data, val_data: Data, epochs: int = 100):
-        for every_step in tqdm(range(1, epochs + 1), desc="Training epochs"):
+        for every_step in tqdm(range(1, epochs + 1), desc="Link prediction progress..."):
 
             loss = self.__train_iter(train_data)
             mlflow.log_metric("loss", loss, every_step)
