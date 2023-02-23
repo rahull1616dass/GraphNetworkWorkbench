@@ -1,4 +1,4 @@
 export enum TaskType{
-    NODE_CLASSIFICATION = "nodeClassification",
-    EDGE_CLASSIFICATION = "edgeClassification"
+    NODE_CLASSIFICATION = "node_class",
+    EDGE_PREDICTION = "link_pred"
 }

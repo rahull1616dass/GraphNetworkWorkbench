@@ -1,9 +1,7 @@
 from celery import Celery
 
-from config import Settings
+from config import settings
 
-
-settings = Settings()
 
 celery_instance = Celery(
     __name__,

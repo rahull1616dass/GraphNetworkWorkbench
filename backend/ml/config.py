@@ -1,3 +1,4 @@
+import threading
 from pydantic import BaseSettings
 
 
@@ -8,6 +9,20 @@ class Settings(BaseSettings):
     rabbitmq_port: str = "5672"
     rabbitmq_user: str = "guest"
     rabbitmq_password: str = "guest"
+    mlflow_uri: str = "./mlflow"
 
     class Config:
         env_file = ".env"
+
+    _instance = None
+    _lock: threading.Lock = threading.Lock()
+
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+
+        return cls._instance
+
+settings = Settings()
