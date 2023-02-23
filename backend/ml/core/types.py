@@ -19,7 +19,11 @@ class MLTask(CamelModel):
     edges_file_url: AnyHttpUrl
     epochs: int = 100
     train_percentage: float = 0.85
-    val_percentage: float = 0.1
+    target_variable: str
+
+
+class ClassificationTask(MLTask):
+    target_variable: str
 
 
 class NodeClassResponse(BaseModel):
