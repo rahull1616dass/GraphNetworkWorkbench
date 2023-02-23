@@ -11,7 +11,7 @@
 </script>
 
 <div class="infobox">
-  <ImageButton
+  <ImageButton styleClass="deleteButtonClass"
     on:click={() => {
       isInfoModalOpen = !isInfoModalOpen;
     }}
@@ -43,6 +43,5 @@
   .infobox {
     position: flex;
     margin: auto;
-    margin-top: 30%;
   }
 </style>

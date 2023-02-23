@@ -245,36 +245,6 @@
 </script>
 
 <div class="root">
-  <InfoBox
-    bind:isInfoModalOpen
-    headerText="File Guide"
-    bodyText="Currently, only csv files are supported. It is required that the
-  network consists of two files:  
-   - nodes.csv 
-   - edges.csv 
-  Each file has to have a header row which contains the column names. There
-  are special column names, that may be required or may have a special function
-  assigned to them (see below). Other than that, the user is free to add
-  any number of additional columns with arbitrary names that will function
-  as node or edge features depending on the file. <br /> <br />
-  The nodes.csv file must contain either 'name' or 'index', or both. If the
-  nodes are not named, then the user must provide at least the index column
-  where each row is assigned a unique index from 0 to n-1 where n is the
-  number of nodes. If the name column is present, then the index column is
-  optional as this can be automatically generated from each row's position.
-  'name' is a special column and if present, it will be shown as the node's
-  name in the Visualize page when the node is hovered on. <br /> 'group'
-  is another special column that can be used to assign a group to each
-  node. Visualize page will then color the nodes according to their
-  group. <br /> <br /> The edges.csv file must contain the 'source' and 'target'
-  columns that specify which nodes the edge connects to. Currently only undirected
-  edges are supported in the Visualize Page, although the specific ordering
-  can be relevant for the machine learning algorithms that run on the network.
-  Note that 'source' and 'target' must be integers that correspond to the
-  indices of nodes as either explicitly specified in the nodes.csv file or
-  automatically generated from the nodes.csv file."
-  />
-
   <div class="metadata">
     <div class="metadata_title">
       <TextInput
@@ -308,52 +278,127 @@
           on:select={({ detail: { color } }) =>
             (newNetwork.metadata.color = color)}
         />
-
-        <div>
-          <CustomInput id="many" bind:files={nodeFiles}
-            >Upload Node File</CustomInput
-          >
-        </div>
-
-        <div>
-          <CustomInput id="many" bind:files={edgeFiles}
-            >Upload Edge File</CustomInput
-          >
-        </div>
-
-        {#if progressBarData.isPresent}
-          <div class="progress_bar">
-            <ProgressBar helperText={progressBarData.text} />
-          </div>
-        {:else}
-          <div class="save_button">
-            <CustomButton
-              type={"secondary"}
-              inverse={false}
-              on:click={onSaveButtonClicked}>Save Network</CustomButton
-            >
-          </div>
-        {/if}
-        {#if modalData.isOpen}
-          <Modal
-            passiveModal
-            bind:open={modalData.isOpen}
-            modalHeading={modalData.messageHeader}
-            on:open
-            on:close={onModalClose}
-          >
-            {modalData.messageBody}
-          </Modal>
-        {/if}
       </div>
     </div>
+
+    <div class="grid">
+      <div>
+        <CustomInput id="many" bind:files={nodeFiles}
+          >Upload Node File</CustomInput
+        >
+      </div>
+      <div class="info">
+        <InfoBox
+          bind:isInfoModalOpen
+          headerText="File Guide"
+          bodyText="Currently, only csv files are supported. It is required that the
+        network consists of two files:  
+         - nodes.csv 
+         - edges.csv 
+        Each file has to have a header row which contains the column names. There
+        are special column names, that may be required or may have a special function
+        assigned to them (see below). Other than that, the user is free to add
+        any number of additional columns with arbitrary names that will function
+        as node or edge features depending on the file. <br /> <br />
+        The nodes.csv file must contain either 'name' or 'index', or both. If the
+        nodes are not named, then the user must provide at least the index column
+        where each row is assigned a unique index from 0 to n-1 where n is the
+        number of nodes. If the name column is present, then the index column is
+        optional as this can be automatically generated from each row's position.
+        'name' is a special column and if present, it will be shown as the node's
+        name in the Visualize page when the node is hovered on. <br /> 'group'
+        is another special column that can be used to assign a group to each
+        node. Visualize page will then color the nodes according to their
+        group. <br /> <br /> The edges.csv file must contain the 'source' and 'target'
+        columns that specify which nodes the edge connects to. Currently only undirected
+        edges are supported in the Visualize Page, although the specific ordering
+        can be relevant for the machine learning algorithms that run on the network.
+        Note that 'source' and 'target' must be integers that correspond to the
+        indices of nodes as either explicitly specified in the nodes.csv file or
+        automatically generated from the nodes.csv file."
+        />
+      </div>
+      <div>
+        <CustomInput id="many" bind:files={edgeFiles}
+          >Upload Edge File</CustomInput
+        >
+      </div>
+      <div class="info">
+        <InfoBox
+          bind:isInfoModalOpen
+          headerText="File Guide"
+          bodyText="Currently, only csv files are supported. It is required that the
+        network consists of two files:  
+         - nodes.csv 
+         - edges.csv 
+        Each file has to have a header row which contains the column names. There
+        are special column names, that may be required or may have a special function
+        assigned to them (see below). Other than that, the user is free to add
+        any number of additional columns with arbitrary names that will function
+        as node or edge features depending on the file. <br /> <br />
+        The nodes.csv file must contain either 'name' or 'index', or both. If the
+        nodes are not named, then the user must provide at least the index column
+        where each row is assigned a unique index from 0 to n-1 where n is the
+        number of nodes. If the name column is present, then the index column is
+        optional as this can be automatically generated from each row's position.
+        'name' is a special column and if present, it will be shown as the node's
+        name in the Visualize page when the node is hovered on. <br /> 'group'
+        is another special column that can be used to assign a group to each
+        node. Visualize page will then color the nodes according to their
+        group. <br /> <br /> The edges.csv file must contain the 'source' and 'target'
+        columns that specify which nodes the edge connects to. Currently only undirected
+        edges are supported in the Visualize Page, although the specific ordering
+        can be relevant for the machine learning algorithms that run on the network.
+        Note that 'source' and 'target' must be integers that correspond to the
+        indices of nodes as either explicitly specified in the nodes.csv file or
+        automatically generated from the nodes.csv file."
+        />
+      </div>
+    </div>
+
+    {#if progressBarData.isPresent}
+      <div class="progress_bar">
+        <ProgressBar helperText={progressBarData.text} />
+      </div>
+    {:else}
+      <div class="save_button">
+        <CustomButton
+          type={"secondary"}
+          inverse={false}
+          on:click={onSaveButtonClicked}>Save Network</CustomButton
+        >
+      </div>
+    {/if}
+    {#if modalData.isOpen}
+      <Modal
+        passiveModal
+        bind:open={modalData.isOpen}
+        modalHeading={modalData.messageHeader}
+        on:open
+        on:close={onModalClose}
+      >
+        {modalData.messageBody}
+      </Modal>
+    {/if}
   </div>
 </div>
 
 <style>
-  .root {
+  .grid {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    grid-template-rows: repeat(2, 1fr);
+    grid-gap: 1%;
+  }
+  .info {
     display: flex;
+  }
+  .root {
+    display: absolute;
     align-items: center;
+    width: 40%;
+    align-content: center;
+    margin: auto;
   }
 
   .metadata {
@@ -375,6 +420,6 @@
   }
 
   .save_button {
-    margin-top: 1rem;
+    padding-top: 10%;
   }
 </style>

@@ -80,6 +80,9 @@
   }
 </script>
 
+<div class="main">
+
+
 {#if progressBarData.isPresent}
   <div class="main_progress_bar">
     <ProgressBar helperText={progressBarData.text} />
@@ -119,6 +122,8 @@
 {/if}
 
 <Footer />
+</div>
+
 
 <style lang="scss">
 

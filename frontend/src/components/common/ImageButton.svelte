@@ -2,13 +2,15 @@
 
 export let defaultImageSource
 export let styleClass = "defaultStyle"
+export let width = "30px"
+export let height = "30px"
 </script>
 
 <button on:click class={styleClass} >
-    <img src= {defaultImageSource}>
+    <!-- svelte-ignore a11y-missing-attribute -->
+    <img src= {defaultImageSource} width={width} height={height}>
     <slot></slot>
 </button>
-
 
 <style lang="scss">
     .defaultStyle {
