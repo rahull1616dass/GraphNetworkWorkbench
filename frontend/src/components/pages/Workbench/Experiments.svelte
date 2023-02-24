@@ -34,6 +34,7 @@
   let experimentState: ExperimentState = ExperimentState.CREATE
 
   // These values should be set by UI Elements later on
+  let x_columns: string[] = []
   let trainPercentage: number = 0.8
   let epochs: number = 100
   let learningRate: number = 0.01
