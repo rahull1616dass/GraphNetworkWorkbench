@@ -98,8 +98,7 @@ def predict_edges(data: Data, task: MLTask):
             T.NormalizeFeatures(),
             T.ToDevice(device),
             T.RandomLinkSplit(
-                num_val=task.val_percentage,
-                num_test=1 - task.val_percentage - task.train_percentage,
+                num_val=1 - task.train_percentage,
                 is_undirected=False, add_negative_train_samples=False)
         ])
         train_data, val_data, test_data = transform(data)
