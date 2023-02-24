@@ -17,10 +17,9 @@ async def download_file(file_url: str) -> str:
     return target_file.name
 
 
-def download_network_files(task: MLTask) -> dict[str, str]:
-    nodes = asyncio.run(download_file(task.nodes_file_url))
-    edges = asyncio.run(download_file(task.edges_file_url))
+@timeit
+async def download_network_files(task: MLTask) -> dict[str, str]:
     return {
-        'nodes': nodes,
-        'edges': edges,
+        'nodes': await download_file(task.nodes_file_url),
+        'edges': await download_file(task.edges_file_url),
     }

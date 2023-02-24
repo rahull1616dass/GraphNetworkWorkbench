@@ -27,8 +27,8 @@ def get_basic_data(data_files: Dict[str, str], class_label_name: str | None = No
     if class_label_name is not None:
         target_classes = nodes[class_label_name]
 
-    """os.remove(data_files["nodes"])
-    os.remove(data_files["edges"])"""
+    os.remove(data_files["nodes"])
+    os.remove(data_files["edges"])
 
     if len(features) == 0:
         graph_data: Data = from_networkx(graph)
@@ -40,6 +40,7 @@ def get_basic_data(data_files: Dict[str, str], class_label_name: str | None = No
     return graph_data, target_classes
 
 
+@timeit
 def to_class_graph_data(data_files: Dict[str, str], task: ClassificationTask) -> Data:
     graph, class_labels = get_basic_data(data_files, task.target_variable)
     target_classes = torch.tensor(LabelEncoder().fit_transform(class_labels))
@@ -47,6 +48,7 @@ def to_class_graph_data(data_files: Dict[str, str], task: ClassificationTask) ->
     return graph
 
 
+@timeit
 def to_pred_graph_data(data_files: Dict[str, str], task: MLTask) -> Data:
     graph, _ = get_basic_data(data_files)
     return graph

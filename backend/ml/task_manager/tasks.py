@@ -1,4 +1,6 @@
 """Celery tasks"""
+import asyncio
+
 from celery import shared_task
 
 from task_manager import celery_instance
@@ -9,7 +11,7 @@ from preprocessing.loading import download_network_files
 
 @shared_task
 def download_task(*args, **kwargs):
-    return download_network_files(*args, **kwargs)
+    return asyncio.run(download_network_files(*args, **kwargs))
 
 
 @shared_task
