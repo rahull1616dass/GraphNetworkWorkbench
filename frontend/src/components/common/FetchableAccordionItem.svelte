@@ -2,21 +2,25 @@
     An accordion that when opened, fetches its content from a URL.
 -->
 <script lang="ts">
+    import FromWeb from "../pages/AddNetwork/FromWeb.svelte";
+
   import { AccordionItem, Button } from "carbon-components-svelte"
   import request from "../../api/request"
   import { createEventDispatcher } from "svelte"
   import { getAuth } from "firebase/auth"  
   import { checkIfNetworkExistTask, getExperimentTasks } from "../../api/firebase"
+  import { NetworkImportStates } from "../../definitions/ImportNetworkStates"
+    import NetworkListItem from "./NetworkListItem.svelte";
 
 
   export let title: string
   export let endpoint: string
   let content = undefined
-  export let isNetworkUploaded: boolean
+  export let isNetworkUploaded: NetworkImportStates
   const dispatch = createEventDispatcher()
 
   const onAccordionClick = async (event: MouseEvent) => {
-    isNetworkUploaded = await checkIfNetworkExistTask(title)
+    isNetworkUploaded = await checkIfNetworkExistTask(title) == true? NetworkImportStates.NetworkImported:NetworkImportStates.NetworkNotLoaded
 
     if (content == undefined) {
       content = await request(endpoint)
@@ -40,7 +44,7 @@
         {content.description}
       </div>
       <div class="import_button">
-      {#if (isNetworkUploaded == true)}
+      {#if (isNetworkUploaded == NetworkImportStates.NetworkImported)}
       <Button
           on:click={() => {console.log('network imported');
           }}
