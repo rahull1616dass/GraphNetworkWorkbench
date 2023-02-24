@@ -58,8 +58,8 @@
 
 <div
   class="main"
-  in:fly={{ delay: 1000, duration: 5000, y: -10 }}
-  out:fly={{ duration: 100, y: 10 }}
+  in:fly={{ y: -50, duration: 250, delay: 300 }}
+  out:fly={{ y: -50, duration: 250 }}
 >
   <div class="login-title"><h>Login Form</h></div>
   <div class="login-form">
