@@ -1,7 +1,7 @@
 <script lang="ts">
   import { DataTable } from "carbon-components-svelte";
   import DropdownSelector from "../../common/DropdownSelector.svelte";
-  import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType";
+  import { DropdownSelectorType } from "../../../definitions/dropdownSelectorType";
   import { selectedNetworkIndex, networksList } from "../../../stores";
   import { getExperimentTasks } from "../../../api/firebase";
   import type { Task } from "../../../definitions/task";
@@ -22,6 +22,7 @@
       .then((incomingTasks) => {
         tasks = incomingTasks;
         for (var i = 0; i < tasks.length; i++) {
+          // @ts-ignore
           tasks[i].index = i;
         }
         console.log("Reports page, updateTasks function, tasks: ", tasks);
@@ -40,7 +41,7 @@
 
 <DropdownSelector
   placeholder={"Select a Network"}
-  type={dropdownSelectorType.NETWORK}
+  type={DropdownSelectorType.NETWORK}
 />
 <div class="reports">
   {#if errorData !== undefined}
@@ -60,7 +61,9 @@
         { key: "trainPercentage", value: "Train Percentage" },
       ]}
       rows={tasks.map((task) => ({
+        // @ts-ignore
         id: task.index,
+        // @ts-ignore
         name: "Experiment " + (task.index + 1),
         taskType: task.taskType,
         mlModelType: task.mlModelType,

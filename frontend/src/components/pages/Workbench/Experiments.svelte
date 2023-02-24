@@ -8,13 +8,14 @@
   import { MenuItem } from "../../../definitions/menuItem"
   import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte"
   import DropdownSelector from "../../common/DropdownSelector.svelte"
+  import DropdownMultiSelector from "../../common/DropdownMultiSelector.svelte"
   import {
     setExperimentTask,
     getExperimentTasks,
     getCurrentTimestamp,
     listenForExperimentResult,
   } from "../../../api/firebase"
-  import { dropdownSelectorType } from "../../../definitions/dropdownSelectorType"
+  import { DropdownSelectorType } from "../../../definitions/dropdownSelectorType"
   import type { Network } from "../../../definitions/network"
   import {
     networksList,
@@ -34,7 +35,7 @@
   let experimentState: ExperimentState = ExperimentState.CREATE
 
   // These values should be set by UI Elements later on
-  let x_columns: string[] = []
+  let xColumns: string[] = []
   let trainPercentage: number = 0.8
   let epochs: number = 100
   let learningRate: number = 0.01
@@ -119,15 +120,17 @@
             listenForExperimentResult(
               $networksList[$selectedNetworkIndex].metadata.id,
               taskDocId
-            ).then((resultTask: Task) => {
-              progressBarData.isPresent = false
-              console.log("Result", resultTask)
-              // @ts-ignore
-              experimentState = ExperimentState[resultTask.state]
-            }).catch((error) => {
-              experimentState = ExperimentState.ERROR
-              console.log(`Error listening for experiment result: ${error}`)
-            })
+            )
+              .then((resultTask: Task) => {
+                progressBarData.isPresent = false
+                console.log("Result", resultTask)
+                // @ts-ignore
+                experimentState = ExperimentState[resultTask.state]
+              })
+              .catch((error) => {
+                experimentState = ExperimentState.ERROR
+                console.log(`Error listening for experiment result: ${error}`)
+              })
           })
           .catch((error) => {
             experimentState = ExperimentState.ERROR
@@ -150,17 +153,28 @@
         <li class="Model">
           <DropdownSelector
             placeholder={"Select a Network"}
-            type={dropdownSelectorType.NETWORK}
+            type={DropdownSelectorType.NETWORK}
           />
 
           <DropdownSelector
             placeholder={"Select a Model"}
-            type={dropdownSelectorType.MLMODEL}
+            type={DropdownSelectorType.MLMODEL}
           />
 
           <DropdownSelector
             placeholder={"Select a Task"}
-            type={dropdownSelectorType.TASK}
+            type={DropdownSelectorType.TASK}
+          />
+
+          <DropdownMultiSelector
+            label={"Select X Columns"}
+            items={Object.keys($networksList[$selectedNetworkIndex].nodes[0])}
+            on:onSelectChanged={(e) => (xColumns = e.detail.selectedColumns)}
+          />
+
+          <DropdownSelector
+            placeholder={"Select a column to predict"}
+            type={DropdownSelectorType.Y_COLUMN}
           />
 
           <hr />

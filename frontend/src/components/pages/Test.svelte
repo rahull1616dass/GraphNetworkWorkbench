@@ -17,7 +17,7 @@
 --> 
 <DropdownMultiSelector
   items={columns}
-  on:onSelectChanged={(e) => {
+  on:selectChanged={(e) => {
     selectedColumns = e.detail.selectedColumns
     console.log(selectedColumns, " in test")
   }}

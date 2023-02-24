@@ -1,25 +1,22 @@
 <script lang="ts">
   import { MultiSelect } from "carbon-components-svelte"
-  import type {
-    MultiSelectItem,
-    MultiSelectItemId,
-  } from "carbon-components-svelte/types/MultiSelect/MultiSelect.svelte"
-  import { selectedNetworkIndex, networksList } from "../../stores"
   import { createEventDispatcher } from "svelte"
 
   export let items: string[] = []
+  export let titleText: string = ""
+  export let label: string = ""
   const dispatcher = createEventDispatcher()
 </script>
 
 <MultiSelect
   size="xl"
-  titleText="Contact"
-  label="Select contact methods..."
+  {titleText}
+  {label}
   items={items.map((item) => {
     return { id: item, text: item }
   })}
   on:select={(e) =>
-    dispatcher("onSelectChanged", { selectedColumns: e.detail.selectedIds })}
+    dispatcher("selectChanged", { selectedColumns: e.detail.selectedIds })}
 />
 
 <style lang="scss">
