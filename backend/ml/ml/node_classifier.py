@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from dataclasses import dataclass
 from torch_geometric.data import Data
 from torch_geometric.nn import GCNConv
+import torch_geometric.transforms as T
 
 from core.types import MLTask
 from core.logging_helpers import timeit
@@ -58,8 +59,9 @@ def classify_nodes(data: Data, task: MLTask):
     mlflow.set_experiment("Node Classification")
 
     with mlflow.start_run() as current_run:
-
-        node_classifier = NodeClassifier(data)
+        transformer = T.RandomNodeSplit(split="train_rest", num_test=0.2, num_val=0)
+        data_to_use = transformer(data)
+        node_classifier = NodeClassifier(data_to_use)
         node_classifier.train(task.epochs)
 
         all_accuracy_history = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "loss")
