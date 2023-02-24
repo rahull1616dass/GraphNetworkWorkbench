@@ -13,13 +13,9 @@
   } from "../../../../stores";
   import { UploadedFileType } from "../../../../definitions/uploadedFileType";
   import {
-    Button,
     Modal,
     TextInput,
-    FileUploader,
     ProgressBar,
-    Accordion,
-    AccordionItem,
   } from "carbon-components-svelte";
   import { Palette } from "@untemps/svelte-palette";
   import cryptoRandomString from "crypto-random-string";
@@ -28,9 +24,6 @@
   import { onMount } from "svelte";
   import CustomInput from "../../../common/CustomInput.svelte";
   import CustomButton from "../../../common/CustomButton.svelte";
-  import CustomModal from "../../../common/CustomModal.svelte";
-  import ImageButton from "../../../common/ImageButton.svelte";
-  import infoIcon from "../../../../assets/info.svg";
   import InfoBox from "../../../common/InfoBox.svelte";
 
   onMount(() => {
