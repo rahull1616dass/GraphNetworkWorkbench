@@ -4,7 +4,7 @@ from celery import shared_task
 from task_manager import celery_instance
 from ml.link_prediction import predict_edges
 from ml.node_classifier import classify_nodes
-from preprocessing.parsing import to_graph_data
+from preprocessing.parsing import to_class_graph_data, to_pred_graph_data
 from preprocessing.loading import download_network_files
 
 @shared_task
@@ -13,8 +13,13 @@ def download_task(*args, **kwargs):
 
 
 @shared_task
-def convert_task(*args, **kwargs):
-    return to_graph_data(*args, **kwargs)
+def convert_for_pred_task(*args, **kwargs):
+    return to_pred_graph_data(*args, **kwargs)
+
+
+@shared_task
+def convert_for_class_task(*args, **kwargs):
+    return to_class_graph_data(*args, **kwargs)
 
 
 @shared_task

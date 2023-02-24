@@ -1,6 +1,8 @@
 import os
-from typing import Dict, Set, Tuple
+from typing import Dict, Tuple
 
+import torch
+import numpy as np
 import pandas as pd
 import networkx as nx
 from torch_geometric.data import Data
@@ -29,16 +31,18 @@ def get_basic_data(data_files: Dict[str, str], class_label_name: str | None = No
     os.remove(data_files["edges"])"""
 
     if len(features) == 0:
-        graph_data = from_networkx(graph)
+        graph_data: Data = from_networkx(graph)
+        graph_data.x = torch.from_numpy(np.eye(nodes.shape[0])).to(torch.float32)
     else:
-        graph_data = from_networkx(graph, features)
+        graph_data: Data = from_networkx(graph, features)
+        graph_data.x = graph_data.x.to(torch.float32)
 
     return graph_data, target_classes
 
 
 def to_class_graph_data(data_files: Dict[str, str], task: ClassificationTask) -> Data:
     graph, class_labels = get_basic_data(data_files, task.target_variable)
-    target_classes = LabelEncoder().fit_transform(class_labels)
+    target_classes = torch.tensor(LabelEncoder().fit_transform(class_labels))
     graph.y = target_classes
     return graph
 
