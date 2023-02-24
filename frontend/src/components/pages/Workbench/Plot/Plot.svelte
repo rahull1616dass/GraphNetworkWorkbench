@@ -21,6 +21,7 @@
   import { UploadedFileType } from "../../../../definitions/uploadedFileType";
   import { ProgressBar } from "carbon-components-svelte";
   import { ProgressBarData } from "../../../../definitions/progressBarData";
+  import { fade, slide, scale, fly } from "svelte/transition";
 
   //import JSON from "json-strictify"
   import cloneDeep from "lodash.clonedeep";
@@ -253,23 +254,23 @@
   }
 </script>
 
-<div class="dropdown">
-  <select
-    class="selectDropdown"
-    bind:value={index}
-    on:click={() => selected(index)}
-  >
+<div in:fly={{ y: -50, duration: 250, delay: 300 }}>
+  <div class="dropdown">
+    <select
+      class="selectDropdown"
+      bind:value={index}
+      on:click={() => selected(index)}
+    >
       <option>{placeholder}</option>
-    {#each $networksList as network, index}
-      <option class="optionDropdown" value={index}>
-        {network.metadata.name} --- Nodes: {network.nodes.length} , Edges: {network
-          .links.length}
-      </option>
-    {/each}
-  </select>
-</div>
+      {#each $networksList as network, index}
+        <option class="optionDropdown" value={index}>
+          {network.metadata.name} --- Nodes: {network.nodes.length} , Edges: {network
+            .links.length}
+        </option>
+      {/each}
+    </select>
+  </div>
 
-<main>
   <div class="content">
     {#if currentNetwork === undefined}
       <div class="no_networks">
@@ -346,7 +347,7 @@
   {#if hoverData !== undefined}
     <Hover {hoverData} />
   {/if}
-</main>
+</div>
 
 <style lang="scss">
   .content {

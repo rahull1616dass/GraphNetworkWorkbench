@@ -13,7 +13,7 @@
   import { MenuItem } from "../../definitions/menuItem";
   import logo from "../../assets/logo.svg";
   import CustomModal from "../common/CustomModal.svelte";
-  import { fade } from "svelte/transition";
+  import { fade, fly } from "svelte/transition";
 
   let isLoggedIn: boolean = false;
   $: isLoggedIn =
@@ -25,7 +25,7 @@
   vegaEmbed("#viz", HomeVisSpec, { actions: false });
 </script>
 
-<main>
+<div in:fly={{ y: -50, duration: 250, delay: 300 }}>
   <div class="loggedInText">
     {#if isLoggedIn}
       <!---Logged In as {$authUserStore.email}--->
@@ -64,7 +64,7 @@
     {/if}
   </div>
   <!--- <div class="viz" id="viz" /> -->
-</main>
+</div>
 
 <style lang="scss">
   h1 {

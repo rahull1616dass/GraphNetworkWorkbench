@@ -12,11 +12,7 @@
     paletteColors,
   } from "../../../../stores";
   import { UploadedFileType } from "../../../../definitions/uploadedFileType";
-  import {
-    Modal,
-    TextInput,
-    ProgressBar,
-  } from "carbon-components-svelte";
+  import { Modal, TextInput, ProgressBar } from "carbon-components-svelte";
   import { Palette } from "@untemps/svelte-palette";
   import cryptoRandomString from "crypto-random-string";
   import { uploadNetworkToStorage } from "../../../../api/firebase";
@@ -25,6 +21,7 @@
   import CustomInput from "../../../common/CustomInput.svelte";
   import CustomButton from "../../../common/CustomButton.svelte";
   import InfoBox from "../../../common/InfoBox.svelte";
+  import { fade, slide, scale, fly } from "svelte/transition";
 
   onMount(() => {
     /*
@@ -237,7 +234,11 @@
   */
 </script>
 
-<div class="root">
+<div
+  in:fly={{ y: -50, duration: 250, delay: 300 }}
+  out:fly={{ y: -50, duration: 250 }}
+  class="root"
+>
   <div class="metadata">
     <div class="metadata_title">
       <TextInput
