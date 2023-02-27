@@ -1,35 +1,54 @@
+import os
 from typing import Dict
 
 import torch
 import numpy as np
 import pandas as pd
-from math import ceil
-from torch_geometric.data import Data as TorchGeoData
+import networkx as nx
+from torch_geometric.data import Data
+from sklearn.preprocessing import LabelEncoder
+from torch_geometric.utils.convert import from_networkx
 
-from core.types import MLTask
 from core.logging_helpers import timeit
+from core.types import MLTask, ClassificationTask
 
 
-def generate_train_mask(dataset_size: int, train_percentage: float) -> torch.Tensor:
-    train_count: int = ceil(train_percentage * dataset_size)
-    test_count: int = dataset_size - train_count
-    train_mask: torch.Tensor = torch.tensor([True] * train_count + [False] * test_count)
+def get_basic_data(data_files: Dict[str, str], task: MLTask) -> Data:
+    nodes = pd.read_csv(data_files["nodes"])
+    edges = pd.read_csv(data_files["edges"])
 
-    # Randomly shuffle the train_mask
-    return train_mask[torch.randperm(train_mask.size(0))]
+    graph = nx.Graph()
+    graph.add_edges_from(list(edges.itertuples(index=False)))
+
+    list(
+        map(
+            lambda column_name: nx.set_node_attributes(graph, nodes[column_name].to_dict(), column_name),
+            task.x_columns
+        )
+    )
+
+    os.remove(data_files["nodes"])
+    os.remove(data_files["edges"])
+
+    if len(task.x_columns) == 0:
+        graph_data: Data = from_networkx(graph)
+        graph_data.x = torch.from_numpy(np.eye(nodes.shape[0])).to(torch.float32)
+    else:
+        graph_data: Data = from_networkx(graph, task.x_columns)
+        graph_data.x = graph_data.x.to(torch.float32)
+
+    if isinstance(task, ClassificationTask):
+        task: ClassificationTask = task
+        graph_data.y = torch.tensor(LabelEncoder().fit_transform(nodes[task.y_column]))
+
+    return graph_data
 
 
 @timeit
-def from_dataframe(data: Dict[str, pd.DataFrame], task: MLTask) -> TorchGeoData:
-    nodes = data["nodes"]
-    edges = data["edges"]
-    y: np.ndarray = nodes["groups"].to_numpy()
-    train_mask: torch.Tensor = generate_train_mask(y.shape[0], task.train_percentage)
+def to_class_graph_data(data_files: Dict[str, str], task: ClassificationTask) -> Data:
+    return get_basic_data(data_files, task)
 
-    return TorchGeoData(
-        x=torch.from_numpy(np.eye(nodes.shape[0])).to(torch.float32),
-        y=torch.from_numpy(nodes["groups"].to_numpy()),
-        edge_index=torch.Tensor(edges.to_numpy()).t().contiguous().to(torch.int64),
-        train_mask=train_mask,
-        test_mask=~train_mask
-    )
+
+@timeit
+def to_pred_graph_data(data_files: Dict[str, str], task: MLTask) -> Data:
+    return get_basic_data(data_files, task)

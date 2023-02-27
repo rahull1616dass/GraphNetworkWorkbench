@@ -1,6 +1,7 @@
 """Logging helpers"""
 import sys
 import logging
+import asyncio
 from time import time
 from functools import wraps
 
@@ -26,19 +27,35 @@ def get_logger(name: str):
 def timeit(function):
     """Log execution time"""
     logger = get_logger(function.__module__)
+    if asyncio.iscoroutinefunction(function):
+        @wraps(function)
+        async def wrap(*args, **kwargs):
+            try:
+                start = time()
+                result = await function(*args, **kwargs)
+            finally:
+                finish = time()
+                logger.info(
+                    "call %r took %2.4f sec",
+                    function.__name__,
+                    finish - start,
+                )
+            return result
 
-    @wraps(function)
-    def wrap(*args, **kwargs):
-        try:
-            start = time()
-            result = function(*args, **kwargs)
-        finally:
-            finish = time()
-            logger.info(
-                "call %r took %2.4f sec",
-                function.__name__,
-                finish - start,
-            )
-        return result
+        return wrap
 
-    return wrap
+    else:
+        @wraps(function)
+        def wrap(*args, **kwargs):
+            try:
+                start = time()
+                result = function(*args, **kwargs)
+            finally:
+                finish = time()
+                logger.info(
+                    "call %r took %2.4f sec",
+                    function.__name__,
+                    finish - start,
+                )
+            return result
+        return wrap
