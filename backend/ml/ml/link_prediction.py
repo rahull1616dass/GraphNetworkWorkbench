@@ -11,6 +11,7 @@ from sklearn.metrics import roc_auc_score
 from torch_geometric.utils import negative_sampling
 
 from core.types import MLTask
+from ml.helpers import set_up_device
 from core.logging_helpers import timeit
 
 
@@ -93,7 +94,8 @@ def predict_edges(data: Data, task: MLTask):
     with mlflow.start_run() as current_run:
         mlflow.log_params(task.dict(exclude={"nodes_file_url", "edges_file_url"}))
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = set_up_device(task.seed)
+
         transform = T.Compose([
             T.NormalizeFeatures(),
             T.ToDevice(device),
