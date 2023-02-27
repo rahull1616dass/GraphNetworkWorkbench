@@ -102,7 +102,7 @@ def predict_edges(data: Data, task: MLTask):
                 is_undirected=False, add_negative_train_samples=False)
         ])
         train_data, val_data, test_data = transform(data)
-        predictor = LinkPredictor(data.num_features, device, learning_rate=0.001)
+        predictor = LinkPredictor(data.num_features, device, task.learning_rate)
 
         predictor.train(train_data, val_data, epochs=task.epochs)
 

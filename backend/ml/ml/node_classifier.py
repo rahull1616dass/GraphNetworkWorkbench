@@ -24,13 +24,12 @@ class SingleLayerGCN(torch.nn.Module):
 
 @dataclass
 class NodeClassifier:
-    data: Data
-    
-    def __post_init__(self): pass
+    data: Data | None = None
+    lr: float = 0.01
     
     def train(self, epochs: int = 100):
         self.model = SingleLayerGCN(self.data.x.shape[0], len(np.unique(self.data.y)))
-        optimizer: Adam = Adam(self.model.parameters(), lr=0.01, weight_decay=5e-4)
+        optimizer: Adam = Adam(self.model.parameters(), lr=self.lr, weight_decay=5e-4)
 
         for every_epoch in tqdm(range(epochs), desc="Node classification progress..."):
             self.model.train()
@@ -61,7 +60,7 @@ def classify_nodes(data: Data, task: MLTask):
     with mlflow.start_run() as current_run:
         transformer = T.RandomNodeSplit(split="train_rest", num_test=0.2, num_val=0)
         data_to_use = transformer(data)
-        node_classifier = NodeClassifier(data_to_use)
+        node_classifier = NodeClassifier(data=data_to_use, lr=task.learning_rate)
         node_classifier.train(task.epochs)
 
         all_accuracy_history = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "loss")
