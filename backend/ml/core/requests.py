@@ -14,7 +14,7 @@ class CamelModel(BaseModel):
         allow_population_by_field = True
 
 
-class MLTask(CamelModel):
+class MLRequest(CamelModel):
     nodes_file_url: AnyHttpUrl
     edges_file_url: AnyHttpUrl
     epochs: int = 100
@@ -26,18 +26,5 @@ class MLTask(CamelModel):
     seed: int = 42
 
 
-class ClassificationTask(MLTask):
+class ClassificationRequest(MLRequest):
     y_column: str
-
-
-class NodeClassResponse(BaseModel):
-    losses: List[float]
-    predictions: List[int]
-    accuracy: float
-
-
-class EdgePredResponse(BaseModel):
-    losses: List[int]
-    score: float
-    validation_scores: List[float]
-    predictions: List[List[int]]

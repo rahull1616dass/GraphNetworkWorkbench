@@ -6,12 +6,13 @@ from torch.optim import Adam
 import torch.nn.functional as F
 from dataclasses import dataclass
 from torch_geometric.data import Data
-from torch_geometric.nn import GCNConv
 import torch_geometric.transforms as T
+from torch_geometric.nn import GCNConv, SAGEConv
 
-from core.types import MLTask
+from core.loggers import timeit
+from core.params import MLParams
 from ml.helpers import set_up_device
-from core.logging_helpers import timeit
+from core.nets import NodeClassificationNet
 
 
 class SingleLayerGCN(torch.nn.Module):
@@ -28,9 +29,12 @@ class NodeClassifier:
     data: Data | None = None
     device: torch.device | None = None
     lr: float = 0.01
+
+    def __init__(self, features_number: int, device: torch.device, params: MLParams):
+        self.model = NodeClassificationNet(params.ml_model_type, features_number, params.hidden_layer_sizes).to(device)
+        self.optimizer = Adam(params=self.model.parameters(), lr=params.learning_rate, weight_decay=5e-4)
     
-    def train(self, epochs: int = 100):
-        self.model = SingleLayerGCN(self.data.x.shape[0], len(np.unique(self.data.y)))
+    def train(self, data: Data, epochs: int = 100):
         optimizer: Adam = Adam(self.model.parameters(), lr=self.lr, weight_decay=5e-4)
 
         for every_epoch in tqdm(range(epochs), desc="Node classification progress..."):
@@ -56,17 +60,17 @@ class NodeClassifier:
 
 
 @timeit
-def classify_nodes(data: Data, task: MLTask):
+def classify_nodes(data: Data, params: MLParams):
     mlflow.set_experiment("Node Classification")
 
     with mlflow.start_run() as current_run:
         transformer = T.RandomNodeSplit(split="train_rest", num_test=0.2, num_val=0)
         data_to_use = transformer(data)
 
-        device = set_up_device(task.seed)
+        device = set_up_device(params.seed)
 
-        node_classifier = NodeClassifier(data=data_to_use, device=device, lr=task.learning_rate)
-        node_classifier.train(task.epochs)
+        node_classifier = NodeClassifier(data=data_to_use, device=device, lr=params.learning_rate)
+        node_classifier.train(params.epochs)
 
         all_accuracy_history = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "loss")
         losses = list(map(lambda metric: metric.value, all_accuracy_history))
