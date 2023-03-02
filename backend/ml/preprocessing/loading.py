@@ -1,10 +1,9 @@
 import tempfile
 
 import aiohttp
-import asyncio
 
-from core.types import MLTask
-from core.logging_helpers import timeit
+from core.loggers import timeit
+from core.requests import MLRequest
 
 
 async def download_file(file_url: str) -> str:
@@ -18,8 +17,8 @@ async def download_file(file_url: str) -> str:
 
 
 @timeit
-async def download_network_files(task: MLTask) -> dict[str, str]:
+async def download_network_files(request: MLRequest) -> dict[str, str]:
     return {
-        'nodes': await download_file(task.nodes_file_url),
-        'edges': await download_file(task.edges_file_url),
+        'nodes': await download_file(request.nodes_file_url),
+        'edges': await download_file(request.edges_file_url),
     }
