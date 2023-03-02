@@ -1,6 +1,5 @@
 import torch
 import mlflow
-import numpy as np
 from tqdm import tqdm
 from torch.optim import Adam
 import torch.nn.functional as F
@@ -27,14 +26,20 @@ class NodeClassifier:
     def train(self, data: Data, epochs: int = 100):
         optimizer: Adam = Adam(self.model.parameters(), lr=self.lr, weight_decay=5e-4)
 
+        losses = []
         for every_epoch in tqdm(range(epochs), desc="Node classification progress..."):
             self.model.train()
             optimizer.zero_grad()
+
             out = self.model(data.x, data.edge_index)
+
             loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+            losses += [loss.item()]
             mlflow.log_metric("loss", loss.item(), every_epoch)
+
             loss.backward()
             optimizer.step()
+        return losses
 
     def predict(self, data: Data) -> list[int]:
         self.model.eval()
@@ -53,7 +58,7 @@ class NodeClassifier:
 def classify_nodes(data: Data, params: MLParams):
     mlflow.set_experiment("Node Classification")
 
-    with mlflow.start_run() as current_run:
+    with mlflow.start_run():
         device = set_up_device(params.seed)
         transforms = T.Compose([
             T.RandomNodeSplit(split="train_rest", num_test=0.2, num_val=0),
@@ -62,10 +67,7 @@ def classify_nodes(data: Data, params: MLParams):
         data_to_use: Data = transforms(data)
 
         node_classifier = NodeClassifier(data_to_use.num_features, device, params)
-        node_classifier.train(data_to_use, params.epochs)
-
-        all_accuracy_history = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "loss")
-        losses = list(map(lambda metric: metric.value, all_accuracy_history))
+        losses = node_classifier.train(data_to_use, params.epochs)
 
         predictions: list[int] = node_classifier.predict(data_to_use)
 

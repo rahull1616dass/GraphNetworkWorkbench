@@ -22,13 +22,18 @@ class LinkPredictor:
         self.criterion = BCEWithLogitsLoss()
 
     def train(self, train_data: Data, val_data: Data, epochs: int = 100):
+        losses, val_roc_auc_scores = [], []
         for every_step in tqdm(range(1, epochs + 1), desc="Link prediction progress..."):
 
             loss = self.__train_iter(train_data)
+            losses += [loss]
             mlflow.log_metric("loss", loss, every_step)
 
             val_acc = self.test(val_data)
+            val_roc_auc_scores += [val_acc]
             mlflow.log_metric("val_roc_auc_score", val_acc, every_step)
+
+        return losses, val_roc_auc_scores
 
     def __train_iter(self, train_data: Data):
         self.model.train()
@@ -88,18 +93,11 @@ def predict_edges(data: Data, params: MLParams):
         train_data, val_data, test_data = transform(data)
         predictor = LinkPredictor(data.num_features, device, params)
 
-        predictor.train(train_data, val_data, params.epochs)
-
-        all_loss_metrics = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "loss")
-        losses = list(map(lambda metric: metric.value, all_loss_metrics))
-
-        all_val_acc = mlflow.tracking.MlflowClient().get_metric_history(current_run.info.run_id, "val_roc_auc_score")
-        val_roc_auc_score = list(map(lambda metric: metric.value, all_val_acc))
+        losses, val_roc_auc_scores =  predictor.train(train_data, val_data, params.epochs)
 
         test_roc_auc_score = predictor.test(test_data)
-        mlflow.log_metric("test_roc_ayc_score", test_roc_auc_score)
+        mlflow.log_metric("test_roc_auc_curve", test_roc_auc_score)
 
         predictions = predictor.predict(test_data)
 
-        mlflow.log_metric("test_roc_auc_curve", test_roc_auc_score)
-    return losses, val_roc_auc_score, test_roc_auc_score, predictions.tolist()
+    return losses, val_roc_auc_scores, test_roc_auc_score, predictions.tolist()
