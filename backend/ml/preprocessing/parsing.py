@@ -13,7 +13,7 @@ from core.loggers import timeit
 from core.params import MLParams, ClassificationParams
 
 
-def get_basic_data(data_files: Dict[str, str], params: MLParams) -> Data:
+def get_basic_data(data_files: Dict[str, str], params: MLParams, label_encoder: LabelEncoder = None) -> Data:
     nodes = pd.read_csv(data_files["nodes"])
     edges = pd.read_csv(data_files["edges"])
 
@@ -39,14 +39,14 @@ def get_basic_data(data_files: Dict[str, str], params: MLParams) -> Data:
 
     if isinstance(params, ClassificationParams):
         params: ClassificationParams = params
-        graph_data.y = torch.tensor(LabelEncoder().fit_transform(nodes[params.y_column]))
+        graph_data.y = torch.tensor(label_encoder.fit_transform(nodes[params.y_column]))
 
     return graph_data
 
 
 @timeit
-def to_class_graph_data(data_files: Dict[str, str], params: ClassificationParams) -> Data:
-    return get_basic_data(data_files, params)
+def to_class_graph_data(data_files: Dict[str, str], params: ClassificationParams, encoder: LabelEncoder) -> Data:
+    return get_basic_data(data_files, params, encoder)
 
 
 @timeit
