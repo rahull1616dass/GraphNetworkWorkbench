@@ -148,16 +148,16 @@ exports.onTaskCreated = functions.firestore
   })
 
 function writeToTaskDocument(data: object, context: functions.EventContext) {
-  admin.firestore.collection(DB.Users)
-    .doc(context.params.userId)
-    .collection(DB.Networks)
-    .doc(context.params.networkId)
-    .collection(DB.Tasks)
-    .doc(context.params.taskId).update(data).then(() => {
-      console.log("Task document updated")
-    }).catch((err) => {
-      console.log(err)
-    })
+  // admin.firestore.collection(DB.Users)
+  //   .doc(context.params.userId)
+  //   .collection(DB.Networks)
+  //   .doc(context.params.networkId)
+  //   .collection(DB.Tasks)
+  //   .doc(context.params.taskId).update(data).then(() => {
+  //     console.log("Task document updated")
+  //   }).catch((err) => {
+  //     console.log(err)
+  //   })
 }
 
 exports.getNetworks = functions.https.onRequest((req, res) => {
@@ -190,8 +190,8 @@ exports.getNetworkDescription = functions.https.onRequest((req, res) => {
 
 exports.downloadNetworkFile = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
-    const { networkName } = req.query;
-    const fileUrl = `https://networks.skewed.de/net/${networkName}/files/${networkName}.csv.zip`;
+    const { networkName, netName } = req.query;
+    const fileUrl = `https://networks.skewed.de/net/${networkName}/files/${netName}.csv.zip`;
     axios({
       method: "get",
       url: fileUrl,

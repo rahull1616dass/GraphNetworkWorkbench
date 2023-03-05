@@ -6,6 +6,8 @@ export const enum FetchableAccordionState {
     UPLOAD_ERROR,
     FETCHED,
     UPLOADED,
-    NETWORK_EXISTS
+    NETWORK_EXISTS,
+    SHOW_MULTIPLE_NETWORK,
+    HIDE_MULTIPLE_NETWORK
 }
   

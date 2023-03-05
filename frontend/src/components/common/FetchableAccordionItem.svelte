@@ -15,12 +15,34 @@
   import { removeCSVColumns } from "../../util/networkParserUtil"
   import { Node, Link, Metadata, Network } from "../../definitions/network"
   import { uploadNetworkToStorage } from "../../api/firebase"
+  import MultipleNetworkPopup from "./MultipleNetworkPopup.svelte"
 
   export let networkName: string
+  export let netName: string
   let endpoint: string = undefined
   $: endpoint = `https://us-central1-graphlearningworkbench.cloudfunctions.net/getNetowrkDescription?networkName=${networkName}`
   let content = undefined
   let state: FetchableAccordionState = FetchableAccordionState.ACCORDION_CLOSED
+
+  let multipleNetworks: string[]
+  let existMultipleNetworks: boolean[] = []
+
+  function showPopup() {
+    state = FetchableAccordionState.SHOW_MULTIPLE_NETWORK
+  }
+
+  function hidePopup() {
+    state = FetchableAccordionState.HIDE_MULTIPLE_NETWORK
+  }
+
+  const handlePopupSubmit = (event) => {
+    // Do something with the result here
+    console.log(event.detail);
+    netName = event.detail;
+    uploadNetwork()
+    hidePopup()
+  }
+
 
   const onAccordionClick = async (event: MouseEvent) => {
     if (state === FetchableAccordionState.ACCORDION_CLOSED) {
@@ -39,6 +61,7 @@
   async function fetchNetwork() {
     state = FetchableAccordionState.FETCHING
     if (content === undefined) {
+      console.log(endpoint)
       request(endpoint)
         .then((response) => {
           state = FetchableAccordionState.FETCHED
@@ -51,17 +74,49 @@
             content.analyses =
               content.analyses[Object.keys(content.analyses)[0]]
           }
+          if(content.nets.length>1){
+            let flag: boolean
+            flag = true;
+            multipleNetworks = content.nets
+            for(let key in multipleNetworks ){
+              if ($networksList.find((network) => network.metadata.id === networkName) !==
+                  undefined) {
+                    existMultipleNetworks.push(true)
+                }
+                else{
+                  existMultipleNetworks.push(false)
+                  flag = false
+                }
+            }
+            if(flag == true)
+            {
+              state = FetchableAccordionState.NETWORK_EXISTS
+            }
+          }
           console.log(content.description)
         })
         .catch((error) => {
+          console.log(error)
           state = FetchableAccordionState.FETCH_ERROR
         })
     }
   }
-
+  function checkForSubnetwork(){
+    if(multipleNetworks.length>1)
+    {
+      state = FetchableAccordionState.SHOW_MULTIPLE_NETWORK
+    }
+    else
+    {
+      netName=networkName;
+      uploadNetwork()
+    }
+  }
   async function uploadNetwork(){
+    
+    state = FetchableAccordionState.UPLOADING
     fetch(
-      `https://us-central1-graphlearningworkbench.cloudfunctions.net/downloadNetworkFile?networkName=${networkName}`
+      `https://us-central1-graphlearningworkbench.cloudfunctions.net/downloadNetworkFile?networkName=${networkName}&netName=${netName}`
     )
       .then((response) => response.blob())
       .then((blob) => {
@@ -80,6 +135,7 @@
           " _pos",
         ])
         let edgesString = alltext[0].replace("# ", "")
+
         let network = new Network(
           new Metadata(
             networkName,
@@ -87,8 +143,12 @@
             content.description,
             "",
           ),
-          new Node(nodesString), // TODO: Parsing here
-          new Link(edgesString)
+          <Node[]>(
+            JSON.parse(nodesString)
+          ),
+          <Link[]>(
+            JSON.parse(edgesString)
+          )
         )
         const files = network.toFiles()
         uploadNetworkToStorage(network.metadata, files.nodes, files.links).then(() => {
@@ -147,8 +207,7 @@
       <div class="import_button">
         <Button
           on:click={() => {
-            state = FetchableAccordionState.UPLOADING
-            uploadNetwork()
+            checkForSubnetwork()
           }}
           size="small"
           on:click>Import Network</Button
@@ -157,6 +216,10 @@
     {:else if state === FetchableAccordionState.UPLOADED}
       <p>Upload complete</p>
     {/if}
+    
+  {/if}
+  {#if state === FetchableAccordionState.SHOW_MULTIPLE_NETWORK}
+    <MultipleNetworkPopup {multipleNetworks} {existMultipleNetworks} on:submit={handlePopupSubmit} />
   {/if}
 </AccordionItem>
 
