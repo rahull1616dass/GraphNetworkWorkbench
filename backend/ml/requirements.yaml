@@ -25,3 +25,4 @@ dependencies:
   - aiohttp=3.8.4=py310h1fa729e_0
   - networkx=2.8.4=py310h06a4308_0
   - dill=0.3.6=pyhd8ed1ab_1
+  - more-itertools=8.12.0=pyhd3eb1b0_0
