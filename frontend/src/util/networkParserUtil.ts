@@ -50,13 +50,18 @@ export function removeCSVColumns(csvData, columnsToRemove) {
     const cells = [];
     let cell = "";
     let insideQuote = false;
-    for (const char of row) {
+    for (let char of row) {
       if (char === '"') {
         insideQuote = !insideQuote;
       } else if (char === "," && !insideQuote) {
         cells.push(cell);
         cell = "";
-      } else {
+      }
+      else if(char ===","&&insideQuote)
+      {
+        cell+='_'
+      }
+      else {
         cell += char;
       }
     }

@@ -6,11 +6,15 @@
     let strings = [];
     let selectedString = '';
     let selectedStringIndex = -1;
+    let disableSubmitButton = true
   
     export let multipleNetworks = [];
     export let existMultipleNetworks = [];
   
     const handleSelection = (event) => {
+      disableSubmitButton=false;
+      console.log("selecting radio")
+      console.log(disableSubmitButton)
       selectedString = event.target.value;
       selectedStringIndex = strings.indexOf(selectedString);
     };
@@ -42,7 +46,7 @@
           {string}
         </label>
       {/each}
-      <button class="submit-btn" disabled={!selectedString} on:click={handleSubmit}>Submit</button>
+      <button class="submit-btn" disabled={disableSubmitButton} on:click={handleSubmit}>Submit</button>
     </div>
   </div>
   
@@ -57,7 +61,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 1;
+      z-index: 2;
     }
   
     .popup-panel {

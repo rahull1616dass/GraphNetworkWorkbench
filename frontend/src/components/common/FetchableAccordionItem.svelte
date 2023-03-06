@@ -18,9 +18,9 @@
   import MultipleNetworkPopup from "./MultipleNetworkPopup.svelte"
 
   export let networkName: string
-  export let netName: string
+  let subNetworkName: string
   let endpoint: string = undefined
-  $: endpoint = `https://us-central1-graphlearningworkbench.cloudfunctions.net/getNetowrkDescription?networkName=${networkName}`
+  $: endpoint = `https://us-central1-graphlearningworkbench.cloudfunctions.net/getNetworkDescription?networkName=${networkName}`
   let content = undefined
   let state: FetchableAccordionState = FetchableAccordionState.ACCORDION_CLOSED
 
@@ -38,9 +38,9 @@
   const handlePopupSubmit = (event) => {
     // Do something with the result here
     console.log(event.detail);
-    netName = event.detail;
-    uploadNetwork()
+    subNetworkName = event.detail;
     hidePopup()
+    uploadNetwork()
   }
 
 
@@ -79,7 +79,7 @@
             flag = true;
             multipleNetworks = content.nets
             for(let key in multipleNetworks ){
-              if ($networksList.find((network) => network.metadata.id === networkName) !==
+              if ($networksList.find((network) => network.metadata.id === `${networkName}_${multipleNetworks[key]}`) !==
                   undefined) {
                     existMultipleNetworks.push(true)
                 }
@@ -100,23 +100,33 @@
           state = FetchableAccordionState.FETCH_ERROR
         })
     }
+    else
+    {
+      state = FetchableAccordionState.FETCHED
+    }
   }
   function checkForSubnetwork(){
-    if(multipleNetworks.length>1)
+    if(multipleNetworks === undefined)
+    {
+      subNetworkName =networkName;
+      uploadNetwork()
+    }
+    else if(multipleNetworks.length>1)
     {
       state = FetchableAccordionState.SHOW_MULTIPLE_NETWORK
     }
     else
     {
-      netName=networkName;
+      subNetworkName =networkName;
       uploadNetwork()
     }
   }
   async function uploadNetwork(){
     
     state = FetchableAccordionState.UPLOADING
+    console.log(`https://us-central1-graphlearningworkbench.cloudfunctions.net/downloadNetworkFile?networkName=${networkName}&netName=${subNetworkName}`)
     fetch(
-      `https://us-central1-graphlearningworkbench.cloudfunctions.net/downloadNetworkFile?networkName=${networkName}&netName=${netName}`
+      `https://us-central1-graphlearningworkbench.cloudfunctions.net/downloadNetworkFile?networkName=${networkName}&netName=${subNetworkName}`
     )
       .then((response) => response.blob())
       .then((blob) => {
@@ -133,9 +143,9 @@
         let nodesString = removeCSVColumns(alltext[1].replace("# ", ""), [
           " name",
           " _pos",
-        ])
+        ]).replace(", ",",").replace("label","name")
         let edgesString = alltext[0].replace("# ", "")
-
+        console.log(nodesString)
         let network = new Network(
           new Metadata(
             networkName,
@@ -188,7 +198,7 @@
       is different from this one you are trying to download, please delete the
       old one first.
     </p>
-  {:else if state === FetchableAccordionState.FETCHED || state === FetchableAccordionState.UPLOADED}
+  {:else if state === FetchableAccordionState.FETCHED || state === FetchableAccordionState.UPLOADED || state == FetchableAccordionState.HIDE_MULTIPLE_NETWORK}
     <div class="content">
       <b>Title:</b>
       {content.title} <br />
@@ -203,7 +213,7 @@
       <b>Average Degree:</b>
       {content.analyses.average_degree} <br />
     </div>
-    {#if state === FetchableAccordionState.FETCHED}
+    {#if state === FetchableAccordionState.FETCHED|| state == FetchableAccordionState.HIDE_MULTIPLE_NETWORK}
       <div class="import_button">
         <Button
           on:click={() => {
@@ -218,10 +228,11 @@
     {/if}
     
   {/if}
-  {#if state === FetchableAccordionState.SHOW_MULTIPLE_NETWORK}
-    <MultipleNetworkPopup {multipleNetworks} {existMultipleNetworks} on:submit={handlePopupSubmit} />
-  {/if}
+  
 </AccordionItem>
+{#if state === FetchableAccordionState.SHOW_MULTIPLE_NETWORK}
+    <MultipleNetworkPopup {multipleNetworks} {existMultipleNetworks} on:submit={handlePopupSubmit} on:close={hidePopup}/>
+{/if}
 
 <style lang="scss">
   .content {
