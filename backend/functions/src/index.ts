@@ -125,11 +125,11 @@ exports.onTaskCreated = functions.firestore
                 context.params.userId,
                 context.params.networkId
             )
-            const requestData = {
+            let requestData = {
                 nodesFileUrl: networkFileUrls.get(NETWORK_FILE_TYPE.NODES),
                 edgesFileUrl: networkFileUrls.get(NETWORK_FILE_TYPE.EDGES),
-                task: snap.data(),
             }
+            requestData = Object.assign(requestData, snap.data())
             const taskUrl = `${ML_SERVICE_URL}/${snap.data().taskType}`
             console.log(`ML Service Request Data: ${JSON.stringify(requestData)}`)
             console.log(`ML Service URL: ${taskUrl}`)
@@ -141,7 +141,8 @@ exports.onTaskCreated = functions.firestore
             }
             )
             console.timeEnd("ML Service call")
-            console.log(`ML Service Response Data: ${JSON.stringify(taskResult)}`)
+            console.log(`ML Service Response Data: ${taskResult}`)
+            console.log(`ML Service Response text: ${taskResult.data}`)
 
             if (Number(taskResult.headers["code"]) !== RESPONSE_CODE.SUCCESS) {
                 console.log("ML Service error")
@@ -153,8 +154,9 @@ exports.onTaskCreated = functions.firestore
                 taskResult.data.state = ExperimentState[ExperimentState.RESULT]
                 writeToTaskDocument(taskResult.data, context)
             }
-        } catch (err) {
-            console.log(err)
+        } catch (err: any) {
+            console.log(`Error in the ML Service call: ${err}`)
+            console.log(`Error response data: ${JSON.stringify(err.response.data)}`)
         }
     })
 

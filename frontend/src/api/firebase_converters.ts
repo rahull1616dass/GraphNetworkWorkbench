@@ -31,6 +31,8 @@ export const tasksConverter = {
       createdAt: task.createdAt,
       // @ts-ignore
       state: ExperimentState[task.state],
+      xColumns: task.xColumns,
+      yColumn: task.yColumn,
     }
   },
   fromFirestore: function (snapshot, options) {
