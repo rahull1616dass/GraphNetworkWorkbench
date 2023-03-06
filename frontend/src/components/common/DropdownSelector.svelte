@@ -37,9 +37,9 @@
     <select
       class="select"
       bind:value={networkIndex}
-      on:click={() => ($selectedNetworkIndex = networkIndex)}
+      on:change={() => ($selectedNetworkIndex = networkIndex)}
     >
-      <option>{placeholder}</option>
+    <option disabled selected>{placeholder}</option>
       {#each $networksList as network, networkIndex}
         <option class="optionDropdown" value={networkIndex}>
           {network.metadata.name} --- Nodes: {network.nodes.length} , Edges: {network
@@ -53,9 +53,9 @@
     <select
       class="select"
       bind:value={model}
-      on:click={() => ($selectedModelType = model)}
+      on:change={() => ($selectedModelType = model)}
     >
-      <option>{placeholder}</option>
+    <option disabled selected>{placeholder}</option>
       {#each modelTypes as model}
         <option class="optionDropdown" value={model}>
           {model}
@@ -68,9 +68,9 @@
     <select
       class="select"
       bind:value={task}
-      on:click={() => ($selectedTaskType = task)}
+      on:change={() => ($selectedTaskType = task)}
     >
-      <option>{placeholder}</option>
+    <option disabled selected>{placeholder}</option>
       {#each taskTypes as task, _}
         <option class="optionDropdown" value={task}>
           {task}

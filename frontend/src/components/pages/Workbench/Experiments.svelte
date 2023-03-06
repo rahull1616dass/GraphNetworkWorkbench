@@ -59,8 +59,15 @@
     "Creating experiment..."
   );
 
+  console.log("column types", typeof(DropdownSelectorType.Y_COLUMN))
+  console.log("column names", DropdownSelectorType.Y_COLUMN)
+
+  function filterColumns(columns: string[]) {
+    return "id"
+  }
+
   function randomize() {
-    seed = Math.floor(Math.random() * 10000);
+    seed = Math.floor(Math.random() * 1000);
   }
 
   function startNewExperiment() {
@@ -174,10 +181,19 @@
             on:onSelectChanged={(e) => (xColumns = e.detail.selectedColumns)}
           />
           -->
+          
+
+          <hr />
+
+          <div>Configure Columns:</div>
+
           <DropdownSelector
             placeholder={"Select a column to predict"}
             type={DropdownSelectorType.Y_COLUMN}
           />
+        
+
+
 
           <hr />
 
