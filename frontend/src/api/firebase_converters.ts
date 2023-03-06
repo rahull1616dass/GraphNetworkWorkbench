@@ -24,13 +24,15 @@ export const tasksConverter = {
       mlModelType: task.mlModelType,
       taskType: task.taskType,
       epochs: task.epochs,
-      train_percentage: task.trainPercentage,
-      learning_rate: task.learningRate,
-      hidden_layer_sizes: task.hiddenLayerSizes,
+      trainPercentage: task.trainPercentage,
+      learningRate: task.learningRate,
+      hiddenLayerSizes: task.hiddenLayerSizes,
       seed: task.seed,
       createdAt: task.createdAt,
       // @ts-ignore
       state: ExperimentState[task.state],
+      xColumns: task.xColumns,
+      yColumn: task.yColumn,
     }
   },
   fromFirestore: function (snapshot, options) {
@@ -40,9 +42,9 @@ export const tasksConverter = {
       data.mlModelType,
       data.taskType,
       data.epochs,
-      data.train_percentage,
-      data.learning_rate,
-      data.hidden_layer_sizes,
+      data.trainPercentage,
+      data.learningRate,
+      data.hiddenLayerSizes,
       data.seed,
       data.createdAt,
       data.state

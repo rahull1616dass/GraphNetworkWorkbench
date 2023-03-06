@@ -1,32 +1,24 @@
-from requests import get as http_get
-from pandas import DataFrame, read_csv
-from requests import Response as RequestsResponse
+import tempfile
 
-from core.types import MLTask
-from core.logging_helpers import timeit
+import aiohttp
+
+from core.loggers import timeit
+from core.requests import MLRequest
 
 
-@timeit
-def get_data_frame(file_url: str) -> DataFrame:
-    file_response: RequestsResponse = http_get(
-        file_url, stream=True, headers={"Content-Type": "text/csv"}
-    )
-    print(file_response.status_code)
-    if file_response.status_code != 200:
-        raise Exception(
-            f"""
-              Error downloading file at {file_url}
-              Reason: {file_response.reason}
-              Text: {file_response.text}
-            """
-        )
-    # Parse the csv in file_response.raw with np.genfromtxt
-    return read_csv(file_response.raw)
+async def download_file(file_url: str) -> str:
+    """Returns the absolute path of the temporal file where the content is saved"""
+    async with aiohttp.ClientSession() as session:
+        async with session.get(file_url, headers={"Content-Type": "text/csv"})  as response:
+            with tempfile.NamedTemporaryFile(delete=False, mode="wb") as target_file:
+                async for every_chunk in response.content.iter_chunked(1024):
+                    target_file.write(every_chunk)
+    return target_file.name
 
 
 @timeit
-def download_network_files(task: MLTask) -> dict[str, DataFrame]:
+async def download_network_files(request: MLRequest) -> dict[str, str]:
     return {
-        'nodes': get_data_frame(task.nodes_file_url),
-        'edges': get_data_frame(task.edges_file_url),
+        'nodes': await download_file(request.nodes_file_url),
+        'edges': await download_file(request.edges_file_url),
     }

@@ -1,5 +1,6 @@
-export const enum dropdownSelectorType {
-  NETWORK = "network",
-  MLMODEL = "mlmodel",
-  TASK = "task",
+export const enum DropdownSelectorType {
+  NETWORK,
+  MLMODEL,
+  TASK,
+  Y_COLUMN,
 }

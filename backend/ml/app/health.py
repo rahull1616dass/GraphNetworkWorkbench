@@ -2,10 +2,8 @@ from fastapi_healthchecks.checks.redis import RedisCheck
 from fastapi_healthchecks.checks.rabbit_mq import RabbitMqCheck
 from fastapi_healthchecks.api.router import HealthcheckRouter, Probe, Check, CheckResult
 
-from config import Settings
+from config import settings
 from task_manager import celery_instance
-
-settings = Settings()
 
 class CeleryCheck(Check):
     async def __call__(self, *args, **kwargs) -> CheckResult:

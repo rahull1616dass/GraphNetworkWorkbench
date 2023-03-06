@@ -37,7 +37,7 @@
   <div class="delete">
     <ImageButton on:click={() => {
       dispatch("deleteItem", { selectedIndex: index })
-    }} defaultImageSource={deleteIcon} />
+    }} defaultImageSource={deleteIcon} styleClass = "deleteButtonClass"/>
   </div>
   </div>
 </div>
@@ -45,13 +45,9 @@
 <style lang="scss">
   .root {
     display: flex;
-    width: 80%;
-    background-color: #f5f5f5;
     border-radius: 5px;
     padding: 10px;
-    margin: 10px;
     cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
     margin: 10px;
     &.selected {
       background-color: var(--wueblue);
@@ -67,6 +63,10 @@
   .content{
     display: flex;
     text-align: left;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
   }
   .network_color {
     width: 10px;
@@ -85,6 +85,6 @@
     height: 1.5rem;
   }
   div{
-    align-content: center;
+    padding-right: 10px;
   }
 </style>
