@@ -15,8 +15,8 @@ export class Task {
     public seed: number = undefined,
     public createdAt: Timestamp = undefined,
     public state: ExperimentState = undefined,
-    public x_columns: string[] = undefined,
-    public y_column: string = undefined,
+    public xColumns: string[] = undefined,
+    public yColumn: string = undefined,
   ) {}
 
   public equals(other: Task): boolean {

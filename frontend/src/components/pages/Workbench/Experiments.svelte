@@ -100,7 +100,9 @@
       hiddenLayerSizes,
       seed,
       getCurrentTimestamp(),
-      ExperimentState.PROGRESS
+      ExperimentState.PROGRESS,
+      ['name'],
+      'group'
     );
 
     await getExperimentTasks($networksList[$selectedNetworkIndex].metadata.id)
