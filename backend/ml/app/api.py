@@ -2,19 +2,20 @@
 from fastapi import APIRouter, Body
 from fastapi.responses import RedirectResponse
 
-from core.logging_helpers import get_logger
+from core.loggers import get_logger
 from app.workflows import (
     link_prediction_workflow,
-    node_prediction_workflow
+    node_classification_workflow
 )
-from core.types import MLTask, NodeClassResponse, EdgePredResponse
+from core.requests import MLRequest, ClassificationRequest
+from core.responses import NodeClassResponse, EdgePredResponse
 
 api = APIRouter()
 logger = get_logger(__name__)
 
 
 @api.post("/link_pred")
-async def link_prediction(task: MLTask = Body()):
+async def link_prediction(task: MLRequest = Body()):
     losses, val_scores, test_score, predictions =  await link_prediction_workflow(task)
     response = EdgePredResponse(
         losses=losses,
@@ -26,8 +27,8 @@ async def link_prediction(task: MLTask = Body()):
 
 
 @api.post("/node_class")
-async def node_classification(task: MLTask = Body()):
-    losses, predictions, accuracy =  await node_prediction_workflow(task)
+async def node_classification(task: ClassificationRequest = Body()):
+    losses, predictions, accuracy =  await node_classification_workflow(task)
     response = NodeClassResponse(
         losses=losses,
         predictions=predictions,

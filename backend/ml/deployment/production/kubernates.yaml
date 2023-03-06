@@ -1,6 +1,69 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
+  name: mlflow
+  namespace: studtarasov
+  annotations:
+    description: "MLflow for the graph learning workbench"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: mlflow
+    spec:
+      containers:
+      - resources:
+          limits:
+            cpu: "4"
+            memory: "4Gi"
+          requests:
+            cpu: "4"
+            memory: "4Gi"
+        name: mlflow
+        image: ghcr.io/mlflow/mlflow
+        imagePullPolicy: "Always"
+        env:
+          - name: MLFLOW_TRACKING_URI
+            value: "/mlruns"
+        command: ["mlflow", "server", "--backend-store-uri", "/mlruns", "--default-artifact-root", "/mlruns", "--host", "0.0.0.0", "--port", "5000", "--workers", "4"]
+        ports:
+        - name: http
+          containerPort: 5000
+        volumeMounts:
+          - mountPath: /mlruns
+            name: mlflow-directory
+      priorityClassName: "research-high"
+      imagePullSecrets:
+      - name: lsx-registry
+      restartPolicy: "Always"
+      volumes:
+        - name: mlflow-directory
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studtarasov
+            path: "/home/stud/tarasov/xtai_lab3/mlflow"
+            secretRef:
+              name: ceph-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow-service
+  namespace: studtarasov
+  annotations:
+    description: "Service for deployment of the mlflow"
+spec:
+  type: NodePort
+  ports:
+  - port: 5000
+  selector:
+    name: mlflow
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
   name: celery-worker
   namespace: studtarasov
   annotations:

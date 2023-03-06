@@ -14,22 +14,17 @@ class CamelModel(BaseModel):
         allow_population_by_field = True
 
 
-class MLTask(CamelModel):
+class MLRequest(CamelModel):
     nodes_file_url: AnyHttpUrl
     edges_file_url: AnyHttpUrl
     epochs: int = 100
+    x_columns: List[str]
     train_percentage: float = 0.85
-    val_percentage: float = 0.1
+    hidden_layer_sizes: List[int]
+    learning_rate: float = 0.01
+    ml_model_type: str
+    seed: int = 42
 
 
-class NodeClassResponse(BaseModel):
-    losses: List[float]
-    predictions: List[int]
-    accuracy: float
-
-
-class EdgePredResponse(BaseModel):
-    losses: List[int]
-    score: float
-    validation_scores: List[float]
-    predictions: List[List[int]]
+class ClassificationRequest(MLRequest):
+    y_column: str
