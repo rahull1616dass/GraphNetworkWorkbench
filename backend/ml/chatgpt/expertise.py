@@ -3,10 +3,8 @@ from typing import List, Tuple
 import openai
 
 from chatgpt import settings
-from core.loggers import timeit, get_logger
+from core.loggers import timeit
 from core.requests import MLRequest, ClassificationRequest
-
-logger = get_logger(__file__)
 
 
 def get_basic_arguments(request: MLRequest, losses: List[float], validation_scores: List[float])-> Tuple:
@@ -36,7 +34,9 @@ async def get_expert_advice_about_class(
              f"datasets with {train} and {val} frequencies respectively. During the training we have used negative " \
              f"log likelihood loss function and ADAM optimizer with the learning rate {lr}. We trained model during " \
              f"{epochs} epochs. We got such list of losses {losses_str} and such list of validation accuracy scores " \
-             f"{vals_str}. The final model accuracy is {test_score}. How to optimize the model?"
+             f"{vals_str}. The final model accuracy is {test_score}. User can only control type of the model, number " \
+             f"of layers and their sizes. Also learning rate, feature, target columns and number of iterations." \
+             f"Which advice would you give to such user based on below data how to optimize the model?"
     response = await openai.Completion.acreate(engine=settings.expert_model, prompt=prompt, max_tokens=200)
     return response.choices[0].text
 
@@ -54,10 +54,8 @@ async def get_expert_advice_about_pred(
              f"the decoding part was done on both positive and negative edge indexes. The BCEWithLogitsLoss was used " \
              f"as loss function and ADAM with the learning rate {lr} was used as optimizer. We trained model during " \
              f"{epochs} epochs. We got such list of losses {losses_str} and such list of test ROC AUC scores " \
-             f"{vals_str}. The final model ROC AUC score is {roc_auc_test_score}. Please advice to optimize the model" \
-             f"without writing code snippets?"
-    logger.info(prompt)
+             f"{vals_str}. The final model ROC AUC score is {roc_auc_test_score}. User can only control type of the " \
+             f"model, number of layers and their sizes. Also learning rate, feature columns and number of iterations." \
+             f"Which advice would you give to such user based on below data how to optimize the model?"
     response = await openai.Completion.acreate(engine=settings.expert_model, prompt=prompt, max_tokens=200)
-    text = response.choices[0].text
-    logger.info(text)
     return response.choices[0].text

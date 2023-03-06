@@ -31,9 +31,9 @@ class NodeClassifier:
         self.model.train()
         self.optimizer.zero_grad()
 
-        out = self.model(data.x, data.edge_index)
+        out = self.model.layers(data.x, data.edge_index)
 
-        loss = F.nll_loss(out, data.y)
+        loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
 
         loss.backward()
         self.optimizer.step()
@@ -43,23 +43,26 @@ class NodeClassifier:
 
         losses, val_acc_scores = [], []
         for every_epoch in tqdm(range(epochs), desc="Node classification progress..."):
-            loss = self.__train_iter(data[data.train_mask])
+            loss = self.__train_iter(data)
             mlflow.log_metric("loss", loss, every_epoch)
             losses.append(loss)
 
-            val_acc_score = self.test(data[data.test_mask])
+            val_acc_score = self.test(data)
             mlflow.log_metric("validation accuracy score", val_acc_score, every_epoch)
             val_acc_scores.append(val_acc_score)
         return losses, val_acc_scores
 
     def test(self, data: Data) -> float:
         self.model.eval()
-        out = self.model(data.x, data.edge_index)
-        return accuracy_score(data.y, out)
+        out = self.model.layers(data.x, data.edge_index)
+        true = data.y[data.test_mask]
+        predicted = out[data.test_mask]
+        return accuracy_score(data.y[data.test_mask], out[data.test_mask])
 
     def predict(self, data: Data) -> List:
         self.model.eval()
-        return self.model(data.x, data.edge_index).tolist()
+        result = self.model.layers(data.x[data.test_mask], data.edge_index[data.test_mask])
+        return self.model(data.x[data.test_mask], data.edge_index[data.test_mask])
 
 
 @timeit
@@ -77,10 +80,10 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
         node_classifier = NodeClassifier(data_to_use.num_features, device, params)
         losses, val_acc_scores = node_classifier.train(data_to_use, params.epochs)
 
-        final_accuracy: float = node_classifier.test(data_to_use[data_to_use.test_mask])
+        final_accuracy: float = node_classifier.test(data_to_use)
         mlflow.log_metric("accuracy", final_accuracy)
 
-        predictions: List = encoder.inverse_transform(node_classifier.predict(data_to_use[data_to_use.test_mask]))
+        predictions: List = encoder.inverse_transform(node_classifier.predict(data_to_use))
 
     return losses, val_acc_scores, final_accuracy, predictions
     

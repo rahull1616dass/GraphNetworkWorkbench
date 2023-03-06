@@ -20,7 +20,7 @@ def create_layers_sequence(model_type: str, features_number: int, hidden_layers_
     layers = []
     for layer_idx, layer_params in enumerate(hidden_layers_params):
         layers.append((model_to_use(*layer_params), 'x, edge_index -> x'))
-        if layer_idx + 1 == number_of_layers:
+        if layer_idx + 1 != number_of_layers:
             layers.append(ReLU())
     return layers
 
