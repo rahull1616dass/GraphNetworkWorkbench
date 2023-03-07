@@ -17,8 +17,6 @@ graph_learning_workbench:
   after_script:
     - bash ./backend/ml/deployment/production/after_script.sh
   only:
-    refs:
-      - main
     changes:
       - .gitlab-ci.yml
       - backend/ml/deployment/production/Dockerfile
