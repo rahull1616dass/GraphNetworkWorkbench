@@ -47,13 +47,3 @@ async def node_classification(request: ClassificationRequest = Body()):
 @api.get("/")
 async def index():
     return RedirectResponse("/docs")
-
-
-@api.get("/n")
-async def n():
-    return FileResponse("nodes.csv")
-
-
-@api.get("/e")
-async def e():
-    return FileResponse("edges.csv")
