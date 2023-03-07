@@ -15,11 +15,12 @@ export class FetchableNetwork {
     }
 
     public getDownloadEndpoint() {
-        if(this.subNetworkName === undefined) this.subNetworkName = this.networkName
+        if (this.subNetworkName === undefined) this.subNetworkName = this.networkName
         return `https://us-central1-graphlearningworkbench.cloudfunctions.net/downloadNetworkFile?networkName=${this.networkName}&netName=${this.subNetworkName}`
     }
 
-    public getNetworkName(){
-        return this.subNetworkName === undefined ? this.networkName : `${this.networkName}_${this.subNetworkName}`
+    public getNetworkName() {
+        return this.subNetworkName === undefined ? `${this.networkName}_${this.networkName}` :
+            `${this.networkName}_${this.subNetworkName}`
     }
 }
