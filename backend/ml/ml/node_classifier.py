@@ -23,8 +23,8 @@ class NodeClassifier:
     device: torch.device | None = None
     lr: float = 0.01
 
-    def __init__(self, features_number: int, device: torch.device, params: MLParams):
-        self.model = NodeClassificationNet(params.ml_model_type, features_number, params.hidden_layer_sizes).to(device)
+    def __init__(self, features_number: int, device: torch.device, params: MLParams, classes_number: int):
+        self.model = NodeClassificationNet(params.ml_model_type, features_number, params.hidden_layer_sizes, classes_number).to(device)
         self.optimizer = Adam(params=self.model.parameters(), lr=params.learning_rate, weight_decay=5e-4)
 
     def __train_iter(self, data: Data):
@@ -55,14 +55,13 @@ class NodeClassifier:
     def test(self, data: Data) -> float:
         self.model.eval()
         out = self.model.layers(data.x, data.edge_index)
-        true = data.y[data.test_mask]
-        predicted = out[data.test_mask]
-        return accuracy_score(data.y[data.test_mask], out[data.test_mask])
+        return accuracy_score(data.y[data.test_mask].cpu().numpy(), torch.argmax(out[data.test_mask], dim=1).unsqueeze(1).cpu().numpy())
 
     def predict(self, data: Data) -> List:
         self.model.eval()
-        result = self.model.layers(data.x[data.test_mask], data.edge_index[data.test_mask])
-        return self.model(data.x[data.test_mask], data.edge_index[data.test_mask])
+        out = self.model.layers(data.x, data.edge_index)
+        predicted_classes = torch.argmax(out[data.test_mask], dim=1)
+        return predicted_classes.detach().cpu().numpy().tolist()
 
 
 @timeit
@@ -77,13 +76,16 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
         ])
         data_to_use: Data = transforms(data)
 
-        node_classifier = NodeClassifier(data_to_use.num_features, device, params)
+        node_classifier = NodeClassifier(data_to_use.num_features, device, params, len(encoder.classes_))
         losses, val_acc_scores = node_classifier.train(data_to_use, params.epochs)
 
         final_accuracy: float = node_classifier.test(data_to_use)
         mlflow.log_metric("accuracy", final_accuracy)
 
         predictions: List = encoder.inverse_transform(node_classifier.predict(data_to_use))
+        test_node_indices = torch.unique(data_to_use.edge_index)[data_to_use.test_mask].cpu().numpy().tolist()
+        node_idx_pred_class_pairs = {node_idx: str(pred_class)
+                                     for node_idx, pred_class in zip(test_node_indices, predictions)}
 
-    return losses, val_acc_scores, final_accuracy, predictions
+    return losses, val_acc_scores, final_accuracy, node_idx_pred_class_pairs
     

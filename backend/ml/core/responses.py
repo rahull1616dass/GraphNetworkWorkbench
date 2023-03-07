@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Dict
 
 from pydantic import BaseModel
 
 
 class NodeClassResponse(BaseModel):
     losses: List[float]
-    predictions: List
+    predictions: Dict
     accuracy: float
     expert_opinion: str
 
