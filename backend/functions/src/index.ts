@@ -186,7 +186,7 @@ exports.getNetworks = functions.https.onRequest((req, res) => {
     })
 })
 
-exports.getNetowrkDescription = functions.https.onRequest((req, res) => {
+exports.getNetworkDescription = functions.https.onRequest((req, res) => {
     cors(req, res, () => {
         const { networkName } = req.query
         console.log(networkName)
@@ -203,8 +203,8 @@ exports.getNetowrkDescription = functions.https.onRequest((req, res) => {
 
 exports.downloadNetworkFile = functions.https.onRequest((req, res) => {
     cors(req, res, () => {
-        const { networkName } = req.query;
-        const fileUrl = `https://networks.skewed.de/net/${networkName}/files/${networkName}.csv.zip`;
+        const { networkName, netName } = req.query;
+        const fileUrl = `https://networks.skewed.de/net/${networkName}/files/${netName}.csv.zip`;
         axios({
             method: "get",
             url: fileUrl,

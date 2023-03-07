@@ -6,16 +6,18 @@
   import request from "../../api/request"
   import { createEventDispatcher } from "svelte"
   import { getAuth } from "firebase/auth"
-  import { networkExists, getExperimentTasks } from "../../api/firebase"
   import { ProgressBarData } from "../../definitions/progressBarData"
   import { UploadResult } from "../../definitions/uploadResult"
   import { FetchableAccordionState } from "../../definitions/fetchableAccordionState"
   import { networksList } from "../../stores"
   import JSZip from "jszip"
-  import { removeCSVColumns } from "../../util/networkParserUtil"
+  import { removeCSVColumns, parseNetwork } from "../../util/networkParserUtil"
   import { Node, Link, Metadata, Network } from "../../definitions/network"
   import { uploadNetworkToStorage } from "../../api/firebase"
-  import MultipleNetworkPopup from "./MultipleNetworkPopup.svelte"
+  import MultipleNetworkPopup from "./MultipleNetworkPopup.svelte"  
+  import type ParseResult from "papaparse";
+  // import fs from "fs"
+
 
   export let networkName: string
   let subNetworkName: string
@@ -135,17 +137,29 @@
       .then((zip) => {
         let edgeFile
         let nodeFile
-        edgeFile = zip.files["edges.csv"].async("text")
-        nodeFile = zip.files["nodes.csv"].async("text")
-        return Promise.all([edgeFile, nodeFile])
+        edgeFile = zip.files["edges.csv"]
+        nodeFile = zip.files["nodes.csv"]
+        // edgeFile = fs.readFileSync(edgeFile, 'utf8')
+
+        Promise.all([
+          parseNetwork(edgeFile),
+          parseNetwork(nodeFile)
+          ])
+        .then(([parsedEdge, parsedNode]) => {
+        let nodeData = parsedNode as ParseResult
+        let edgeData = parsedEdge as ParseResult
+        console.log(nodeData.data)
+        return Promise.all([edgeData, nodeData])
       })
       .then((alltext) => {
-        let nodesString = removeCSVColumns(alltext[1].replace("# ", ""), [
-          " name",
-          " _pos",
-        ]).replace(", ",",").replace("label","name")
-        let edgesString = alltext[0].replace("# ", "")
-        console.log(nodesString)
+        let nodesString = alltext[1]
+        let edgesString = alltext[0]
+        // let nodesString = removeCSVColumns(alltext[1].replace("# ", ""), [
+        //   " name",
+        //   " _pos",
+        // ]).replace(", ",",").replace("label","name")
+        // let edgesString = alltext[0].replace("# ", "")
+        console.log(nodesString.async("text"))
         let network = new Network(
           new Metadata(
             networkName,
@@ -167,6 +181,7 @@
           state = FetchableAccordionState.UPLOAD_ERROR
         })
   })
+})
 }
 
 </script>
