@@ -6,5 +6,9 @@ ssh vingilot -t "
   if test -d /home/stud/tarasov/xtai_lab3/application; then rm -rf /home/stud/tarasov/xtai_lab3/application; fi;
   mv /home/stud/tarasov/xtai_lab3/application.new /home/stud/tarasov/xtai_lab3/application;
   sleep 5;
+  echo '
+    CHATGPT_API_KEY=${CHAT_GPT_API_KEY}
+    EXPERT_MODEL=${EXPERT_MODEL}
+  ' > /home/stud/tarasov/xtai_lab3/application/.env
   kubectl -n ${VINGILOT_USER} create -f /home/stud/tarasov/xtai_lab3/deployment/kubernates.yaml;
 "
