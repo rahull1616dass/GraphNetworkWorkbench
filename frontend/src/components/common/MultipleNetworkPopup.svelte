@@ -5,10 +5,10 @@
   const dispatch = createEventDispatcher()
 
   export let subNetworks: string[] = []
-  let selectedSubNetworkIndex: number = undefined
+  let selectedSubNetworkIndex: number = 0
 
   const handleSubmit = () => {
-    dispatch("onSubmit", {
+    dispatch("submit", {
       selectedNetwork: subNetworks[selectedSubNetworkIndex],
     })
   }
@@ -25,6 +25,7 @@
           type="radio"
           name="strings"
           value={networkName}
+          checked={index === selectedSubNetworkIndex}
           on:change={() => (selectedSubNetworkIndex = index)}
         />
         {networkName}

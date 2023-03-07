@@ -47,11 +47,7 @@
     state = FetchableAccordionState.HIDE_MULTIPLE_NETWORK
   }
 
-  const handlePopupSubmit = (event) => {
-    fetchableNetwork.subNetworkName = event.detail.selectedNetwork
-    hidePopup()
-    uploadNetwork()
-  }
+
 
   const onAccordionClick = async (event: MouseEvent) => {
     if (state === FetchableAccordionState.ACCORDION_CLOSED) {
@@ -113,7 +109,7 @@
       .then(async (zip) => {
         let edgeBlob = zip.files['edges.csv']
         let nodeBlob = zip.files['nodes.csv']
-        progressBarData.text = "Uploading network to storage..."
+        progressBarData.text = "Uploading network to storage. This may take some time."
         const metadata = new Metadata(
           fetchableNetwork.getNetworkName(),
           fetchableNetwork.getNetworkName(),
@@ -141,6 +137,9 @@
           .catch((error) => {
             state = FetchableAccordionState.UPLOAD_ERROR
           })
+      }).catch((error) => {
+        console.log(error)
+        state = FetchableAccordionState.UPLOAD_ERROR
       })
   }
 </script>
@@ -201,7 +200,11 @@
 {#if state === FetchableAccordionState.SHOW_MULTIPLE_NETWORK}
   <MultipleNetworkPopup
     subNetworks={fetchableNetwork.content.nets}
-    on:submit={handlePopupSubmit}
+    on:submit={(e) => {
+      fetchableNetwork.subNetworkName = e.detail.selectedNetwork
+      hidePopup()
+      uploadNetwork()
+    }}
     on:close={hidePopup}
   />
 {/if}
