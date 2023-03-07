@@ -3,7 +3,7 @@
   import { XMLParser } from "fast-xml-parser"
   import { parseNetwork, toCSVFile } from "../../../../util/networkParserUtil"
   import type ParseResult from "papaparse"
-  import { Network, Node, Link } from "../../../../definitions/network"
+  import { Network, Node, Link, Metadata } from "../../../../definitions/network"
   import { ModalData } from "../../../../definitions/modalData"
   import { MenuItem } from "../../../../definitions/menuItem"
   import {
@@ -46,13 +46,13 @@
   // Note that `files` is of type `FileList`, not an Array:
   // https://developer.mozilla.org/en-US/docs/Web/API/FileList
 
-  let idPlaceHolder = cryptoRandomString({ length: 4, type: "url-safe" })
-  $: idPlaceHolder = idPlaceHolder.replace(/^/, newNetwork.metadata.name)
-
   // TODO OnClose callback doesn't work for now
   let nodeFiles: File[] = []
   let edgeFiles: File[] = []
-  let newNetwork = new Network()
+  let newNetwork = new Network(new Metadata())
+  
+  let randomId = cryptoRandomString({ length: 4, type: "url-safe" })
+  $: newNetwork.metadata.id = `${newNetwork.metadata.name}-${randomId}`
 
   let isUploadSuccessful = false
 
@@ -67,6 +67,8 @@
     console.log(`Selected node file: ${nodeFile.name}: ${nodeFile.size} bytes`)
     parseFile(nodeFile, UploadedFileType.NODE_FILE)
   }
+
+  $: isSaveButtonDisabled = newNetwork.metadata.name === "" || newNetwork.links.length === 0 || newNetwork.nodes.length === 0
 
   function parseFile(file: File, uploadedFileType: UploadedFileType) {
     // See https://stackoverflow.com/a/66487071/11330757
@@ -249,8 +251,8 @@
       <div class="metadata_id">
         <TextInput
           bind:value={newNetwork.metadata.id}
+          disabled
           type="text"
-          bind:placeholder={idPlaceHolder}
           id="network-id"
           labelText="A unique network ID"
         />
@@ -268,6 +270,7 @@
         <div class="labels">Network Color</div>
         <Palette
           colors={$paletteColors}
+          selectedColor={$paletteColors[Math.floor(Math.random() * $paletteColors.length)]}
           on:select={({ detail: { color } }) =>
             (newNetwork.metadata.color = color)}
         />
@@ -358,6 +361,7 @@
         <CustomButton
           type={"secondary"}
           inverse={false}
+          disabled={isSaveButtonDisabled}
           on:click={onSaveButtonClicked}>Save Network</CustomButton
         >
       </div>
