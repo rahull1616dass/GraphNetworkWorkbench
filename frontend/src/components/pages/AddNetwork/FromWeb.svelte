@@ -1,23 +1,13 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { netzschleuderNetworkNames } from "../../../stores";
-  import { SideNavItems } from "carbon-components-svelte";
-  import FetchableAccordionItem from "../../common/FetchableAccordionItem.svelte";
-  import { Accordion } from "carbon-components-svelte";
-  import request from "../../../api/request";
-  import decompressResponse from "decompress-response";
-  import { parseReadableStream } from "../../../util/networkParserUtil";
-  import { parse } from "vega";
-  import { selectedMenuItem } from "../../../stores";
-  import { MenuItem } from "../../../definitions/menuItem";
-  import JSZip from "jszip";
-  import { browserLocalPersistence } from "firebase/auth";
-  import { uploadNetworkToStorage } from "../../../api/firebase"
-  import { Network } from "../../../definitions/network"
-  import { onFetchNetwork } from "../AddNetwork/ImportNetwork";
-  import type { Link, Metadata, Node } from "../../../definitions/network"
-  import { uploadedNetworkStatus} from "../AddNetwork/ImportNetwork"
-  import { fly } from "svelte/transition";
+  import { onMount } from "svelte"
+  import { netzschleuderNetworkNames } from "../../../stores"
+  import { ProgressBar } from "carbon-components-svelte"
+  import FetchableAccordionItem from "../../common/FetchableAccordionItem.svelte"
+  import { Accordion } from "carbon-components-svelte"
+  import request from "../../../api/request"
+  import { selectedMenuItem } from "../../../stores"
+  import { MenuItem } from "../../../definitions/menuItem"
+  import { ProgressBarData } from "../../../definitions/progressBarData"
 
   onMount(async () => {
     /*
@@ -26,42 +16,44 @@
     At this point, the selectedMenuItem must be set to NONE so that the root div is not rendered
     on top of the import pages
     */
-    $selectedMenuItem = MenuItem.FROM_WEB;
+    $selectedMenuItem = MenuItem.FROM_WEB
     netzschleuderNetworkNames.set(
-      await request("https://us-central1-graphlearningworkbench.cloudfunctions.net/getNetworks")
+      await request(
+        "https://us-central1-graphlearningworkbench.cloudfunctions.net/getNetworks"
+      )
     )
+    progressBarData.isPresent = false
   })
   
-  
-  let searchTerm = "";
+  let searchTerm = ""
+  let progressBarData: ProgressBarData = new ProgressBarData(
+    true,
+    "Fetching networks..."
+  )
   $: filteredItems = $netzschleuderNetworkNames.filter((item) =>
     item.includes(searchTerm)
-  );
+  )
 </script>
 
-<main
-  in:fly={{ y: -50, duration: 350, delay: 300 }}
-  out:fly={{ y: -50, duration: 350 }}
->
-  <h1>Network Names</h1>
-  {#if $netzschleuderNetworkNames}
+<main>
+  {#if progressBarData.isPresent}
+    <div class="progress_bar">
+      <ProgressBar helperText={progressBarData.text} />
+    </div>
+  {:else}
+    <h1>Network Names</h1>
     <Accordion>
       <input type="text" bind:value={searchTerm} placeholder="Search..." />
       <div class="OuterContailer">
         <div class="networks">
           {#each filteredItems as networkName}
             <FetchableAccordionItem
-              isNetworkUploaded={uploadedNetworkStatus}
-              title={networkName}
-              endpoint={`https://us-central1-graphlearningworkbench.cloudfunctions.net/getNetowrkDescription?networkName=${networkName}`}
-              on:fetchNetwork={onFetchNetwork}
+              accordionTitle={networkName}
             />
           {/each}
         </div>
       </div>
     </Accordion>
-  {:else}
-    <p>Fetching networks...</p>
   {/if}
 </main>
 
@@ -82,5 +74,12 @@
   .OuterContailer {
     overflow: auto;
     width: 100%;
+  }
+
+  .progress_bar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 </style>

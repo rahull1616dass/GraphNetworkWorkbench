@@ -1,27 +1,27 @@
 <script lang="ts">
-  import { GraphFormatConverter } from "graph-format-converter";
-  import { XMLParser } from "fast-xml-parser";
-  import { parseNetwork, toCSVFile } from "../../../../util/networkParserUtil";
-  import type ParseResult from "papaparse";
-  import { Network, Node, Link } from "../../../../definitions/network";
-  import { ModalData } from "../../../../definitions/modalData";
-  import { MenuItem } from "../../../../definitions/menuItem";
+  import { GraphFormatConverter } from "graph-format-converter"
+  import { XMLParser } from "fast-xml-parser"
+  import { parseNetwork, toCSVFile } from "../../../../util/networkParserUtil"
+  import type ParseResult from "papaparse"
+  import { Network, Node, Link, Metadata } from "../../../../definitions/network"
+  import { ModalData } from "../../../../definitions/modalData"
+  import { MenuItem } from "../../../../definitions/menuItem"
   import {
     selectedMenuItem,
     networksList,
     paletteColors,
-  } from "../../../../stores";
-  import { UploadedFileType } from "../../../../definitions/uploadedFileType";
-  import { Modal, TextInput, ProgressBar } from "carbon-components-svelte";
-  import { Palette } from "@untemps/svelte-palette";
-  import cryptoRandomString from "crypto-random-string";
-  import { uploadNetworkToStorage } from "../../../../api/firebase";
-  import { ProgressBarData } from "../../../../definitions/progressBarData";
-  import { onMount } from "svelte";
-  import CustomInput from "../../../common/CustomInput.svelte";
-  import CustomButton from "../../../common/CustomButton.svelte";
-  import InfoBox from "../../../common/InfoBox.svelte";
-  import { fade, slide, scale, fly } from "svelte/transition";
+  } from "../../../../stores"
+  import { UploadedFileType } from "../../../../definitions/uploadedFileType"
+  import { Modal, TextInput, ProgressBar } from "carbon-components-svelte"
+  import { Palette } from "@untemps/svelte-palette"
+  import cryptoRandomString from "crypto-random-string"
+  import { uploadNetworkToStorage } from "../../../../api/firebase"
+  import { ProgressBarData } from "../../../../definitions/progressBarData"
+  import { onMount } from "svelte"
+  import CustomInput from "../../../common/CustomInput.svelte"
+  import CustomButton from "../../../common/CustomButton.svelte"
+  import InfoBox from "../../../common/InfoBox.svelte"
+  import { fade, slide, scale, fly } from "svelte/transition"
 
   onMount(() => {
     /*
@@ -30,12 +30,12 @@
     At this point, the selectedMenuItem must be set to NONE so that the root div is not rendered
     on top of the import pages
     */
-    $selectedMenuItem = MenuItem.FROM_PC;
-  });
+    $selectedMenuItem = MenuItem.FROM_PC
+  })
 
-  let modalData: ModalData = new ModalData();
-  let progressBarData: ProgressBarData = new ProgressBarData();
-  $: isInfoModalOpen = false;
+  let modalData: ModalData = new ModalData()
+  let progressBarData: ProgressBarData = new ProgressBarData()
+  $: isInfoModalOpen = false
 
   /*
    TODO Make this work with the 'File type'. Right now, this throws an eror on the bind:file if declared as 
@@ -46,83 +46,84 @@
   // Note that `files` is of type `FileList`, not an Array:
   // https://developer.mozilla.org/en-US/docs/Web/API/FileList
 
-  let idPlaceHolder = cryptoRandomString({ length: 4, type: "url-safe" });
-  $: idPlaceHolder = idPlaceHolder.replace(/^/, newNetwork.metadata.name);
-
   // TODO OnClose callback doesn't work for now
-  let nodeFiles: File[] = [];
-  let edgeFiles: File[] = [];
-  let newNetwork = new Network();
+  let nodeFiles: File[] = []
+  let edgeFiles: File[] = []
+  let newNetwork = new Network(new Metadata())
+  
+  let randomId = cryptoRandomString({ length: 4, type: "url-safe" })
+  $: newNetwork.metadata.id = `${newNetwork.metadata.name}-${randomId}`
 
-  let isUploadSuccessful = false;
+  let isUploadSuccessful = false
 
   $: if (edgeFiles.length > 0) {
-    let edgeFile = edgeFiles[0];
-    console.log(`Selected edge file: ${edgeFile.name}: ${edgeFile.size} bytes`);
-    parseFile(edgeFile, UploadedFileType.EDGE_FILE);
+    let edgeFile = edgeFiles[0]
+    console.log(`Selected edge file: ${edgeFile.name}: ${edgeFile.size} bytes`)
+    parseFile(edgeFile, UploadedFileType.EDGE_FILE)
   }
 
   $: if (nodeFiles.length > 0) {
-    let nodeFile = nodeFiles[0];
-    console.log(`Selected node file: ${nodeFile.name}: ${nodeFile.size} bytes`);
-    parseFile(nodeFile, UploadedFileType.NODE_FILE);
+    let nodeFile = nodeFiles[0]
+    console.log(`Selected node file: ${nodeFile.name}: ${nodeFile.size} bytes`)
+    parseFile(nodeFile, UploadedFileType.NODE_FILE)
   }
+
+  $: isSaveButtonDisabled = newNetwork.metadata.name === "" || newNetwork.links.length === 0 || newNetwork.nodes.length === 0
 
   function parseFile(file: File, uploadedFileType: UploadedFileType) {
     // See https://stackoverflow.com/a/66487071/11330757
-    parseNetwork(file).then((parsedNetwork: ParseResult) => {
-      console.log(`Parsed network: ${parsedNetwork as ParseResult}`);
+    parseNetwork(file).then((parseResult: ParseResult) => {
+      console.log(`Parsed network: ${parseResult as ParseResult}`)
       switch (uploadedFileType) {
         case UploadedFileType.NODE_FILE:
-          if (!parsedNetwork.meta.fields.includes("name")) {
+          if (!parseResult.meta.fields.includes("name")) {
             onInvalidFile(
               `'name' field is required for nodes. Please create this column 
             in your nodes file and assign a name to each node.
             `,
               UploadedFileType.NODE_FILE
-            );
-            return;
+            )
+            return
           }
-          if (!parsedNetwork.meta.fields.includes("index")) {
-            parsedNetwork.data.forEach((value, index) => {
-              value["index"] = index;
-            });
-            parsedNetwork.meta.fields.push("index");
+          if (!parseResult.meta.fields.includes("index")) {
+            parseResult.data.forEach((value, index) => {
+              value["index"] = index
+            })
+            parseResult.meta.fields.push("index")
           }
-          newNetwork.nodes = <Node[]>(
-            JSON.parse(JSON.stringify(parsedNetwork.data))
-          );
-          checkForExtraField(newNetwork.nodes, UploadedFileType.NODE_FILE);
-          break;
+          newNetwork.nodes = parseResult.data
+          checkForExtraField(newNetwork.nodes, UploadedFileType.NODE_FILE)
+          break
         case UploadedFileType.EDGE_FILE:
-          let isFileValid = true;
-          const requiredColumns = ["source", "target"];
+          let isFileValid = true
+          const requiredColumns = ["source", "target"]
           requiredColumns.forEach((column) => {
-            if (!parsedNetwork.meta.fields.includes(column)) {
+            if (!parseResult.meta.fields.includes(column)) {
               onInvalidFile(
                 `'${column}' field is required for edges. Please create this column and assign a 
               ${column} to each edge.`,
                 UploadedFileType.EDGE_FILE
-              );
-              isFileValid = false;
-              return;
+              )
+              isFileValid = false
+              return
             }
-            if (!isFileValid) return;
-          });
+            if (!isFileValid) return
+          })
           newNetwork.links = <Link[]>(
-            JSON.parse(JSON.stringify(parsedNetwork.data))
-          );
-          checkForExtraField(newNetwork.links, UploadedFileType.EDGE_FILE);
-          break;
+            JSON.parse(JSON.stringify(parseResult.data))
+          )
+          checkForExtraField(newNetwork.links, UploadedFileType.EDGE_FILE)
+          break
       }
-    });
+    })
   }
 
   function checkForExtraField(
-    list: Node[] | Link[],
+    list: object[],
     uploadedFileType: UploadedFileType
   ) {
     list.forEach((element) => {
+      //@ts-ignore
       if (element.__parsed_extra !== undefined) {
         switch (uploadedFileType) {
           case UploadedFileType.NODE_FILE:
@@ -133,55 +134,55 @@
               UploadedFileType.NODE_FILE
             )
             */
-            break;
+            break
           case UploadedFileType.EDGE_FILE:
             onInvalidFile(
               `The edge Index_${element.source} -> Index_${element.target} has an extra column that 
               is not part of the network. Please remove this column from the edges file.`,
               UploadedFileType.EDGE_FILE
-            );
-            break;
+            )
+            break
         }
       }
-    });
+    })
   }
 
   function onInvalidFile(
     messageBody: string,
     uploadedFileType: UploadedFileType
   ) {
-    modalData.messageBody = messageBody;
-    modalData.isOpen = true;
+    modalData.messageBody = messageBody
+    modalData.isOpen = true
     switch (uploadedFileType) {
       case UploadedFileType.NODE_FILE:
-        nodeFiles = [];
-        newNetwork.nodes = [];
-        break;
+        nodeFiles = []
+        newNetwork.nodes = []
+        break
       case UploadedFileType.EDGE_FILE:
-        edgeFiles = [];
-        newNetwork.links = [];
-        break;
+        edgeFiles = []
+        newNetwork.links = []
+        break
     }
   }
 
   function onSaveButtonClicked() {
-    progressBarData.isPresent = true;
+    progressBarData.isPresent = true
     console.log(
       `Save button clicked with nodes: ${newNetwork.nodes} and edges: ${newNetwork.links}`
-    );
+    )
     if (newNetwork.nodes.length == 0) {
-      modalData.messageBody = "Please upload a valid nodes file.";
-      modalData.isOpen = true;
-      return;
+      modalData.messageBody = "Please upload a valid nodes file."
+      modalData.isOpen = true
+      return
     }
     if (newNetwork.links.length == 0) {
-      modalData.messageBody = "Please upload a valid edges file.";
-      modalData.isOpen = true;
-      return;
+      modalData.messageBody = "Please upload a valid edges file."
+      modalData.isOpen = true
+      return
     }
     networksList.update((networksList) => {
-      return [...networksList, newNetwork];
-    });
+      return [...networksList, newNetwork]
+    })
 
     /*
     One could also store the network in each user's Firestore document, and this would even
@@ -191,11 +192,11 @@
     application, it is better to store the networks in Firebase Storage, and only store the
     metadata in Firestore. This way, we can have a much larger network size limit.
     */
-    uploadNetworkToFirebaseStorage();
+    uploadNetworkToFirebaseStorage()
   }
 
   async function uploadNetworkToFirebaseStorage() {
-    progressBarData.text = "Saving network to the cloud...";
+    progressBarData.text = "Saving network to the cloud..."
     /*
     Why create the CSV file from scratch using the newNetwork object, rather than simply
     uploading the files that the user uploaded? 
@@ -205,26 +206,26 @@
     index was missing and it was added by the client. In these cases, the user's file
     is not the same as the network that we want to upload.
     */
-    let files: Record<string, File> = newNetwork.toFiles();
+    let files: Record<string, File> = newNetwork.toFiles()
     await uploadNetworkToStorage(newNetwork.metadata, files.nodes, files.links)
       .then((url) => {
-        console.log(`Network uploaded to ${url}`);
+        console.log(`Network uploaded to ${url}`)
         //TODO Newline does not render in the modal currently.
         modalData.messageBody = `Network successfully uploaded.\nName: ${newNetwork.metadata.name}
                             \nDescription: ${newNetwork.metadata.description}
-                            \nNodes: ${newNetwork.nodes.length} \nEdges: ${newNetwork.links.length}`;
-        modalData.isOpen = true;
-        isUploadSuccessful = true;
-        progressBarData.isPresent = false;
+                            \nNodes: ${newNetwork.nodes.length} \nEdges: ${newNetwork.links.length}`
+        modalData.isOpen = true
+        isUploadSuccessful = true
+        progressBarData.isPresent = false
       })
       .catch((error) => {
-        console.log(`Error uploading network: ${error}`);
-      });
+        console.log(`Error uploading network: ${error}`)
+      })
   }
 
   function onModalClose() {
     if (isUploadSuccessful) {
-      $selectedMenuItem = MenuItem.HOME;
+      $selectedMenuItem = MenuItem.HOME
     }
   }
   /*let xmlOutput = new XMLParser().parse(files[0])
@@ -250,8 +251,8 @@
       <div class="metadata_id">
         <TextInput
           bind:value={newNetwork.metadata.id}
+          disabled
           type="text"
-          bind:placeholder={idPlaceHolder}
           id="network-id"
           labelText="A unique network ID"
         />
@@ -269,6 +270,7 @@
         <div class="labels">Network Color</div>
         <Palette
           colors={$paletteColors}
+          selectedColor={$paletteColors[Math.floor(Math.random() * $paletteColors.length)]}
           on:select={({ detail: { color } }) =>
             (newNetwork.metadata.color = color)}
         />
@@ -359,6 +361,7 @@
         <CustomButton
           type={"secondary"}
           inverse={false}
+          disabled={isSaveButtonDisabled}
           on:click={onSaveButtonClicked}>Save Network</CustomButton
         >
       </div>
