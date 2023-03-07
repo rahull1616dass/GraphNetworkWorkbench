@@ -46,43 +46,6 @@ export async function parseReadableStream(
     })
 }
 
-export function removeCSVColumns(csvData, columnsToRemove) {
-  const rows = csvData.split("\n").map(row => {
-    const cells = [];
-    let cell = "";
-    let insideQuote = false;
-    for (let char of row) {
-      if (char === '"') {
-        insideQuote = !insideQuote;
-      } else if (char === "," && !insideQuote) {
-        cells.push(cell);
-        cell = "";
-      }
-      else if(char ===","&&insideQuote)
-      {
-        cell+='_'
-      }
-      else {
-        cell += char;
-      }
-    }
-    cells.push(cell);
-    return cells;
-  });
-  const header = rows[0];
-  let indicesToRemove = [];
-  if (Array.isArray(columnsToRemove)) {
-    for (const col of columnsToRemove) {
-      const index = header.indexOf(col);
-      if (index !== -1) {
-        indicesToRemove.push(index);
-      }
-    }
-  }
-  return rows.map(row => {
-    return row.filter((_, i) => !indicesToRemove.includes(i));
-  }).map(row => row.join(",")).join("\n");
-}
 
 const cleanFieldName = (fieldName: string) => {
   return fieldName.replace(/^[\s#_]+|[\s]+/g, '');
@@ -100,7 +63,7 @@ async function parseCSV(file: File): Promise<ParseResult> {
       complete: (results) => {
         if (!results.meta.fields.includes("index")) {
           results.data.forEach((row, index) => {
-            row["index"] = index.toString()
+            row["index"] = index
           })
           results.meta.fields.push("index")
         }
@@ -114,23 +77,7 @@ async function parseCSV(file: File): Promise<ParseResult> {
   })
 }
 
-export function parseNetzschleuderFile(blob: Blob, uploadedFileType: UploadedFileType): Promise<File> {
-  return new Promise((resolve, reject) => {
-    Papa.parse(blob, {
-      header: true,
-      skipEmptyLines: true,
-      dynamicTyping: true,
-      complete: (results) => {
-        // Log the results of PapaParse
-        console.log(results)
-        resolve(results)
-      },
-      error: (error) => {
-        reject(error)
-      },
-    })
-  })
-}
+
 
 export function JSZipObjectToFile(zipObject: JSZip.JSZipObject): Promise<File> {
   return new Promise((resolve, reject) => {

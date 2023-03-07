@@ -303,14 +303,12 @@ export async function getNetworkFromStorage(
         console.log(blob)
         parseNetwork(blobToFile(blob, "nodes.csv"))
           .then((parsedNodes) => {
-            network.nodes = <Node[]>JSON.parse(JSON.stringify(parsedNodes.data))
+            network.nodes = parsedNodes.data
             getBlob(storagePaths.edgesFileRef)
               .then((blob) => {
                 parseNetwork(blobToFile(blob, "edges.csv"))
                   .then((parsedEdges) => {
-                    network.links = <Link[]>(
-                      JSON.parse(JSON.stringify(parsedEdges.data))
-                    )
+                    network.links = parsedEdges.data
                     resolve(network)
                   })
                   .catch((error) => {

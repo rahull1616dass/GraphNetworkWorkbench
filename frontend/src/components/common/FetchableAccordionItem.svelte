@@ -12,10 +12,8 @@
   import { networksList, paletteColors } from "../../stores"
   import JSZip from "jszip"
   import {
-    removeCSVColumns,
     parseNetwork,
     blobToFile,
-    parseNetzschleuderFile,
     JSZipObjectToFile,
   } from "../../util/networkParserUtil"
   import { Node, Link, Metadata, Network } from "../../definitions/network"
@@ -155,8 +153,8 @@
         ))
     parseNetwork(nodeFile).then(parsedNodes =>{
       parseNetwork(edgeFile).then(parsedEdges => {
-        network.nodes = JSON.parse(JSON.stringify(parsedNodes.data))
-        network.links = JSON.parse(JSON.stringify(parsedEdges.data))
+        network.nodes = parsedNodes.data
+        network.links = parsedEdges.data
         resolve(network)
       }).catch(error => {
         reject(error)
