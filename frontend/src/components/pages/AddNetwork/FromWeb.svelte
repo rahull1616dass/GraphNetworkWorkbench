@@ -48,7 +48,7 @@
         <div class="networks">
           {#each filteredItems as networkName}
             <FetchableAccordionItem
-              {networkName}
+              accordionTitle={networkName}
             />
           {/each}
         </div>

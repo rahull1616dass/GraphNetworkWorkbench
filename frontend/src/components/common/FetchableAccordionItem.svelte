@@ -9,25 +9,22 @@
   import { ProgressBarData } from "../../definitions/progressBarData"
   import { UploadResult } from "../../definitions/uploadResult"
   import { FetchableAccordionState } from "../../definitions/fetchableAccordionState"
-  import { networksList } from "../../stores"
+  import { networksList, paletteColors } from "../../stores"
   import JSZip from "jszip"
-  import { removeCSVColumns, parseNetwork } from "../../util/networkParserUtil"
+  import { removeCSVColumns, parseNetwork, blobToFile } from "../../util/networkParserUtil"
   import { Node, Link, Metadata, Network } from "../../definitions/network"
-  import { uploadNetworkToStorage } from "../../api/firebase"
-  import MultipleNetworkPopup from "./MultipleNetworkPopup.svelte"  
-  import type ParseResult from "papaparse";
+  import { uploadNetworkToStorage, getNetworkFromStorage } from "../../api/firebase"
+  import MultipleNetworkPopup from "./MultipleNetworkPopup.svelte"
+  import type ParseResult from "papaparse"
+  import { FetchableNetwork } from "../../definitions/fetchableNetwork"
   // import fs from "fs"
 
-
-  export let networkName: string
-  let subNetworkName: string
-  let endpoint: string = undefined
-  $: endpoint = `https://us-central1-graphlearningworkbench.cloudfunctions.net/getNetworkDescription?networkName=${networkName}`
-  let content = undefined
+  export let accordionTitle: string = undefined
+  let fetchableNetwork: FetchableNetwork = new FetchableNetwork()
+  $: fetchableNetwork.networkName = accordionTitle
   let state: FetchableAccordionState = FetchableAccordionState.ACCORDION_CLOSED
-
-  let multipleNetworks: string[]
-  let existMultipleNetworks: boolean[] = []
+  let progressBarData: ProgressBarData = new ProgressBarData(true, "Fetching network details...")
+  const zip = new JSZip()
 
   function showPopup() {
     state = FetchableAccordionState.SHOW_MULTIPLE_NETWORK
@@ -38,22 +35,20 @@
   }
 
   const handlePopupSubmit = (event) => {
-    // Do something with the result here
-    console.log(event.detail);
-    subNetworkName = event.detail;
+    fetchableNetwork.subNetworkName = event.detail.selectedNetwork
     hidePopup()
     uploadNetwork()
   }
 
-
   const onAccordionClick = async (event: MouseEvent) => {
     if (state === FetchableAccordionState.ACCORDION_CLOSED) {
       /*
-    The assumption is that the id of a network imported this way will be equal to the name of the network.
-    */
+      The assumption is that the id of a network imported this way will be equal to the name of the network.
+      */
       if (
-        $networksList.find((network) => network.metadata.id === networkName) !==
-        undefined
+        $networksList.find(
+          (network) => network.metadata.id === fetchableNetwork.getNetworkName()
+        ) !== undefined
       ) {
         state = FetchableAccordionState.NETWORK_EXISTS
       } else fetchNetwork()
@@ -62,145 +57,92 @@
 
   async function fetchNetwork() {
     state = FetchableAccordionState.FETCHING
-    if (content === undefined) {
-      console.log(endpoint)
-      request(endpoint)
+    if (fetchableNetwork.content === undefined) {
+      request(fetchableNetwork.getNetworkContentEndpoint())
         .then((response) => {
           state = FetchableAccordionState.FETCHED
-          content = response
-          /*
-        If there is more than one network in a given network content, then just take
-        the first one to show the details of, and ignore the rest.
-        */
-          if (Object.keys(content.analyses).length > 1) {
-            content.analyses =
-              content.analyses[Object.keys(content.analyses)[0]]
+          fetchableNetwork.content = response
+
+          // @ts-ignore
+          if (fetchableNetwork.content.nets.length > 1) {
+            // Filter out the subnetworks that already exist in user's network list
+            const currentNetworkIds: string[] = $networksList.map(
+              (network) => network.metadata.id
+            )
+            // @ts-ignore
+            fetchableNetwork.content.nets =
+              fetchableNetwork.content.nets.filter(
+                (subNetworkName) =>
+                  !currentNetworkIds.includes(
+                    `${fetchableNetwork.networkName}_${subNetworkName}}`
+                  )
+              )
+            showPopup()
           }
-          if(content.nets.length>1){
-            let flag: boolean
-            flag = true;
-            multipleNetworks = content.nets
-            for(let key in multipleNetworks ){
-              if ($networksList.find((network) => network.metadata.id === `${networkName}_${multipleNetworks[key]}`) !==
-                  undefined) {
-                    existMultipleNetworks.push(true)
-                }
-                else{
-                  existMultipleNetworks.push(false)
-                  flag = false
-                }
-            }
-            if(flag == true)
-            {
-              state = FetchableAccordionState.NETWORK_EXISTS
-            }
-          }
-          console.log(content.description)
+          console.log(fetchableNetwork.content)
         })
         .catch((error) => {
           console.log(error)
           state = FetchableAccordionState.FETCH_ERROR
         })
-    }
-    else
-    {
-      state = FetchableAccordionState.FETCHED
-    }
+    } else state = FetchableAccordionState.FETCHED // This network has alraedy been fetched and is stored in content
   }
-  function checkForSubnetwork(){
-    if(multipleNetworks === undefined)
-    {
-      subNetworkName =networkName;
-      uploadNetwork()
-    }
-    else if(multipleNetworks.length>1)
-    {
-      state = FetchableAccordionState.SHOW_MULTIPLE_NETWORK
-    }
-    else
-    {
-      subNetworkName =networkName;
-      uploadNetwork()
-    }
-  }
-  async function uploadNetwork(){
-    
+
+  async function uploadNetwork() {
     state = FetchableAccordionState.UPLOADING
-    console.log(`https://us-central1-graphlearningworkbench.cloudfunctions.net/downloadNetworkFile?networkName=${networkName}&netName=${subNetworkName}`)
-    fetch(
-      `https://us-central1-graphlearningworkbench.cloudfunctions.net/downloadNetworkFile?networkName=${networkName}&netName=${subNetworkName}`
-    )
+    progressBarData.text = "Downloading network from source..."
+    fetch(fetchableNetwork.getDownloadEndpoint())
       .then((response) => response.blob())
       .then((blob) => {
-        return JSZip.loadAsync(blob)
+        progressBarData.text = "Network downloaded. Parsing the network..."
+        return JSZip().loadAsync(blob)
       })
       .then((zip) => {
         let edgeFile
         let nodeFile
-        edgeFile = zip.files["edges.csv"]
-        nodeFile = zip.files["nodes.csv"]
-        // edgeFile = fs.readFileSync(edgeFile, 'utf8')
+        zip.generateAsync({ type: "blob" }).then((content) => { // // blob -> nodebuffer, see: https://stackoverflow.com/a/56585051
+          zip.forEach((relativePath, zipEntry) => {
+            if (zipEntry.name.includes("edges")) edgeFile = zipEntry
+            if (zipEntry.name.includes("nodes")) nodeFile = zipEntry
+          })
+            progressBarData.text = "Uploading network to storage..."
+            const metadata = new Metadata(
+              fetchableNetwork.getNetworkName(),
+              fetchableNetwork.getNetworkName(),
+              fetchableNetwork.content.description,
+              $paletteColors[Math.floor(Math.random() * $paletteColors.length)]
+            )
+            uploadNetworkToStorage(metadata, blobToFile(nodeFile, "nodes.csv"), blobToFile(nodeFile, "edges.csv"))
+              .then(() => {
+                progressBarData.text = "Network uploaded to storage. Parsing the network..."
+                getNetworkFromStorage(metadata).then((network) => {
+                  $networksList = [...$networksList, network]
+                  state = FetchableAccordionState.UPLOADED
+                }).catch((error) => {
+                  console.log(error)
+                  state = FetchableAccordionState.UPLOAD_ERROR
+                })
+              })
+              .catch((error) => {
+                state = FetchableAccordionState.UPLOAD_ERROR
+              })
+          })
 
-        Promise.all([
-          parseNetwork(edgeFile),
-          parseNetwork(nodeFile)
-          ])
-        .then(([parsedEdge, parsedNode]) => {
-        let nodeData = parsedNode as ParseResult
-        let edgeData = parsedEdge as ParseResult
-        console.log(nodeData.data)
-        return Promise.all([edgeData, nodeData])
       })
-      .then((alltext) => {
-        let nodesString = alltext[1]
-        let edgesString = alltext[0]
-        // let nodesString = removeCSVColumns(alltext[1].replace("# ", ""), [
-        //   " name",
-        //   " _pos",
-        // ]).replace(", ",",").replace("label","name")
-        // let edgesString = alltext[0].replace("# ", "")
-        console.log(nodesString.async("text"))
-        let network = new Network(
-          new Metadata(
-            networkName,
-            networkName,
-            content.description,
-            "",
-          ),
-          <Node[]>(
-            JSON.parse(nodesString)
-          ),
-          <Link[]>(
-            JSON.parse(edgesString)
-          )
-        )
-        const files = network.toFiles()
-        uploadNetworkToStorage(network.metadata, files.nodes, files.links).then(() => {
-          state = FetchableAccordionState.UPLOADED
-        }).catch((error) => {
-          state = FetchableAccordionState.UPLOAD_ERROR
-        })
-  })
-})
-}
-
+  }
 </script>
 
 <AccordionItem
   on:click={(e) => {
     onAccordionClick(e)
   }}
-  bind:title={networkName}
+  bind:title={accordionTitle}
 >
   {#if state === FetchableAccordionState.ACCORDION_CLOSED}
     closed
-  {:else if state === FetchableAccordionState.FETCHING}
+  {:else if state === FetchableAccordionState.FETCHING || state === FetchableAccordionState.UPLOADING}
     <div class="progress_bar">
-      <ProgressBar helperText="Fetching network..." />
-    </div>
-  {:else if state === FetchableAccordionState.UPLOADING}
-    <div class="progress_bar">
-      <ProgressBar helperText="Uploading network to your list of networks..." />
+      <ProgressBar helperText={progressBarData.text} />
     </div>
   {:else if state === FetchableAccordionState.FETCH_ERROR}
     Error fetching the network from the source.
@@ -209,30 +151,30 @@
   {:else if state === FetchableAccordionState.NETWORK_EXISTS}
     <p>
       This network <i>probably</i> exists in your list of networks, given that
-      you have a network with name {networkName}. If you think that your network
-      is different from this one you are trying to download, please delete the
-      old one first.
+      you have a network with name {fetchableNetwork.getNetworkName()}. If you
+      think that your network is different from this one you are trying to
+      download, please delete the old one first.
     </p>
   {:else if state === FetchableAccordionState.FETCHED || state === FetchableAccordionState.UPLOADED || state == FetchableAccordionState.HIDE_MULTIPLE_NETWORK}
     <div class="content">
       <b>Title:</b>
-      {content.title} <br />
+      {fetchableNetwork.content.title} <br />
       <b>Description:</b>
-      {content.description} <br />
+      {fetchableNetwork.content.description} <br />
       <b>Nodes:</b>
-      {content.analyses.num_nodes} <br />
+      {fetchableNetwork.content.analyses.num_nodes} <br />
       <b>Edges:</b>
-      {content.analyses.num_edges} <br />
+      {fetchableNetwork.content.analyses.num_edges} <br />
       <b>Is directed:</b>
-      {content.analyses.is_directed} <br />
+      {fetchableNetwork.content.analyses.is_directed} <br />
       <b>Average Degree:</b>
-      {content.analyses.average_degree} <br />
+      {fetchableNetwork.content.analyses.average_degree} <br />
     </div>
-    {#if state === FetchableAccordionState.FETCHED|| state == FetchableAccordionState.HIDE_MULTIPLE_NETWORK}
+    {#if state === FetchableAccordionState.FETCHED || state == FetchableAccordionState.HIDE_MULTIPLE_NETWORK}
       <div class="import_button">
         <Button
           on:click={() => {
-            checkForSubnetwork()
+            uploadNetwork()
           }}
           size="small"
           on:click>Import Network</Button
@@ -241,12 +183,14 @@
     {:else if state === FetchableAccordionState.UPLOADED}
       <p>Upload complete</p>
     {/if}
-    
   {/if}
-  
 </AccordionItem>
 {#if state === FetchableAccordionState.SHOW_MULTIPLE_NETWORK}
-    <MultipleNetworkPopup {multipleNetworks} {existMultipleNetworks} on:submit={handlePopupSubmit} on:close={hidePopup}/>
+  <MultipleNetworkPopup
+    subNetworks={fetchableNetwork.content.nets}
+    on:submit={handlePopupSubmit}
+    on:close={hidePopup}
+  />
 {/if}
 
 <style lang="scss">
