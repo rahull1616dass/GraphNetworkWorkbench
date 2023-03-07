@@ -1,6 +1,7 @@
 import asyncio
 
 from celery import chain
+from sklearn.preprocessing import LabelEncoder
 
 from task_manager.tasks import (
     convert_for_pred_task,
@@ -27,6 +28,10 @@ async def link_prediction_workflow(request: MLRequest):
     return await run_workflow(pipe)
 
 async def node_classification_workflow(request: ClassificationRequest):
+    label_encoder: LabelEncoder = LabelEncoder()
     params: MLParams = ClassificationParams(**request.dict(exclude={"nodes_file_url", "edges_file_url"}))
-    pipe = chain(download_task.s(request), convert_for_class_task.s(params), node_classification_task.s(params))
+    pipe = chain(
+        download_task.s(request),
+        convert_for_class_task.s(params, label_encoder),
+        node_classification_task.s(params, label_encoder))
     return await run_workflow(pipe)

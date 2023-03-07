@@ -1,17 +1,12 @@
 from typing import List
 from pydantic import BaseModel, AnyHttpUrl
 
-from humps import camelize
-
-
-def to_camel(snake_case: str):
-    return camelize(snake_case)
+from stringcase import camelcase
 
 
 class CamelModel(BaseModel):
     class Config:
-        alias_generator = to_camel
-        allow_population_by_field = True
+        alias_generator = camelcase
 
 
 class MLRequest(CamelModel):
