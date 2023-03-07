@@ -17,6 +17,8 @@ export const fetchedProfilePicture: Writable<File> = writable()
 export const selectedModelType: Writable<MLModelType> = writable(undefined)
 export const selectedTaskType: Writable<TaskType> = writable(undefined)
 
+export const maxNumberOfNodesForPlot: Readable<number> = writable(100)
+
 // If there is a network to talk about at all in the list, then
 // we can set the selected network index to 0
 networksList.subscribe((newNetworksList) => {
