@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     rabbitmq_user: str = "guest"
     rabbitmq_password: str = "guest"
     mlflow_uri: str = "./mlflow"
+    chatgpt_api_key: str
+    expert_model: str = "text-davinci-002"
 
     class Config:
         env_file = ".env"
