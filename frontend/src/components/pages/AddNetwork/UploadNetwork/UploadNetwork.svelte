@@ -115,7 +115,7 @@
           checkForExtraField(newNetwork.links, UploadedFileType.EDGE_FILE);
           break;
       }
-    });
+    })
   }
 
   function checkForExtraField(

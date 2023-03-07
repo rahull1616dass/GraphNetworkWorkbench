@@ -330,6 +330,11 @@ export async function getNetworkFromStorage(
       })
   })
 }
+
+function fixNodeFields(data: Node) {
+  console.log(data)
+}
+
 export async function deleteNetwork(networkId: string): Promise<void> {
   return new Promise((resolve, reject) => {
     deleteDoc(doc(db, getNetworkPath(networkId))).then(() => {

@@ -49,30 +49,6 @@
     createVegaEmbed(VisSpec);
   }
 
-  function createNewVega() {
-    const edges = [
-      { source: "A", target: "B", weight: 1 },
-      { source: "B", target: "C", weight: 2 },
-      { source: "C", target: "D", weight: 3 },
-      { source: "D", target: "E", weight: 4 },
-      { source: "E", target: "F", weight: 5 },
-    ];
-    // Create a new Vega view and initialize it with the edge data.
-    const view = {
-      // Use the directed-edge mark type to draw the edges.
-      mark: "directed-edge",
-
-      // Map the edge weight attribute to the thickness of the edge line.
-      encoding: {
-        thickness: { field: "weight" },
-      },
-
-      // Use the edge data for the visual marks.
-      data: { values: edges },
-    };
-    createVegaEmbed(view);
-  }
-
   function createVegaEmbed(embeddedNetwork: any) {
     vegaEmbed("#viz", embeddedNetwork, { actions: false })
       .then((result) => {

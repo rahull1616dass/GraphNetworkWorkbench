@@ -107,24 +107,25 @@
         return JSZip().loadAsync(blob)
       })
       .then(async (zip) => {
-        let edgeBlob = zip.files['edges.csv']
-        let nodeBlob = zip.files['nodes.csv']
-        progressBarData.text = "Uploading network to storage. This may take some time."
-        const metadata = new Metadata(
-          fetchableNetwork.getNetworkName(),
-          fetchableNetwork.getNetworkName(),
-          fetchableNetwork.content.description,
-          $paletteColors[Math.floor(Math.random() * $paletteColors.length)]
-        )
+        progressBarData.text = "Cleaning the parsed fields and uploading the network. This may take some time."
+        let nodeFile: File = await JSZipObjectToFile(zip.files['nodes.csv'])
+        let edgeFile: File = await JSZipObjectToFile(zip.files['edges.csv'])
+        /*
+        At this point, one can directly upload these files to the storage. However,
+        we would like to clean the parsed fields before uploading the network to the storage.
+        As such the following parsing is also necessary.
+        */
+        let network: Network = await filesToCleanedNetwork(nodeFile, edgeFile)
+        const files = network.toFiles()
         uploadNetworkToStorage(
-          metadata,
-          await JSZipObjectToFile(zip.files['nodes.csv']),
-          await JSZipObjectToFile(zip.files['edges.csv']),
+          network.metadata,
+          files.nodes,
+          files.links
         )
           .then(() => {
             progressBarData.text =
               "Network uploaded to storage. Parsing the network..."
-            getNetworkFromStorage(metadata)
+            getNetworkFromStorage(network.metadata)
               .then((network) => {
                 $networksList = [...$networksList, network]
                 state = FetchableAccordionState.UPLOADED
@@ -135,6 +136,7 @@
               })
           })
           .catch((error) => {
+            console.log(error)
             state = FetchableAccordionState.UPLOAD_ERROR
           })
       }).catch((error) => {
@@ -142,6 +144,28 @@
         state = FetchableAccordionState.UPLOAD_ERROR
       })
   }
+
+  async function filesToCleanedNetwork(nodeFile: File, edgeFile: File): Promise<Network>{
+    return new Promise((resolve, reject) => {
+    let network: Network = new Network(new Metadata(
+          fetchableNetwork.getNetworkName(),
+          fetchableNetwork.getNetworkName(),
+          fetchableNetwork.content.description,
+          $paletteColors[Math.floor(Math.random() * $paletteColors.length)]
+        ))
+    parseNetwork(nodeFile).then(parsedNodes =>{
+      parseNetwork(edgeFile).then(parsedEdges => {
+        network.nodes = JSON.parse(JSON.stringify(parsedNodes.data))
+        network.links = JSON.parse(JSON.stringify(parsedEdges.data))
+        resolve(network)
+      }).catch(error => {
+        reject(error)
+      })
+    }).catch(error => {
+      reject(error)
+    })
+  })
+}
 </script>
 
 <AccordionItem

@@ -84,18 +84,26 @@ export function removeCSVColumns(csvData, columnsToRemove) {
   }).map(row => row.join(",")).join("\n");
 }
 
-//Declare an async function that parses a CSV file and returns a promise
+const cleanFieldName = (fieldName: string) => {
+  return fieldName.replace(/^[\s#_]+|[\s]+/g, '');
+}
+
 async function parseCSV(file: File): Promise<ParseResult> {
-  console.log("my name is " + file.name)
-  // Parse the CSV file using PapaParse and return a promise
   return await new Promise((resolve, reject) => {
-    console.log("my name is in promise" + file.name)
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       dynamicTyping: true,
+      transformHeader: (header) => {
+        return cleanFieldName(header)
+      },
       complete: (results) => {
-        // Log the results of PapaParse
+        if (!results.meta.fields.includes("index")) {
+          results.data.forEach((row, index) => {
+            row["index"] = index.toString()
+          })
+          results.meta.fields.push("index")
+        }
         console.log(results)
         resolve(results)
       },
@@ -105,7 +113,6 @@ async function parseCSV(file: File): Promise<ParseResult> {
     })
   })
 }
-
 
 export function parseNetzschleuderFile(blob: Blob, uploadedFileType: UploadedFileType): Promise<File> {
   return new Promise((resolve, reject) => {
@@ -132,6 +139,7 @@ export function JSZipObjectToFile(zipObject: JSZip.JSZipObject): Promise<File> {
     })
   })
 }
+
 
 export function blobToFile(theBlob: Blob, fileName: string, type: string = undefined): File {
   return new File([theBlob as any], fileName, {
