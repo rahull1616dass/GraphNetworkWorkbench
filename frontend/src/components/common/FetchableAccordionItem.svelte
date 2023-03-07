@@ -11,19 +11,32 @@
   import { FetchableAccordionState } from "../../definitions/fetchableAccordionState"
   import { networksList, paletteColors } from "../../stores"
   import JSZip from "jszip"
-  import { removeCSVColumns, parseNetwork, blobToFile } from "../../util/networkParserUtil"
+  import {
+    removeCSVColumns,
+    parseNetwork,
+    blobToFile,
+    parseNetzschleuderFile,
+    JSZipObjectToFile,
+  } from "../../util/networkParserUtil"
   import { Node, Link, Metadata, Network } from "../../definitions/network"
-  import { uploadNetworkToStorage, getNetworkFromStorage } from "../../api/firebase"
+  import {
+    uploadNetworkToStorage,
+    getNetworkFromStorage,
+  } from "../../api/firebase"
   import MultipleNetworkPopup from "./MultipleNetworkPopup.svelte"
   import type ParseResult from "papaparse"
   import { FetchableNetwork } from "../../definitions/fetchableNetwork"
+  import { UploadedFileType } from "../../definitions/uploadedFileType"
   // import fs from "fs"
 
   export let accordionTitle: string = undefined
   let fetchableNetwork: FetchableNetwork = new FetchableNetwork()
   $: fetchableNetwork.networkName = accordionTitle
   let state: FetchableAccordionState = FetchableAccordionState.ACCORDION_CLOSED
-  let progressBarData: ProgressBarData = new ProgressBarData(true, "Fetching network details...")
+  let progressBarData: ProgressBarData = new ProgressBarData(
+    true,
+    "Fetching network details..."
+  )
   const zip = new JSZip()
 
   function showPopup() {
@@ -97,37 +110,37 @@
         progressBarData.text = "Network downloaded. Parsing the network..."
         return JSZip().loadAsync(blob)
       })
-      .then((zip) => {
-        let edgeFile
-        let nodeFile
-        zip.generateAsync({ type: "blob" }).then((content) => { // // blob -> nodebuffer, see: https://stackoverflow.com/a/56585051
-          zip.forEach((relativePath, zipEntry) => {
-            if (zipEntry.name.includes("edges")) edgeFile = zipEntry
-            if (zipEntry.name.includes("nodes")) nodeFile = zipEntry
-          })
-            progressBarData.text = "Uploading network to storage..."
-            const metadata = new Metadata(
-              fetchableNetwork.getNetworkName(),
-              fetchableNetwork.getNetworkName(),
-              fetchableNetwork.content.description,
-              $paletteColors[Math.floor(Math.random() * $paletteColors.length)]
-            )
-            uploadNetworkToStorage(metadata, blobToFile(nodeFile, "nodes.csv"), blobToFile(nodeFile, "edges.csv"))
-              .then(() => {
-                progressBarData.text = "Network uploaded to storage. Parsing the network..."
-                getNetworkFromStorage(metadata).then((network) => {
-                  $networksList = [...$networksList, network]
-                  state = FetchableAccordionState.UPLOADED
-                }).catch((error) => {
-                  console.log(error)
-                  state = FetchableAccordionState.UPLOAD_ERROR
-                })
+      .then(async (zip) => {
+        let edgeBlob = zip.files['edges.csv']
+        let nodeBlob = zip.files['nodes.csv']
+        progressBarData.text = "Uploading network to storage..."
+        const metadata = new Metadata(
+          fetchableNetwork.getNetworkName(),
+          fetchableNetwork.getNetworkName(),
+          fetchableNetwork.content.description,
+          $paletteColors[Math.floor(Math.random() * $paletteColors.length)]
+        )
+        uploadNetworkToStorage(
+          metadata,
+          await JSZipObjectToFile(zip.files['nodes.csv']),
+          await JSZipObjectToFile(zip.files['edges.csv']),
+        )
+          .then(() => {
+            progressBarData.text =
+              "Network uploaded to storage. Parsing the network..."
+            getNetworkFromStorage(metadata)
+              .then((network) => {
+                $networksList = [...$networksList, network]
+                state = FetchableAccordionState.UPLOADED
               })
               .catch((error) => {
+                console.log(error)
                 state = FetchableAccordionState.UPLOAD_ERROR
               })
           })
-
+          .catch((error) => {
+            state = FetchableAccordionState.UPLOAD_ERROR
+          })
       })
   }
 </script>

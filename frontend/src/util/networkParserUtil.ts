@@ -2,6 +2,7 @@ import { FileExtension } from "../definitions/fileExtension"
 import Papa from "papaparse"
 import type ParseResult from "papaparse"
 import { UploadedFileType } from "../definitions/uploadedFileType"
+import type JSZip from "jszip"
 
 export async function parseNetwork(file: File): Promise<ParseResult> {
   let fileExtension: string = file.name.split(".").pop()
@@ -105,10 +106,37 @@ async function parseCSV(file: File): Promise<ParseResult> {
   })
 }
 
-export function blobToFile(theBlob: Blob, fileName: string): File {
+
+export function parseNetzschleuderFile(blob: Blob, uploadedFileType: UploadedFileType): Promise<File> {
+  return new Promise((resolve, reject) => {
+    Papa.parse(blob, {
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: true,
+      complete: (results) => {
+        // Log the results of PapaParse
+        console.log(results)
+        resolve(results)
+      },
+      error: (error) => {
+        reject(error)
+      },
+    })
+  })
+}
+
+export function JSZipObjectToFile(zipObject: JSZip.JSZipObject): Promise<File> {
+  return new Promise((resolve, reject) => {
+    zipObject.async("blob").then((blob) => {
+      resolve(blobToFile(blob, zipObject.name, "text/csv;charset=utf-8;"))
+    })
+  })
+}
+
+export function blobToFile(theBlob: Blob, fileName: string, type: string = undefined): File {
   return new File([theBlob as any], fileName, {
     lastModified: new Date().getTime(),
-    type: theBlob.type,
+    type: type === undefined ? theBlob.type: type,
   })
 }
 
