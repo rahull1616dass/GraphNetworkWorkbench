@@ -26,7 +26,7 @@ spec:
         env:
           - name: MLFLOW_TRACKING_URI
             value: "/mlruns"
-        command: ["mlflow", "server", "--backend-store-uri", "/mlruns", "--default-artifact-root", "/mlruns", "--host", "0.0.0.0", "--port", "5000", "--workers", "4"]
+        command: ["mlflow", "server", "--backend-store-uri", "/mlflow", "--default-artifact-root", "/mlflow", "--host", "0.0.0.0", "--port", "5000", "--workers", "4"]
         ports:
         - name: http
           containerPort: 5000
