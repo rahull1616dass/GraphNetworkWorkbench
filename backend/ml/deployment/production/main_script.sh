@@ -11,5 +11,6 @@ ssh vingilot -t "
   EXPERT_MODEL=${EXPERT_MODEL}
   ' > /home/stud/tarasov/xtai_lab3/application/.env;
   mkdir -p /home/stud/tarasov/xtai_lab3/redis_data;
+  mkdir -p /home/stud/tarasov/xtai_lab3/mlflow;
   kubectl -n ${VINGILOT_USER} create -f /home/stud/tarasov/xtai_lab3/deployment/kubernates/ -R;
 "

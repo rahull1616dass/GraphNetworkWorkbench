@@ -38,10 +38,14 @@ spec:
             value: "guest"
           - name: RABBITMQ_PASSWORD
             value: "guest"
-        command: ["celery", "-A", "task_manager.tasks", "worker"]
+          - name: MLFLOW_URI
+            value: "/mlflow"
+        command: ["celery", "-A", "task_manager.tasks", "worker", "--concurrency", "4"]
         volumeMounts:
           - mountPath: /workspace
             name: project-code-for-celery
+          - mountPath: /mlflow
+            name: celery-mlflow-volume
       priorityClassName: "research-high"
       imagePullSecrets:
       - name: lsx-registry
@@ -53,5 +57,13 @@ spec:
               - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
             user: studtarasov
             path: "/home/stud/tarasov/xtai_lab3/application"
+            secretRef:
+              name: ceph-secret
+        - name: celery-mlflow-volume
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studtarasov
+            path: "/home/stud/tarasov/xtai_lab3/mlflow"
             secretRef:
               name: ceph-secret
