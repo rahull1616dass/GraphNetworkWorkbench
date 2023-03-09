@@ -1,6 +1,5 @@
 import * as functions from "firebase-functions";
-
-
+//import {inspect} from 'util'
 /*
  * import fetch from "node-fetch"
  * See: https://stackoverflow.com/a/58734908/11330757
@@ -11,14 +10,12 @@ import * as functions from "firebase-functions";
  * But Firebase Cloud Function only supports up to v16 -.-
  * UPDATE: Using FormData is not necessary anymore, since the ML service can now handle the file URLs directly.
  */
+import { AxiosError, AxiosResponse } from "axios"
 import axios from "axios"
 import * as admin from "firebase-admin"
 import type { QueryDocumentSnapshot } from "firebase-functions/v1/firestore"
 import { GetSignedUrlResponse, GetSignedUrlConfig } from "@google-cloud/storage"
 const cors = require("cors")({ origin: true });
-
-
-
 
 admin.initializeApp()
 
@@ -26,7 +23,6 @@ const NETWORK_FILE_TYPE = {
     NODES: "nodes",
     EDGES: "edges",
 }
-
 
 const DB = {
     Users: "Users",
@@ -120,45 +116,44 @@ exports.onTaskCreated = functions.firestore
             return
         }
         console.time("ML Service call")
-        try {
-            const networkFileUrls = await getNetworkDownloadUrls(
-                context.params.userId,
-                context.params.networkId
-            )
-            let requestData = {
-                nodesFileUrl: networkFileUrls.get(NETWORK_FILE_TYPE.NODES),
-                edgesFileUrl: networkFileUrls.get(NETWORK_FILE_TYPE.EDGES),
-            }
-            requestData = Object.assign(requestData, snap.data())
-            const taskUrl = `${ML_SERVICE_URL}/${snap.data().taskType}`
-            console.log(`ML Service Request Data: ${JSON.stringify(requestData)}`)
-            console.log(`ML Service URL: ${taskUrl}`)
-            const taskResult = await axios({
-                method: "POST",
-                url: taskUrl,
-                data: requestData,
-                headers: { "Content-Type": "application/json", "Accept": "application/json" }
-            }
-            )
-            console.timeEnd("ML Service call")
-            console.log(`ML Service Response Data: ${taskResult}`)
-            console.log(`ML Service Response text: ${taskResult.data}`)
-
-            if (Number(taskResult.headers["code"]) !== RESPONSE_CODE.SUCCESS) {
-                console.log("ML Service error")
-                // @ts-ignore
-                taskResult.data.state = ExperimentState[ExperimentState.ERROR]
-                writeToTaskDocument(taskResult.data, context)
-            } else {
-                // @ts-ignore
-                taskResult.data.state = ExperimentState[ExperimentState.RESULT]
-                writeToTaskDocument(taskResult.data, context)
-            }
-        } catch (err: any) {
-            console.log(`Error in the ML Service call: ${err}`)
-            console.log(`Error response data: ${JSON.stringify(err.response.data)}`)
+        const networkFileUrls = await getNetworkDownloadUrls(
+            context.params.userId,
+            context.params.networkId
+        )
+        let requestData = {
+            nodesFileUrl: networkFileUrls.get(NETWORK_FILE_TYPE.NODES),
+            edgesFileUrl: networkFileUrls.get(NETWORK_FILE_TYPE.EDGES),
         }
+        requestData = Object.assign(requestData, snap.data())
+        const taskUrl = `${ML_SERVICE_URL}/${snap.data().taskType}`
+        console.log(`ML Service Request Data: ${JSON.stringify(requestData)}`)
+        console.log(`ML Service URL: ${taskUrl}`)
+        axios({
+            method: "POST",
+            url: taskUrl,
+            data: requestData,
+            headers: { "Content-Type": "application/json", "Accept": "application/json" }
+        }).then((taskResult: AxiosResponse) => {
+            console.timeEnd("ML Service call")
+            // @ts-ignore
+            console.log("Successful result")
+            //console.log(inspect(taskResult, { showHidden: false, depth: null }));
+            taskResult.data.state = "RESULT" //ExperimentState[ExperimentState.RESULT]
+            writeToTaskDocument(taskResult.data, context)
+
+        }).catch((error: AxiosError) => {
+            console.log("Error in ML Service call")
+            console.error(error)
+            writeToTaskDocument({
+                // @ts-ignore
+                code: error.response.status,
+                state: "ERROR", //ExperimentState[ExperimentState.ERROR]
+                message: `Error in ML Service call: ${error.message}`
+            }, context)
+        })
     })
+
+
 
 function writeToTaskDocument(data: object, context: functions.EventContext) {
     admin.firestore().collection(DB.Users)
@@ -186,6 +181,7 @@ exports.getNetworks = functions.https.onRequest((req, res) => {
     })
 })
 
+
 exports.getNetworkDescription = functions.https.onRequest((req, res) => {
     cors(req, res, () => {
         const { networkName } = req.query
@@ -200,6 +196,8 @@ exports.getNetworkDescription = functions.https.onRequest((req, res) => {
             })
     })
 })
+
+
 
 exports.downloadNetworkFile = functions.https.onRequest((req, res) => {
     cors(req, res, () => {
