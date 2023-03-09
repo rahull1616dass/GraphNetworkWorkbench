@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { ExperimentState } from "../../../definitions/experimentState"
-  import { ProgressBar } from "carbon-components-svelte"
-  import { ProgressBarData } from "../../../definitions/progressBarData"
-  import { Task } from "../../../definitions/task"
-  import { TaskType } from "../../../definitions/taskType"
-  import CustomButton from "../../common/CustomButton.svelte"
-  import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte"
-  import DropdownSelector from "../../common/DropdownSelector.svelte"
+  import { ExperimentState } from "../../../definitions/experimentState";
+  import { ProgressBar } from "carbon-components-svelte";
+  import { ProgressBarData } from "../../../definitions/progressBarData";
+  import { Task } from "../../../definitions/task";
+  import { TaskType } from "../../../definitions/taskType";
+  import CustomButton from "../../common/CustomButton.svelte";
+  import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte";
+  import DropdownSelector from "../../common/DropdownSelector.svelte";
   import {
     setExperimentTask,
     getExperimentTasks,
     getCurrentTimestamp,
     listenForExperimentResult,
-  } from "../../../api/firebase"
-  import { DropdownSelectorType } from "../../../definitions/dropdownSelectorType"
-  import type { Network } from "../../../definitions/network"
+  } from "../../../api/firebase";
+  import { DropdownSelectorType } from "../../../definitions/dropdownSelectorType";
+  import type { Network } from "../../../definitions/network";
   import {
     networksList,
     selectedNetworkIndex,
@@ -28,17 +28,17 @@
   let experimentState: ExperimentState = ExperimentState.CREATE;
 
   // These values should be set by UI Elements later on
-  let xColumns: string[] = []
-  let trainPercentage: number = 0.8
-  let epochs: number = 100
-  let learningRate: number = 0.01
-  let seed: number = $defaultSeed
-  let hiddenLayers = [{ first: true, checked: false, size: 10 }]
-  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
+  let xColumns: string[] = [];
+  let trainPercentage: number = 0.8;
+  let epochs: number = 100;
+  let learningRate: number = 0.01;
+  let seed: number = $defaultSeed;
+  let hiddenLayers = [{ first: true, checked: false, size: 10 }];
+  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
 
-  let selectedTask = undefined
-  let selectedModel = undefined
-  let selectedYColumn = undefined
+  let selectedTask = undefined;
+  let selectedModel = undefined;
+  let selectedYColumn = undefined;
 
   let isCustomizeModalOpen: boolean = false;
   let currentNetwork: Network = undefined;
@@ -58,7 +58,7 @@
   );
 
   // remove the is_train column from the nodeColumns array
-  let nodeColumns = Object.keys($networksList[$selectedNetworkIndex].nodes[0])
+  let nodeColumns = Object.keys($networksList[$selectedNetworkIndex].nodes[0]);
   nodeColumns = nodeColumns.filter((nodeColumns) => nodeColumns !== "is_train");
 
   let selectedNodeColumns = [];
@@ -148,15 +148,15 @@
               taskDocId
             )
               .then((resultTask: Task) => {
-                progressBarData.isPresent = false
-                console.log("Result", resultTask)
+                progressBarData.isPresent = false;
+                console.log("Result", resultTask);
                 // @ts-ignore
-                experimentState = ExperimentState[resultTask.state]
+                experimentState = ExperimentState[resultTask.state];
               })
               .catch((error) => {
-                experimentState = ExperimentState.ERROR
-                console.log(`Error listening for experiment result: ${error}`)
-              })
+                experimentState = ExperimentState.ERROR;
+                console.log(`Error listening for experiment result: ${error}`);
+              });
           })
           .catch((error) => {
             experimentState = ExperimentState.ERROR;
@@ -183,7 +183,6 @@
           <DropdownSelector
             placeholder={"Select a Network"}
             type={DropdownSelectorType.NETWORK}
-            
           />
 
           <DropdownSelector
@@ -197,7 +196,7 @@
             type={DropdownSelectorType.TASK}
             on:taskChange={handleTaskChange}
           />
-          
+
           <hr />
 
           <div>Configure Columns:</div>
@@ -207,24 +206,19 @@
             type={DropdownSelectorType.Y_COLUMN}
             on:columnChange={handleColumnChange}
           />
-        
-            <div>
 
-           
-          {#each nodeColumns as column}
-          <label>
-            <input
-              type="checkbox"
-              value={column}
-              on:change={updateSelectedNodeColumns}
-            />
-            {column}
-          </label>
-        {/each}
-
-
-      </div>
-
+          <div>
+            {#each nodeColumns as column}
+              <label>
+                <input
+                  type="checkbox"
+                  value={column}
+                  on:change={updateSelectedNodeColumns}
+                />
+                {column}
+              </label>
+            {/each}
+          </div>
 
           <hr />
 
