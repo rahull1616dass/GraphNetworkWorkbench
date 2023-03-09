@@ -14,6 +14,8 @@
     MLModelType.GCN,
     MLModelType.DeepWalk,
     MLModelType.GIN,
+    MLModelType.GCNCONV,
+    MLModelType.SAGECONV
   ];
   let taskTypes: TaskType[] = [
     TaskType.NODE_CLASSIFICATION,
