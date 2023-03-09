@@ -53,7 +53,7 @@
       bind:value={networkIndex}
       on:change={() => ($selectedNetworkIndex = networkIndex)}
     >
-      <option disabled selected>{placeholder}</option>
+      <!-- <option disabled selected>{placeholder}</option> -->
       {#each $networksList as network, networkIndex}
         <option class="optionDropdown" value={networkIndex}>
           {network.metadata.name} --- Nodes: {network.nodes.length} , Edges: {network

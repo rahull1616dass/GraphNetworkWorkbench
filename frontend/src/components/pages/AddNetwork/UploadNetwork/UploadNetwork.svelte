@@ -220,6 +220,10 @@
       })
       .catch((error) => {
         console.log(`Error uploading network: ${error}`)
+        modalData.messageBody = `Oops... Something went wrong\nError uploading network`
+        modalData.isOpen = true
+        isUploadSuccessful = false
+        progressBarData.isPresent = false
       })
   }
 
@@ -279,7 +283,7 @@
 
     <div class="grid">
       <div>
-        <CustomInput id="many" bind:files={nodeFiles}
+        <CustomInput id="nodeFile" bind:files={nodeFiles}
           >Upload Node File</CustomInput
         >
       </div>
@@ -315,7 +319,7 @@
         />
       </div>
       <div>
-        <CustomInput id="many" bind:files={edgeFiles}
+        <CustomInput id="edgeFile" bind:files={edgeFiles}
           >Upload Edge File</CustomInput
         >
       </div>
