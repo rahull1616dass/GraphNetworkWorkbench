@@ -12,7 +12,7 @@
   import { deleteNetwork } from "../../../api/firebase";
   import { ProgressBarData } from "../../../definitions/progressBarData";
   import { ProgressBar } from "carbon-components-svelte";
-  import { fade, slide, scale, fly } from "svelte/transition";
+  import { fly } from "svelte/transition";
 
   $: selectNetwork();
   let tabchange;
@@ -168,7 +168,7 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    flex-wrap: nowrap;
+    //flex-wrap: nowrap;
   }
 
   p {
