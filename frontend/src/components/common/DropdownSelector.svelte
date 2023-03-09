@@ -2,12 +2,13 @@
   import {
     networksList,
     selectedNetworkIndex,
-    selectedModelType,
-    selectedTaskType,
   } from "../../stores"
   import { DropdownSelectorType } from "../../definitions/dropdownSelectorType"
   import { MLModelType } from "../../definitions/mlModelType"
   import { TaskType } from "../../definitions/taskType"
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
 
   export let placeholder: string = "Select one of the following"
   export let type: DropdownSelectorType = undefined
@@ -22,14 +23,31 @@
     TaskType.EDGE_PREDICTION,
   ]
 
-  let nodeColumns: string[] = Object.keys(
-    $networksList[$selectedNetworkIndex].nodes[0]
-  )
+  // remove the is_train column from the nodeColumns array
+  let nodeColumns = Object.keys($networksList[$selectedNetworkIndex].nodes[0])
+  nodeColumns = nodeColumns.filter((nodeColumns) => nodeColumns !== "is_train");
 
   let networkIndex: number = undefined
   let task: TaskType
   let model: MLModelType
   let y_column: string = undefined
+  
+  function handleModelChange(event) {
+    model = event.target.value;
+    dispatch("modelChange", model);
+  }
+
+  function handleTaskChange(event) {
+    task = event.target.value;
+    dispatch("taskChange", task);
+  }
+
+  function handleColumnChange(event) {
+    y_column = event.target.value;
+    dispatch("columnChange", y_column);
+  }
+
+
 </script>
 
 {#if type === DropdownSelectorType.NETWORK}
@@ -53,7 +71,7 @@
     <select
       class="select"
       bind:value={model}
-      on:change={() => ($selectedModelType = model)}
+      on:change={handleModelChange}
     >
     <option disabled selected>{placeholder}</option>
       {#each modelTypes as model}
@@ -68,7 +86,7 @@
     <select
       class="select"
       bind:value={task}
-      on:change={() => ($selectedTaskType = task)}
+      on:change={handleTaskChange}
     >
     <option disabled selected>{placeholder}</option>
       {#each taskTypes as task, _}
@@ -80,7 +98,8 @@
   </div>
 {:else if type === DropdownSelectorType.Y_COLUMN}
   <div>
-    <select class="select" bind:value={y_column}>
+    <select class="select" bind:value={y_column} 
+    on:change={handleColumnChange}>
       <option>{placeholder}</option>
       {#each nodeColumns as column}
         <option class="optionDropdown" value={column}>

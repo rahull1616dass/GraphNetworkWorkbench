@@ -28,7 +28,9 @@ export class Task {
       this.trainPercentage === other.trainPercentage &&
       this.learningRate === other.learningRate &&
       this.hiddenLayerSizes === other.hiddenLayerSizes &&
-      this.seed === other.seed
+      this.seed === other.seed &&
+      this.xColumns === other.xColumns &&
+      this.yColumn === other.yColumn
     );
   }
 }

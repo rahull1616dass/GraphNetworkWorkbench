@@ -5,7 +5,6 @@
   import { Task } from "../../../definitions/task"
   import { TaskType } from "../../../definitions/taskType"
   import CustomButton from "../../common/CustomButton.svelte"
-  import { MenuItem } from "../../../definitions/menuItem"
   import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte"
   import DropdownSelector from "../../common/DropdownSelector.svelte"
   import {
@@ -19,14 +18,9 @@
   import {
     networksList,
     selectedNetworkIndex,
-    selectedModelType,
-    selectedTaskType,
-    selectedMenuItem,
     defaultSeed,
   } from "../../../stores";
-  import { fade, slide, scale, fly } from "svelte/transition";
-  import { UploadedFileType } from "../../../definitions/uploadedFileType";
-  import { toCSVFile } from "../../../util/networkParserUtil";
+  import { fly } from "svelte/transition";
   import { ModalData } from "../../../definitions/modalData";
   import ExperimentResults from "../../common/ExperimentResults.svelte";
   import { delay } from "../../../util/generalUtil";
@@ -41,6 +35,10 @@
   let seed: number = $defaultSeed
   let hiddenLayers = [{ first: true, checked: false, size: 10 }]
   $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
+
+  let selectedTask = undefined
+  let selectedModel = undefined
+  let selectedYColumn = undefined
 
   let isCustomizeModalOpen: boolean = false;
   let currentNetwork: Network = undefined;
@@ -59,11 +57,31 @@
     "Creating experiment..."
   );
 
-  console.log("column types", typeof(DropdownSelectorType.Y_COLUMN))
-  console.log("column names", DropdownSelectorType.Y_COLUMN)
+  // remove the is_train column from the nodeColumns array
+  let nodeColumns = Object.keys($networksList[$selectedNetworkIndex].nodes[0])
+  nodeColumns = nodeColumns.filter((nodeColumns) => nodeColumns !== "is_train");
 
-  function filterColumns(columns: string[]) {
-    return "id"
+  let selectedNodeColumns = [];
+
+  function handleModelChange(event) {
+    selectedModel = event.detail;
+  }
+
+  function handleTaskChange(event) {
+    selectedTask = event.detail;
+  }
+
+  function handleColumnChange(event) {
+    selectedYColumn = event.detail;
+  }
+
+  function updateSelectedNodeColumns(event) {
+    const fruit = event.target.value;
+    if (event.target.checked) {
+      selectedNodeColumns = [...selectedNodeColumns, fruit];
+    } else {
+      selectedNodeColumns = selectedNodeColumns.filter((f) => f !== fruit);
+    }
   }
 
   function randomize() {
@@ -72,8 +90,8 @@
 
   function startNewExperiment() {
     experimentState = ExperimentState.CREATE;
-    $selectedTaskType = undefined;
-    $selectedModelType = undefined;
+    selectedTask = undefined;
+    selectedModel = undefined;
   }
 
   function addHiddenLayer() {
@@ -99,8 +117,8 @@
     await delay(2000); // To simulate task being run. TODO: Remove this later on.
     const taskToBeCreated = new Task(
       undefined, // This will be set by the backend
-      $selectedModelType,
-      $selectedTaskType,
+      selectedModel,
+      selectedTask,
       epochs,
       trainPercentage,
       learningRate,
@@ -108,8 +126,8 @@
       seed,
       getCurrentTimestamp(),
       ExperimentState.PROGRESS,
-      ['name'],
-      'group'
+      selectedNodeColumns,
+      selectedYColumn
     );
 
     await getExperimentTasks($networksList[$selectedNetworkIndex].metadata.id)
@@ -165,26 +183,21 @@
           <DropdownSelector
             placeholder={"Select a Network"}
             type={DropdownSelectorType.NETWORK}
+            
           />
 
           <DropdownSelector
             placeholder={"Select a Model"}
             type={DropdownSelectorType.MLMODEL}
+            on:modelChange={handleModelChange}
           />
 
           <DropdownSelector
             placeholder={"Select a Task"}
             type={DropdownSelectorType.TASK}
+            on:taskChange={handleTaskChange}
           />
-          <!--
-          <DropdownMultiSelector
-            label={"Select X Columns"}
-            items={Object.keys($networksList[$selectedNetworkIndex].nodes[0])}
-            on:onSelectChanged={(e) => (xColumns = e.detail.selectedColumns)}
-          />
-          -->
           
-
           <hr />
 
           <div>Configure Columns:</div>
@@ -192,9 +205,25 @@
           <DropdownSelector
             placeholder={"Select a column to predict"}
             type={DropdownSelectorType.Y_COLUMN}
+            on:columnChange={handleColumnChange}
           />
         
+            <div>
 
+           
+          {#each nodeColumns as column}
+          <label>
+            <input
+              type="checkbox"
+              value={column}
+              on:change={updateSelectedNodeColumns}
+            />
+            {column}
+          </label>
+        {/each}
+
+
+      </div>
 
 
           <hr />
@@ -240,7 +269,7 @@
           <div>
             <li>
               Training Percentage
-              {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+              {#if selectedTask === TaskType.NODE_CLASSIFICATION}
                 <CustomButton
                   type={"secondary"}
                   inverse={false}
@@ -347,8 +376,8 @@
             <CustomButton
               type={"secondary"}
               inverse={false}
-              disabled={$selectedModelType === undefined ||
-                $selectedTaskType === undefined ||
+              disabled={selectedModel === undefined ||
+                selectedTask === undefined ||
                 epochs === 0 ||
                 learningRate === 0.0 ||
                 trainPercentage === 0 ||
