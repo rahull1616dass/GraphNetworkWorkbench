@@ -13,19 +13,22 @@ from core.loggers import timeit
 from core.params import MLParams, ClassificationParams
 
 
+# TODO: If this project will be further developed this parsing file has to be changed: saving graphs in two csv files makes the task of parsing different(directed/undirected, weighted/unweighted graphs) graphs really like reinventing the wheel. It is better to keep supporting .graphml files because networkx exist for both python and JS and can parse it without writing any additional code.
 def get_basic_data(data_files: Dict[str, str], params: MLParams, label_encoder: LabelEncoder = None) -> Data:
     nodes = pd.read_csv(data_files["nodes"])
     edges = pd.read_csv(data_files["edges"])
 
     graph = nx.Graph()
-    graph.add_edges_from(list(edges.itertuples(index=False)))
 
-    list(
-        map(
-            lambda column_name: nx.set_node_attributes(graph, nodes[column_name].to_dict(), column_name),
-            params.x_columns
-        )
-    )
+    if len(edges.columns) == 2:
+        graph.add_edges_from(list(edges.itertuples(index=False)))
+    else:
+        graph.add_weighted_edges_from(list(edges.itertuples(index=False)))
+
+    for every_column in params.x_columns:
+        if pd.api.types.is_string_dtype(nodes[every_column]):
+            nodes[every_column] = LabelEncoder().fit_transform(nodes[every_column].values)
+        nx.set_node_attributes(graph, nodes[every_column].to_dict(), every_column)
 
     os.remove(data_files["nodes"])
     os.remove(data_files["edges"])
