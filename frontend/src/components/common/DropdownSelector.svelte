@@ -21,8 +21,9 @@
   ];
 
   // remove the is_train column from the nodeColumns array
-  let nodeColumns = Object.keys($networksList[$selectedNetworkIndex].nodes[0]);
-  nodeColumns = nodeColumns.filter((nodeColumns) => nodeColumns !== "is_train");
+  $: nodeColumns = Object.keys(
+    $networksList[$selectedNetworkIndex].nodes[0]
+  ).filter((nodeColumns) => nodeColumns !== "is_train");
 
   let networkIndex: number = undefined;
   let task: TaskType;

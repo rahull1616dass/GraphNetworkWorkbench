@@ -58,8 +58,9 @@
   );
 
   // remove the is_train column from the nodeColumns array
-  let nodeColumns = Object.keys($networksList[$selectedNetworkIndex].nodes[0]);
-  nodeColumns = nodeColumns.filter((nodeColumns) => nodeColumns !== "is_train");
+  $: nodeColumns = Object.keys(
+    $networksList[$selectedNetworkIndex].nodes[0]
+  ).filter((nodeColumns) => nodeColumns !== "is_train");
 
   let selectedNodeColumns = [];
 
@@ -76,11 +77,11 @@
   }
 
   function updateSelectedNodeColumns(event) {
-    const fruit = event.target.value;
+    const column = event.target.value;
     if (event.target.checked) {
-      selectedNodeColumns = [...selectedNodeColumns, fruit];
+      selectedNodeColumns = [...selectedNodeColumns, column];
     } else {
-      selectedNodeColumns = selectedNodeColumns.filter((f) => f !== fruit);
+      selectedNodeColumns = selectedNodeColumns.filter((f) => f !== column);
     }
   }
 
