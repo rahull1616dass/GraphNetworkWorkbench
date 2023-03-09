@@ -40,6 +40,8 @@ spec:
             value: "guest"
           - name: MLFLOW_URI
             value: "/mlflow"
+          - name: USERNAME
+            value: 1317
         command: ["celery", "-A", "task_manager.tasks", "worker", "--concurrency", "4"]
         volumeMounts:
           - mountPath: /workspace
