@@ -15,6 +15,8 @@ import axios from "axios"
 import * as admin from "firebase-admin"
 import type { QueryDocumentSnapshot } from "firebase-functions/v1/firestore"
 import { GetSignedUrlResponse, GetSignedUrlConfig } from "@google-cloud/storage"
+import {stringify} from 'flatted'
+
 const cors = require("cors")({ origin: true });
 
 admin.initializeApp()
@@ -128,23 +130,29 @@ exports.onTaskCreated = functions.firestore
         const taskUrl = `${ML_SERVICE_URL}/${snap.data().taskType}`
         console.log(`ML Service Request Data: ${JSON.stringify(requestData)}`)
         console.log(`ML Service URL: ${taskUrl}`)
-        axios({
+
+        // Very important to return the promise by axios, otherwise it takes minutes to update
+        // the task document even after getting a response from the ML service.
+        return axios({
             method: "POST",
             url: taskUrl,
             data: requestData,
             headers: { "Content-Type": "application/json", "Accept": "application/json" }
         }).then((taskResult: AxiosResponse) => {
             console.timeEnd("ML Service call")
-            // @ts-ignore
             console.log("Successful result")
-            //console.log(inspect(taskResult, { showHidden: false, depth: null }));
+            /*
+            Because taskResult may contain circular references, 
+            we need to use flatted to stringify it.
+            */
+            console.log(stringify(taskResult.data))
             taskResult.data.state = "RESULT" //ExperimentState[ExperimentState.RESULT]
-            writeToTaskDocument(taskResult.data, context)
+            return writeToTaskDocument(taskResult.data, context)
 
         }).catch((error: AxiosError) => {
             console.log("Error in ML Service call")
             console.error(error)
-            writeToTaskDocument({
+            return writeToTaskDocument({
                 // @ts-ignore
                 code: error.response.status,
                 state: "ERROR", //ExperimentState[ExperimentState.ERROR]
