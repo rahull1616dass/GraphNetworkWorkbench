@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: redis
+    role: master
+    tier: backend
+  name: redis-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      role: master
+      tier: backend
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: redis
+        role: master
+        tier: backend
+    spec:
+      containers:
+      - image: redis
+        name: redis-master
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+          - mountPath: /data
+            name: redis-data
+      volumes:
+        - name: redis-data
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20
+            user: studtarasov
+            path: "/home/stud/tarasov/xtai_lab3/redis_data"
+            secretRef:
+              name: ceph-secret
+status: {}

@@ -36,6 +36,8 @@ RABBITMQ_PORT=5672
 RABBITMQ_USER=guest
 RABBITMQ_PASSWORD=guest
 MLFLOW_URI="./mlflow"
+CHATGPT_API_KEY="API_key"
+EXPERT_MODEL="model_you_would_like_to_use"
 ```
 
 start task manager workers
