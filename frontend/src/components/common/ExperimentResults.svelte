@@ -1,13 +1,16 @@
-<script>
-  import CardView from "./CardView.svelte";
-  import Embedding from "./Embedding.svelte";
+<script lang="ts">
+  import CardView from "./CardView.svelte"
+  import Embedding from "./Embedding.svelte"
+  import type { Task } from "../../definitions/task"
+
+  export let task: Task = undefined
 </script>
 
 <div class="container">
   <CardView>
     <h4 slot="header">Details</h4>
     <div slot="body">
-      <p>Accuracy:</p>
+      <p>Accuracy:{task.accuracy}</p>
       <p>F1 score:</p>
       <p>Precision:</p>
       <p>Recall:</p>
