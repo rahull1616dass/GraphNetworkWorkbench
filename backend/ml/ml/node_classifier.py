@@ -1,67 +1,91 @@
+from typing import List
+
 import torch
-import numpy as np
+import mlflow
+from tqdm import tqdm
 from torch.optim import Adam
 import torch.nn.functional as F
 from dataclasses import dataclass
 from torch_geometric.data import Data
-from torch_geometric.nn import GCNConv
+import torch_geometric.transforms as T
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
 
-from core.types import MLTask
-from core.logging_helpers import timeit
+from core.loggers import timeit
+from core.params import MLParams
+from ml.helpers import set_up_device
+from core.nets import NodeClassificationNet
 
-
-class SingleLayerGCN(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(SingleLayerGCN, self).__init__()
-        self.conv1 = GCNConv(in_channels, out_channels)
-
-    def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index)
-        return F.log_softmax(x, dim=1)
 
 @dataclass
 class NodeClassifier:
-    data: Data
-    
-    def __post_init__(self): pass
-    
-    def train(self, epochs: int = 100) -> list[float]:
-        self.model = SingleLayerGCN(self.data.x.shape[0], len(np.unique(self.data.y)))
-        optimizer: Adam = Adam(self.model.parameters(), lr=0.01, weight_decay=5e-4)
+    data: Data | None = None
+    device: torch.device | None = None
+    lr: float = 0.01
 
-        self.losses: list[float] = []
-        for _ in range(epochs):
-            self.model.train()
-            optimizer.zero_grad()
-            out = self.model(self.data.x, self.data.edge_index)
-            loss: torch.Tensor = F.nll_loss(out[self.data.train_mask], self.data.y[self.data.train_mask])
-            self.losses.append(loss.item())
-            loss.backward()
-            optimizer.step()
-        return self.losses
+    def __init__(self, features_number: int, device: torch.device, params: MLParams, classes_number: int):
+        self.model = NodeClassificationNet(params.ml_model_type, features_number, params.hidden_layer_sizes, classes_number).to(device)
+        self.optimizer = Adam(params=self.model.parameters(), lr=params.learning_rate, weight_decay=5e-4)
 
-    def predict(self) -> list[int]:
+    def __train_iter(self, data: Data):
+        self.model.train()
+        self.optimizer.zero_grad()
+
+        out = self.model.layers(data.x, data.edge_index)
+
+        loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+
+        loss.backward()
+        self.optimizer.step()
+        return loss.item()
+    
+    def train(self, data: Data, epochs: int = 100):
+
+        losses, val_acc_scores = [], []
+        for every_epoch in tqdm(range(epochs), desc="Node classification progress..."):
+            loss = self.__train_iter(data)
+            mlflow.log_metric("loss", loss, every_epoch)
+            losses.append(loss)
+
+            val_acc_score = self.test(data)
+            mlflow.log_metric("validation accuracy score", val_acc_score, every_epoch)
+            val_acc_scores.append(val_acc_score)
+        return losses, val_acc_scores
+
+    def test(self, data: Data) -> float:
         self.model.eval()
-        _, self.predictions = self.model(self.data.x, self.data.edge_index).max(dim=1)
-        return self.predictions.tolist()
-    
+        out = self.model.layers(data.x, data.edge_index)
+        return accuracy_score(data.y[data.test_mask].cpu().numpy(), torch.argmax(out[data.test_mask], dim=1).unsqueeze(1).cpu().numpy())
 
-    def evaluate(self) -> float:
-        correct = self.predictions[self.data.test_mask].eq(self.data.y[self.data.test_mask]).sum().item()
-        accuracy = correct / self.data.test_mask.sum().item()
-        print('Accuracy: {:.4f}'.format(accuracy))
-        return accuracy
+    def predict(self, data: Data) -> List:
+        self.model.eval()
+        out = self.model.layers(data.x, data.edge_index)
+        predicted_classes = torch.argmax(out[data.test_mask], dim=1)
+        return predicted_classes.detach().cpu().numpy().tolist()
 
 
 @timeit
-def classify_nodes(data: Data, task: MLTask):
-    node_classifier = NodeClassifier(data)
+def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
+    mlflow.set_experiment("Node Classification")
 
-    # Need to set them first before creating the MLResult dataclass
-    # since train,predict,evaluate has to happen in a consecutive manner
-    losses: list[float] = node_classifier.train(task.epochs)
-    predictions: list[int] = node_classifier.predict()
-    accuracy: float = node_classifier.evaluate()
+    with mlflow.start_run():
+        device = set_up_device(params.seed)
+        transforms = T.Compose([
+            T.RandomNodeSplit(split="train_rest", num_test=0.2, num_val=0),
+            T.ToDevice(device)
+        ])
+        data_to_use: Data = transforms(data)
 
-    return losses, predictions, accuracy
+        node_classifier = NodeClassifier(data_to_use.num_features, device, params, len(encoder.classes_))
+        losses, val_acc_scores = node_classifier.train(data_to_use, params.epochs)
+
+        final_accuracy: float = node_classifier.test(data_to_use)
+        mlflow.log_metric("accuracy", final_accuracy)
+
+        predictions: List = encoder.inverse_transform(node_classifier.predict(data_to_use))
+        test_node_indices = torch.unique(data_to_use.edge_index)[data_to_use.test_mask].cpu().numpy().tolist()
+        node_idx_pred_class_pairs = {node_idx: str(pred_class)
+                                     for node_idx, pred_class in zip(test_node_indices, predictions)}
+
+    return losses, val_acc_scores, final_accuracy, node_idx_pred_class_pairs
     

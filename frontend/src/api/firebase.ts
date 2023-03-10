@@ -34,6 +34,7 @@ import {
   authUserStore,
   loginUserStore,
   networksList,
+  fetchedProfilePicture,
   defaultSeed as defaultSeedStore,
 } from "../stores"
 import { get } from "svelte/store"
@@ -51,7 +52,8 @@ export const db = initializeFirestore(app, {
 const enum Database {
   USERS = "Users",
   NETWORKS = "Networks",
-  TASKS = "Tasks",
+  IMAGES = "Images",
+  TASKS = "Tasks"
 }
 
 export function getCurrentTimestamp(): Timestamp {
@@ -112,6 +114,21 @@ export async function registerUser(loginUser: LoginUser): Promise<void> {
       })
   })
 }
+
+function getUserPath(): string {
+  return `Users/${get(authUserStore).uid}`
+}
+
+
+
+function getImageStorageRefs(image: string): any {
+  const storage = getStorage(app)
+  const imagePath = `Users/${get(authUserStore).uid}/Images`
+  return {
+    imageFileRef: ref(storage, `${imagePath}/${image}.png`),
+  }
+}
+
 export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
   return new Promise((resolve, reject) => {
     signInWithEmailAndPassword(
@@ -132,6 +149,23 @@ export async function loginUser(loginUser: LoginUser): Promise<LoginUser> {
 }
 // ---- Authentication ----
 
+export async function UploadProfileImage(imageFile: File): Promise<void> {
+  return new Promise((resolve, reject) => {
+
+    const storagePath = getImageStorageRefs('profile')
+    uploadBytes(storagePath['imageFileRef'], imageFile)
+      .then(() => {
+        console.log(`Uploaded image file to firebase`)
+        resolve()
+      }
+      )
+      .catch((error) => {
+        console.log(`Image upload error: ${error}`)
+        reject()
+      }
+      )
+  })
+}
 // ---- Networks ----
 function getNetworkPath(networkId: string): string {
   if (networkId === undefined)
@@ -221,6 +255,29 @@ async function saveNetworkDocument(networkMetadata: Metadata): Promise<void> {
       })
   })
 }
+
+export async function getProfileImage() {
+
+  const storagePaths = getImageStorageRefs('profile')
+  console.log(storagePaths)
+  getBlob(storagePaths['imageFileRef']).then((image) => {
+    fetchedProfilePicture.set(blobToFile(image, "profileImage.png"))
+  })
+    .catch((error) => {
+      console.log("No file of profilePics")
+    }
+    )
+}
+
+export async function networkExists(networkId: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const networkDoc = doc(db, getNetworkPath(networkId))
+    getDoc(networkDoc)
+      .then((doc) => resolve(doc.exists()))
+      .catch((error) => reject(error))
+  })
+}
+
 export async function getNetworks() {
   const networksQuery = query(collection(db, getNetworkPath(undefined)))
   await getDocs(networksQuery).then((querySnapshot) => {
@@ -233,6 +290,8 @@ export async function getNetworks() {
     })
   })
 }
+
+
 export async function getNetworkFromStorage(
   metadata: Metadata
 ): Promise<Network> {
@@ -244,14 +303,12 @@ export async function getNetworkFromStorage(
         console.log(blob)
         parseNetwork(blobToFile(blob, "nodes.csv"))
           .then((parsedNodes) => {
-            network.nodes = <Node[]>JSON.parse(JSON.stringify(parsedNodes.data))
+            network.nodes = parsedNodes.data
             getBlob(storagePaths.edgesFileRef)
               .then((blob) => {
                 parseNetwork(blobToFile(blob, "edges.csv"))
                   .then((parsedEdges) => {
-                    network.links = <Link[]>(
-                      JSON.parse(JSON.stringify(parsedEdges.data))
-                    )
+                    network.links = parsedEdges.data
                     resolve(network)
                   })
                   .catch((error) => {
@@ -271,6 +328,11 @@ export async function getNetworkFromStorage(
       })
   })
 }
+
+function fixNodeFields(data: Node) {
+  console.log(data)
+}
+
 export async function deleteNetwork(networkId: string): Promise<void> {
   return new Promise((resolve, reject) => {
     deleteDoc(doc(db, getNetworkPath(networkId))).then(() => {

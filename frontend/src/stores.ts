@@ -4,8 +4,6 @@ import type { Network } from "./definitions/network"
 import { MenuItem } from "./definitions/menuItem"
 import type { User } from "firebase/auth"
 import type { LoginUser } from "./definitions/user"
-import type { MLModelType } from "./definitions/mlModelType"
-import type { TaskType } from "./definitions/taskType"
 
 export const selectedMenuItem: Writable<MenuItem> = writable(MenuItem.HOME)
 export const testStoreValue: Writable<string> = writable("test val")
@@ -13,8 +11,9 @@ export const netzschleuderNetworkNames: Writable<string[]> = writable([])
 export const networksList: Writable<Network[]> = writable([])
 export const selectedNetworkIndex: Writable<number> = writable(undefined)
 export const fetchedNetworkOnce: Writable<boolean> = writable(false)
-export const selectedModelType: Writable<MLModelType> = writable(undefined)
-export const selectedTaskType: Writable<TaskType> = writable(undefined)
+export const fetchedProfilePicture: Writable<File> = writable()
+
+export const maxNumberOfNodesForPlot: Readable<number> = writable(100)
 
 // If there is a network to talk about at all in the list, then
 // we can set the selected network index to 0

@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte"
   import logo from "../../assets/logo.svg"
+  import mlLogo from "../../assets/ml4nets_logo.svg"
   import { selectedMenuItem } from "../../stores"
   import { MenuItem } from "../../definitions/menuItem"
   import { getAuth } from "firebase/auth"
@@ -15,6 +17,7 @@
     MenuItem.EXPERIMENTS,
     MenuItem.REPORTS,
     MenuItem.PROFILE,
+    MenuItem.FROM_WEB,
     MenuItem.TEST,
   ]
   let menuItemsLogout: MenuItem[] = [
@@ -27,8 +30,9 @@
 <div class="tabs">
   <li class="image">
     <img src={logo} class="logo" alt="logo" />
+    <img src={mlLogo} class="mlLogo" alt="logo" />
   </li>
-  <ul>
+  <ul style="background-color: whitesmoke;">
     {#if isLoggedIn}
       {#each menuItemsLogin as item}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -51,11 +55,17 @@
   .tabs {
     background-color: whitesmoke;
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: nowrap;
   }
   .image {
     display: flex;
     justify-content: left;
-    padding: 0%;
+    padding: 0.1%;
     list-style-type: none;
   }
   ul {
@@ -63,6 +73,10 @@
     justify-content: right;
     padding: 0%;
     list-style-type: none;
+    flex-wrap: wrap;
+    align-content: center;
+    flex-direction: row;
+    width: -webkit-fill-available;
   }
   .menuItem {
     margin: 1% 1%;
@@ -95,5 +109,9 @@
     height: 100%;
     cursor: pointer;
     color: #063d79;
+  }
+  .mlLogo {
+    width: 47px;
+    padding-left: 4%;
   }
 </style>

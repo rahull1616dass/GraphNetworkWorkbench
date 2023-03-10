@@ -4,8 +4,8 @@ import { UploadedFileType } from "./uploadedFileType"
 export class Network{
     constructor(
         public metadata: Metadata = new Metadata(),
-        public nodes: Node[] = [],
-        public links: Link[] = []
+        public nodes: object[] = [],
+        public links: object[] = []
     ){}
 
     public toFiles(): Record<string, File> {
@@ -37,7 +37,8 @@ export class Link{
     constructor(
         readonly source: string = undefined,
         readonly target: string = undefined,
-        readonly value: number = undefined
+        readonly value: (string|number)[] = undefined,
+        readonly __parsed_extra: object = undefined,
     ){}
 
     public equals(other: Link): boolean{
@@ -55,5 +56,6 @@ export class Node{
         readonly index: number = undefined,
         readonly pos: string[] = undefined,
         public is_train: number = undefined,
+        readonly __parsed_extra: object = undefined,
     ){}
 }

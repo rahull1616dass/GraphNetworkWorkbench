@@ -15,6 +15,8 @@ export class Task {
     public seed: number = undefined,
     public createdAt: Timestamp = undefined,
     public state: ExperimentState = undefined,
+    public xColumns: string[] = undefined,
+    public yColumn: string = undefined,
   ) {}
 
   public equals(other: Task): boolean {
@@ -26,7 +28,9 @@ export class Task {
       this.trainPercentage === other.trainPercentage &&
       this.learningRate === other.learningRate &&
       this.hiddenLayerSizes === other.hiddenLayerSizes &&
-      this.seed === other.seed
+      this.seed === other.seed &&
+      this.xColumns === other.xColumns &&
+      this.yColumn === other.yColumn
     );
   }
 }

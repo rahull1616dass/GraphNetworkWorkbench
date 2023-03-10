@@ -1,42 +1,61 @@
 <script lang="ts">
-  import {
-    networksList,
-    selectedNetworkIndex,
-    selectedModelType,
-    selectedTaskType,
-  } from "../../stores";
-  import { dropdownSelectorType } from "../../definitions/dropdownSelectorType";
+  import { networksList, selectedNetworkIndex } from "../../stores";
+  import { DropdownSelectorType } from "../../definitions/dropdownSelectorType";
   import { MLModelType } from "../../definitions/mlModelType";
   import { TaskType } from "../../definitions/taskType";
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
 
   export let placeholder: string = "Select one of the following";
-  export let type: dropdownSelectorType = undefined;
+  export let type: DropdownSelectorType = undefined;
 
   let modelTypes: MLModelType[] = [
     MLModelType.GCN,
     MLModelType.DeepWalk,
     MLModelType.GIN,
+    MLModelType.GCNCONV,
+    MLModelType.SAGECONV
   ];
   let taskTypes: TaskType[] = [
     TaskType.NODE_CLASSIFICATION,
-    TaskType.EDGE_CLASSIFICATION,
+    TaskType.EDGE_PREDICTION,
   ];
 
-  let networkIndex: number = $selectedNetworkIndex
-  let task: TaskType = $selectedTaskType
-  let model: MLModelType = $selectedModelType
+  // remove the is_train column from the nodeColumns array
+  $: nodeColumns = Object.keys(
+    $networksList[$selectedNetworkIndex].nodes[0]
+  ).filter((nodeColumns) => nodeColumns !== "is_train");
+
+  let networkIndex: number = undefined;
+  let task: TaskType;
+  let model: MLModelType;
+  let y_column: string = undefined;
+
+  function handleModelChange(event) {
+    model = event.target.value;
+    dispatch("modelChange", model);
+  }
+
+  function handleTaskChange(event) {
+    task = event.target.value;
+    dispatch("taskChange", task);
+  }
+
+  function handleColumnChange(event) {
+    y_column = event.target.value;
+    dispatch("columnChange", y_column);
+  }
 </script>
 
-{#if type === dropdownSelectorType.NETWORK}
+{#if type === DropdownSelectorType.NETWORK}
   <div>
     <select
       class="select"
       bind:value={networkIndex}
-      on:change={() => {
-      $selectedNetworkIndex = networkIndex
-      console.log(`Selected network index changed too: ${$selectedNetworkIndex}`)}}
+      on:change={() => ($selectedNetworkIndex = networkIndex)}
     >
-      <option>{placeholder}</option>
+      <!-- <option disabled selected>{placeholder}</option> -->
       {#each $networksList as network, networkIndex}
         <option class="optionDropdown" value={networkIndex}>
           {network.metadata.name} --- Nodes: {network.nodes.length} , Edges: {network
@@ -45,14 +64,10 @@
       {/each}
     </select>
   </div>
-{:else if type === dropdownSelectorType.MLMODEL}
+{:else if type === DropdownSelectorType.MLMODEL}
   <div>
-    <select
-      class="select"
-      bind:value={model}
-      on:change={() => ($selectedModelType = model)}
-    >
-      <option>{placeholder}</option>
+    <select class="select" bind:value={model} on:change={handleModelChange}>
+      <option disabled selected>{placeholder}</option>
       {#each modelTypes as model}
         <option class="optionDropdown" value={model}>
           {model}
@@ -60,17 +75,24 @@
       {/each}
     </select>
   </div>
-{:else if type === dropdownSelectorType.TASK}
+{:else if type === DropdownSelectorType.TASK}
   <div>
-    <select
-      class="select"
-      bind:value={task}
-      on:change={() => ($selectedTaskType = task)}
-    >
-      <option>{placeholder}</option>
+    <select class="select" bind:value={task} on:change={handleTaskChange}>
+      <option disabled selected>{placeholder}</option>
       {#each taskTypes as task, _}
         <option class="optionDropdown" value={task}>
           {task}
+        </option>
+      {/each}
+    </select>
+  </div>
+{:else if type === DropdownSelectorType.Y_COLUMN}
+  <div>
+    <select class="select" bind:value={y_column} on:change={handleColumnChange}>
+      <option>{placeholder}</option>
+      {#each nodeColumns as column}
+        <option class="optionDropdown" value={column}>
+          {column}
         </option>
       {/each}
     </select>

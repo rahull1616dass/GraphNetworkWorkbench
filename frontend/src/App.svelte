@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { MenuItem } from "./definitions/menuItem"
-  import NetworkListItem from "./components/common/NetworkListItem.svelte"
-  import Home from "./components/pages/Home.svelte"
-  import Plot from "./components/pages/Workbench/Plot/Plot.svelte"
-  import Register from "./components/pages/Register.svelte"
-  import Login from "./components/pages/Login.svelte"
-  import Profile from "./components/pages/Profile.svelte"
-  import Experiments from "./components/pages/Workbench/Experiments.svelte"
-  import Reports from "./components/pages/Workbench/Reports.svelte"
-  import FromWeb from "./components/pages/AddNetwork/FromWeb.svelte"
-  import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte"
-  import Footer from "./components/common/Footer.svelte"
-  import Tabs from "./components/common/Tabs.svelte"
-  import Test from "./components/pages/Test.svelte"
-  import Networks from "./components/pages/Workbench/Networks.svelte"
+  import { MenuItem } from "./definitions/menuItem";
+  import NetworkListItem from "./components/common/NetworkListItem.svelte";
+  import Home from "./components/pages/Home.svelte";
+  import Plot from "./components/pages/Workbench/Plot/Plot.svelte";
+  import Register from "./components/pages/Register.svelte";
+  import Login from "./components/pages/Login.svelte";
+  import Profile from "./components/pages/Profile.svelte";
+  import Experiments from "./components/pages/Workbench/Experiments.svelte";
+  import Reports from "./components/pages/Workbench/Reports.svelte";
+  import FromWeb from "./components/pages/AddNetwork/FromWeb.svelte";
+  import UploadNetwork from "./components/pages/AddNetwork/UploadNetwork/UploadNetwork.svelte";
+  import Footer from "./components/common/Footer.svelte";
+  import Tabs from "./components/common/Tabs.svelte";
+  import Test from "./components/pages/Test.svelte";
+  import Networks from "./components/pages/Workbench/Networks.svelte";
   import {
     selectedMenuItem,
     authUserStore,
@@ -22,22 +22,26 @@
     selectedNetworkIndex,
     fetchedNetworkOnce,
     defaultSeed,
-  } from "./stores"
-  import { getAuth } from "firebase/auth"
+  } from "./stores";
+  import { getAuth } from "firebase/auth";
   import {
     loginUser,
     getNetworks as getNetworksFromFirestore,
     getDefaultSeed,
-  } from "./api/firebase"
-  import { ProgressBarData } from "./definitions/progressBarData"
-  import { ProgressBar, Button } from "carbon-components-svelte"
-  import { onMount } from "svelte"
-  import ImportModal from "./components/common/ImportModal.svelte"
-  import { ImportModalType } from "./definitions/importModalType"
+  } from "./api/firebase";
+  import { ProgressBarData } from "./definitions/progressBarData";
+  import { ProgressBar, Button } from "carbon-components-svelte";
+  import { onMount } from "svelte";
+  import ImportModal from "./components/common/ImportModal.svelte";
+  import { ImportModalType } from "./definitions/importModalType";
+  import { fly, fade } from "svelte/transition";
 
   /* ---- PAGE LOAD AND LOGIN ---- */
-  let progressBarData: ProgressBarData = new ProgressBarData(true, "Loading...")
-  let isLoggedIn: boolean = false
+  let progressBarData: ProgressBarData = new ProgressBarData(
+    true,
+    "Loading..."
+  );
+  let isLoggedIn: boolean = false;
 
   // For some reason, the getNetworksFromFirestore() function is called multiple times on page load.
   // For now, this variable is used to prevent that. TODO: Find a better solution.
@@ -51,81 +55,92 @@
       loginUser($loginUserStore)
         .then((user) => checkForLoggedIn())
         .catch((error) => {
-          console.log(error)
-          progressBarData.isPresent = false
-        })
-    } else progressBarData.isPresent = false
-  })
+          console.log(error);
+          progressBarData.isPresent = false;
+        });
+    } else progressBarData.isPresent = false;
+  });
 
   // Should update after the user manually logins or registers
-  $: $authUserStore, checkForLoggedIn()
+  $: $authUserStore, checkForLoggedIn();
 
   function checkForLoggedIn() {
-    isLoggedIn = $authUserStore !== undefined //&& getAuth().currentUser !== null
+    isLoggedIn = $authUserStore !== undefined; //&& getAuth().currentUser !== null
     if (isLoggedIn && $networksList.length === 0) {
-      progressBarData.text = "Fetching networks..."
-      if ($fetchedNetworkOnce) return
-      $fetchedNetworkOnce = true
+      progressBarData.text = "Fetching networks...";
+      if ($fetchedNetworkOnce) return;
+      $fetchedNetworkOnce = true;
       getNetworksFromFirestore().finally(() => {
-        progressBarData.isPresent = false
-      })
+        progressBarData.isPresent = false;
+      });
       getDefaultSeed()
         .then((seed) => {
-          if (seed !== undefined) $defaultSeed = seed
+          if (seed !== undefined) $defaultSeed = seed;
         })
         .catch((error) =>
           console.log(`Error in getting default seed: ${error}`)
-        )
+        );
     }
   }
 </script>
 
-{#if progressBarData.isPresent}
-  <div class="main_progress_bar">
-    <ProgressBar helperText={progressBarData.text} />
-  </div>
-{:else if isLoggedIn === true}
-  <ul id="menuLogin">
-    <Tabs />
-    {#if $selectedMenuItem === MenuItem.HOME}
-      <Home />
-    {:else if $selectedMenuItem === MenuItem.NETWORKS}
-      <Networks />
-    {:else if $selectedMenuItem === MenuItem.PLOT}
-      <Plot />
-    {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
-      <Experiments />
-    {:else if $selectedMenuItem === MenuItem.REPORTS}
-      <Reports />
-    {:else if $selectedMenuItem === MenuItem.PROFILE}
-      <Profile />
-    {:else if $selectedMenuItem === MenuItem.FROM_WEB}
-      <FromWeb />
-    {:else if $selectedMenuItem === MenuItem.FROM_PC}
-      <UploadNetwork />
-    {:else if $selectedMenuItem === MenuItem.TEST}
-      <Test />
-    {/if}
-  </ul>
-{:else if isLoggedIn === false}
-  <Tabs />
-  {#if $selectedMenuItem === MenuItem.HOME}
-    <Home />
-  {:else if $selectedMenuItem === MenuItem.LOGIN}
-    <Login />
-  {:else if $selectedMenuItem === MenuItem.REGISTER}
-    <Register />
+<div class="main">
+  {#if progressBarData.isPresent}
+    <div class="main_progress_bar">
+      <ProgressBar helperText={progressBarData.text} />
+    </div>
+  {:else if isLoggedIn === true}
+    <ul id="menuLogin" class="menuLogin">
+      <Tabs />
+      {#if $selectedMenuItem === MenuItem.HOME}
+        <Home />
+      {:else if $selectedMenuItem === MenuItem.NETWORKS}
+        <Networks />
+      {:else if $selectedMenuItem === MenuItem.PLOT}
+        <Plot />
+      {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
+        <Experiments />
+      {:else if $selectedMenuItem === MenuItem.REPORTS}
+        <Reports />
+      {:else if $selectedMenuItem === MenuItem.PROFILE}
+        <Profile />
+      {:else if $selectedMenuItem === MenuItem.FROM_WEB}
+        <FromWeb />
+      {:else if $selectedMenuItem === MenuItem.FROM_PC}
+        <UploadNetwork />
+      {:else if $selectedMenuItem === MenuItem.TEST}
+        <Test />
+      {/if}
+    </ul>
+  {:else if isLoggedIn === false}
+    <ul>
+      <Tabs />
+      {#if $selectedMenuItem === MenuItem.HOME}
+        <Home />
+      {:else if $selectedMenuItem === MenuItem.LOGIN}
+        <Login />
+      {:else if $selectedMenuItem === MenuItem.REGISTER}
+        <Register />
+      {/if}
+    </ul>
   {/if}
-{/if}
 
-<Footer />
+  <Footer />
+</div>
 
 <style lang="scss">
+  .menuLogin {
+    height: 100%;
+  }
   .main_progress_bar {
-    position: absolute;
-    top: 100%;
-    left: 100%;
-    transform: translate(-50%, -50%);
+    position: relative;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
   }
   .root {
     overflow: auto;
@@ -195,5 +210,9 @@
     right: 0;
     bottom: 0;
     overflow-y: auto;
+  }
+
+  .mainUI {
+    height: 100%;
   }
 </style>
