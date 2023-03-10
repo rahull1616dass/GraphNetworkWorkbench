@@ -10,7 +10,7 @@
   let columns: string[] = Object.keys($networksList[$selectedNetworkIndex].nodes[0])
   let selectedColumns: string[] = []
 
-  let loss = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+  let losses = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 </script>
 
 <!--
@@ -26,7 +26,7 @@
   }}
 />
 --> 
-<PlotLoss {loss}/>
+<PlotLoss {losses}/>
 
 <style lang="scss">
 </style>

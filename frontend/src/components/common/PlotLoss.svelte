@@ -4,13 +4,13 @@
   import type { VisualizationSpec } from "vega-embed"
   import LossVisSpec from "../../data/LossVisSpec";
 
-  export let loss: number[] = undefined
+  export let losses: number[] = undefined
 
   onMount(() => {
     // @ts-ignore
-    LossVisSpec.data.values = loss.map((l, i) => ({ epoch: i + 1, loss: l }))
+    LossVisSpec.data.values = losses.map((l, i) => ({ epoch: i + 1, loss: l }))
     // @ts-ignore
-    LossVisSpec.signals = [{ name: "loss", value: loss }]
+    LossVisSpec.signals = [{ name: "losses", value: losses }]
     vegaEmbed("#embedding", LossVisSpec)
   })
 </script>

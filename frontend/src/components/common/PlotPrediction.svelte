@@ -11,6 +11,7 @@
     import cloneDeep from "lodash.clonedeep"
 
     let hoverData: HoverData = undefined
+    export let predictions: Record<string, string> = undefined
     // Run an onMount function to initialize the plot
     onMount(() => { 
         loadNetwork()
