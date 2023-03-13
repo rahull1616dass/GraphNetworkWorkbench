@@ -43,8 +43,6 @@
     undefined, // yColumn,
   )
 
-  $: task.hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
-
   let isCustomizeModalOpen: boolean = false
   let currentNetwork: Network = undefined
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
@@ -64,9 +62,11 @@
 
   // remove the is_train column from the nodeColumns array
   $: nodeColumns = Object.keys(
-    $networksList[$selectedNetworkIndex].nodes[0]
+    currentNetwork.nodes[0]
   ).filter((nodeColumns) => nodeColumns !== "is_train")
 
+  $: task.hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
+  $: currentNetwork = $networksList[$selectedNetworkIndex]
 
   function handleModelChange(event) {
     task.mlModelType = event.detail
@@ -120,7 +120,7 @@
   async function createTask() {
     task.state = ExperimentState.PROGRESS
     // await delay(2000) // To simulate task being run. TODO: Remove this later on.
-    await getExperimentTasks($networksList[$selectedNetworkIndex].metadata.id)
+    await getExperimentTasks(currentNetwork.metadata.id)
       .then((tasks) => {
         console.log("Tasks", tasks)
         tasks.forEach((firestoreTask) => {
@@ -130,12 +130,12 @@
           }
         })
         task.createdAt = getCurrentTimestamp()
-        setExperimentTask($networksList[$selectedNetworkIndex], task)
+        setExperimentTask(currentNetwork, task)
           .then((taskDocId) => {
             console.log(`Task created with id: ${taskDocId}`)
             progressBarData.text = "Experiment created. Running..."
             listenForExperimentResult(
-              $networksList[$selectedNetworkIndex].metadata.id,
+              currentNetwork.metadata.id,
               taskDocId
             )
               .then((resultTask: Task) => {
@@ -158,7 +158,7 @@
       .catch((error) => {
         task.state = ExperimentState.ERROR
         console.log(
-          `Error retrieving tasks for network ${$networksList[$selectedNetworkIndex]}: ${error}`
+          `Error retrieving tasks for network ${currentNetwork}: ${error}`
         )
       })
   }
@@ -366,6 +366,8 @@
                 task.epochs === 0 ||
                 task.learningRate === 0.0 ||
                 task.trainPercentage === 0 ||
+                task.yColumn === undefined ||
+                task.xColumns.length === 0 ||
                 task.trainPercentage === 1}
               on:click={() => {
                 createTask()

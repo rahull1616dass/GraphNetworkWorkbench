@@ -11,9 +11,9 @@ export function train_test_split(network: Network, seed: number, trainPercentage
         or do sth about this, wtf is this travesty
         */
         if (train_indices.includes(index)) {
-            node.is_train = 2
+            node.is_train = true
         } else {
-            node.is_train = 1
+            node.is_train = false
         }
     })
     return network

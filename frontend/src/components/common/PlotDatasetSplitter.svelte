@@ -50,14 +50,7 @@
                 currentNetwork.nodes[item.datum.index].is_train
               }`
             )
-            let newValue: number
-            // See experimentUtils.ts for the meaning of the values
-            if (item.datum.is_train === 1) {
-              newValue = 2
-            } else {
-              newValue = 1
-            }
-            currentNetwork.nodes[item.datum.index].is_train = newValue
+            currentNetwork.nodes[item.datum.index].is_train = !currentNetwork.nodes[item.datum.index].is_train
             console.log(
               `For node ${item.datum.name} is_train = ${
                 currentNetwork.nodes[item.datum.index].is_train

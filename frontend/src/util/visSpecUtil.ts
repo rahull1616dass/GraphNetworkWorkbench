@@ -44,6 +44,9 @@ export function updateVisSpec(
     visSpec.data[0].values = network.nodes
     visSpec.data[1].values = network.links
   }
+  if(network.nodes[0].is_train !== undefined){
+    visSpec = setColorKey(visSpec, "is_train", ["#ff0000", "#00ff00"])
+  }
   return visSpec
 }
 
