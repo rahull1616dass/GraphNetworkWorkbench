@@ -383,20 +383,24 @@ export async function setExperimentTask(
       tasksConverter.toFirestore(task)
     )
       .then((taskDoc: DocumentReference) => {
-        uploadNetworkToStorage(
-          network.metadata,
-          files.nodes,
-          files.links,
-          taskDoc.id
-        )
-          .then(() => {
-            updateDefaultSeed(task.seed)
-              .then(() => resolve(taskDoc.id))
-              .catch((error) => reject(error))
-          })
+        updateDoc(taskDoc, { id: taskDoc.id }).then(() => {
+          console.log(`Added task ${taskDoc.id} to network ${network.metadata.id}`)
+          uploadNetworkToStorage(
+            network.metadata,
+            files.nodes,
+            files.links,
+            taskDoc.id
+          )
+            .then(() => {
+              updateDefaultSeed(task.seed)
+                .then(() => resolve(taskDoc.id))
+                .catch((error) => reject(error))
+            })
+            .catch((error) => reject(error))
+        })
           .catch((error) => reject(error))
-      })
-      .catch((error) => reject(error))
+      }).catch((error) => reject(error))
+
   })
 }
 

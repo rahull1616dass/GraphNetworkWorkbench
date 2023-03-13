@@ -12,7 +12,14 @@
   import { deleteNetwork } from "../../../api/firebase";
   import { ProgressBarData } from "../../../definitions/progressBarData";
   import { ProgressBar } from "carbon-components-svelte";
-  import { fade, slide, scale, fly } from "svelte/transition";
+  import { fly } from "svelte/transition";
+  import { ImportModalType } from "../../../definitions/importModalType";
+  import FromWeb from "../AddNetwork/FromWeb.svelte";
+  import UploadNetwork from "../AddNetwork/UploadNetwork/UploadNetwork.svelte";
+  import ImportModal from "../../common/ImportModal.svelte";
+
+  let isImportModalOpen: boolean = false;
+  let selectedImportType: ImportModalType = ImportModalType.NONE;
 
   $: selectNetwork();
   let tabchange;
@@ -70,92 +77,107 @@
   in:fly={{ y: -50, duration: 250, delay: 300 }}
   out:fly={{ y: -50, duration: 250 }}
 >
-  <div class="explanation-title">
-    <p>
-      This page shows the networks list you uploaded. Please select a network
-      from the list to visualize its nodes and edged and play with it!
-    </p>
-  </div>
+  {#if selectedImportType === ImportModalType.NONE}
+    <div class="explanation-title">
+      <p>
+        This page shows the networks list you uploaded. Please select a network
+        from the list to visualize its nodes and edged and play with it!
+      </p>
+    </div>
+    <div>
+      <ImportModal bind:selectedImportType bind:open={isImportModalOpen} />
+    </div>
+    <CustomButton
+      type={"secondary"}
+      inverse={false}
+      on:click={() => (isImportModalOpen = !isImportModalOpen)}
+      >Add Network</CustomButton
+    >
 
-  <div
-    class="networks_list_items"
-    style="--height: {$networksList.length * 120}px;"
-  >
-    {#each $networksList as network, index}
-      <NetworkListItem
-        {network}
-        {index}
-        selected={$selectedNetworkIndex == index}
-        on:selectItem={(event) => {
-          $selectedNetworkIndex = event.detail.selectedIndex;
-          tabchange = event.detail.selectedIndex;
-        }}
-        on:deleteItem={(event) => {
-          networkIndexToDelete = event.detail.selectedIndex;
-          deleteModalData.isOpen = true;
-        }}
-      />
-    {/each}
-  </div>
+    <div
+      class="networks_list_items"
+      style="--height: {$networksList.length * 120}px;"
+    >
+      {#each $networksList as network, index}
+        <NetworkListItem
+          {network}
+          {index}
+          selected={$selectedNetworkIndex == index}
+          on:selectItem={(event) => {
+            $selectedNetworkIndex = event.detail.selectedIndex;
+            tabchange = event.detail.selectedIndex;
+          }}
+          on:deleteItem={(event) => {
+            networkIndexToDelete = event.detail.selectedIndex;
+            deleteModalData.isOpen = true;
+          }}
+        />
+      {/each}
+    </div>
 
-  {#if deleteModalData.isOpen}
-    <CustomModal on:close={() => (deleteModalData.isOpen = false)}>
-      <h4 slot="header">
-        {deleteModalData.messageHeader}
-      </h4>
-      <div slot="body">
-        {deleteModalData.messageBody}
-      </div>
+    {#if deleteModalData.isOpen}
+      <CustomModal on:close={() => (deleteModalData.isOpen = false)}>
+        <h4 slot="header">
+          {deleteModalData.messageHeader}
+        </h4>
+        <div slot="body">
+          {deleteModalData.messageBody}
+        </div>
 
-      <div slot="footer">
-        {#if deleteNetworkProgressData.isPresent}
-          <ProgressBar labelText={deleteNetworkProgressData.text} />
-        {:else}
+        <div slot="footer">
+          {#if deleteNetworkProgressData.isPresent}
+            <ProgressBar labelText={deleteNetworkProgressData.text} />
+          {:else}
+            <CustomButton
+              type={"primary"}
+              inverse={true}
+              on:click={() => {
+                deleteModalData.isOpen = false;
+              }}
+            >
+              No
+            </CustomButton>
+
+            <CustomButton
+              type={"secondary"}
+              inverse={false}
+              on:click={() => {
+                onDeleteNetwork();
+              }}
+            >
+              Yes
+            </CustomButton>
+          {/if}
+        </div>
+      </CustomModal>
+    {/if}
+
+    {#if deleteResultModalData.isOpen}
+      <CustomModal on:close={() => (deleteResultModalData.isOpen = false)}>
+        <h4 slot="header">
+          {deleteResultModalData.messageHeader}
+        </h4>
+        <div slot="body">
+          {deleteResultModalData.messageBody}
+        </div>
+
+        <div slot="delete_modal">
           <CustomButton
             type={"primary"}
             inverse={true}
             on:click={() => {
-              deleteModalData.isOpen = false;
+              deleteResultModalData.isOpen = false;
             }}
           >
-            No
+            OK
           </CustomButton>
-
-          <CustomButton
-            type={"secondary"}
-            inverse={false}
-            on:click={() => {
-              onDeleteNetwork();
-            }}
-          >
-            Yes
-          </CustomButton>
-        {/if}
-      </div>
-    </CustomModal>
-  {/if}
-
-  {#if deleteResultModalData.isOpen}
-    <CustomModal on:close={() => (deleteResultModalData.isOpen = false)}>
-      <h4 slot="header">
-        {deleteResultModalData.messageHeader}
-      </h4>
-      <div slot="body">
-        {deleteResultModalData.messageBody}
-      </div>
-
-      <div slot="delete_modal">
-        <CustomButton
-          type={"primary"}
-          inverse={true}
-          on:click={() => {
-            deleteResultModalData.isOpen = false;
-          }}
-        >
-          OK
-        </CustomButton>
-      </div>
-    </CustomModal>
+        </div>
+      </CustomModal>
+    {/if}
+  {:else if selectedImportType === ImportModalType.FROM_WEB}
+    <FromWeb />
+  {:else if selectedImportType === ImportModalType.UPLOAD}
+    <UploadNetwork />
   {/if}
 </div>
 
@@ -168,8 +190,7 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    flex-wrap: nowrap;
-    background: white;
+    //flex-wrap: nowrap;
   }
 
   p {

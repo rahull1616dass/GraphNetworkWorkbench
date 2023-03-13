@@ -5,7 +5,6 @@
   import { Task } from "../../../definitions/task"
   import { TaskType } from "../../../definitions/taskType"
   import CustomButton from "../../common/CustomButton.svelte"
-  import { MenuItem } from "../../../definitions/menuItem"
   import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte"
   import DropdownSelector from "../../common/DropdownSelector.svelte"
   import {
@@ -19,37 +18,41 @@
   import {
     networksList,
     selectedNetworkIndex,
-    selectedModelType,
-    selectedTaskType,
-    selectedMenuItem,
     defaultSeed,
-  } from "../../../stores";
-  import { fade, slide, scale, fly } from "svelte/transition";
-  import { UploadedFileType } from "../../../definitions/uploadedFileType";
-  import { toCSVFile } from "../../../util/networkParserUtil";
-  import { ModalData } from "../../../definitions/modalData";
-  import ExperimentResults from "../../common/ExperimentResults.svelte";
-  import { delay } from "../../../util/generalUtil";
+  } from "../../../stores"
+  import { fly } from "svelte/transition"
+  import { ModalData } from "../../../definitions/modalData"
+  import ExperimentResults from "../../common/ExperimentResults.svelte"
+  import { delay } from "../../../util/generalUtil"
 
-  let experimentState: ExperimentState = ExperimentState.CREATE;
+  let hiddenLayers = [{ first: true, checked: false, size: 10 }]
 
   // These values should be set by UI Elements later on
-  let xColumns: string[] = []
-  let trainPercentage: number = 0.8
-  let epochs: number = 100
-  let learningRate: number = 0.01
-  let seed: number = $defaultSeed
-  let hiddenLayers = [{ first: true, checked: false, size: 10 }]
-  $: hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
+  let task = new Task(
+    undefined, // taskID
+    undefined, // mlModelType,
+    undefined, // taskType,
+    100, // epochs,
+    0.8, // trainPercentage
+    0.01, // learningRate
+   undefined, // hiddenLayerSizes
+   $defaultSeed, // seed
+   undefined, // createdAt,
+   ExperimentState.CREATE, // experimentState,
+   [], // xColumns,
+    undefined, // yColumn,
+  )
 
-  let isCustomizeModalOpen: boolean = false;
-  let currentNetwork: Network = undefined;
+  $: task.hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
+
+  let isCustomizeModalOpen: boolean = false
+  let currentNetwork: Network = undefined
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
     undefined,
     "Error Uploading Network",
     `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
     false
-  );
+  )
 
   /*
   progressBarData.isPresent = true by default since the page is being controlled by ExperimentState enum anyway
@@ -57,23 +60,43 @@
   let progressBarData: ProgressBarData = new ProgressBarData(
     true,
     "Creating experiment..."
-  );
+  )
 
-  console.log("column types", typeof(DropdownSelectorType.Y_COLUMN))
-  console.log("column names", DropdownSelectorType.Y_COLUMN)
+  // remove the is_train column from the nodeColumns array
+  $: nodeColumns = Object.keys(
+    $networksList[$selectedNetworkIndex].nodes[0]
+  ).filter((nodeColumns) => nodeColumns !== "is_train")
 
-  function filterColumns(columns: string[]) {
-    return "id"
+
+  function handleModelChange(event) {
+    task.mlModelType = event.detail
+  }
+
+  function handleTaskChange(event) {
+    task.taskType = event.detail
+  }
+
+  function handleColumnChange(event) {
+    task.yColumn = event.detail
+  }
+
+  function updateSelectedNodeColumns(event) {
+    const column = event.target.value
+    if (event.target.checked) {
+      task.xColumns = [...task.xColumns, column]
+    } else {
+      task.xColumns = task.xColumns.filter((f) => f !== column)
+    }
   }
 
   function randomize() {
-    seed = Math.floor(Math.random() * 1000);
+    task.seed = Math.floor(Math.random() * 1000)
   }
 
   function startNewExperiment() {
-    experimentState = ExperimentState.CREATE;
-    $selectedTaskType = undefined;
-    $selectedModelType = undefined;
+    task.state = ExperimentState.CREATE
+    task.taskType = undefined
+    task.mlModelType = undefined
   }
 
   function addHiddenLayer() {
@@ -81,76 +104,63 @@
       first: false,
       checked: false,
       size: 10,
-    });
+    })
   }
 
   function clearHiddenLayer() {
-    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first);
+    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first)
   }
 
   function saveSplitClicked(event: CustomEvent) {
-    currentNetwork = event.detail.network;
-    isCustomizeModalOpen = false;
-    console.log("Current Network", currentNetwork);
+    currentNetwork = event.detail.network
+    isCustomizeModalOpen = false
+    console.log("Current Network", currentNetwork)
   }
 
   async function createTask() {
-    experimentState = ExperimentState.PROGRESS;
-    await delay(2000); // To simulate task being run. TODO: Remove this later on.
-    const taskToBeCreated = new Task(
-      undefined, // This will be set by the backend
-      $selectedModelType,
-      $selectedTaskType,
-      epochs,
-      trainPercentage,
-      learningRate,
-      hiddenLayerSizes,
-      seed,
-      getCurrentTimestamp(),
-      ExperimentState.PROGRESS,
-      ['name'],
-      'group'
-    );
-
+    task.state = ExperimentState.PROGRESS
+    // await delay(2000) // To simulate task being run. TODO: Remove this later on.
     await getExperimentTasks($networksList[$selectedNetworkIndex].metadata.id)
       .then((tasks) => {
-        console.log("Tasks", tasks);
-        tasks.forEach((task) => {
-          if (task.equals(taskToBeCreated)) {
-            console.log("Task already exists");
-            return;
+        console.log("Tasks", tasks)
+        tasks.forEach((firestoreTask) => {
+          if (firestoreTask.equals(task)) {
+            console.log("Task already exists")
+            return
           }
-        });
-        setExperimentTask($networksList[$selectedNetworkIndex], taskToBeCreated)
+        })
+        task.createdAt = getCurrentTimestamp()
+        setExperimentTask($networksList[$selectedNetworkIndex], task)
           .then((taskDocId) => {
-            console.log(`Task created with id: ${taskDocId}`);
-            progressBarData.text = "Experiment created. Running...";
+            console.log(`Task created with id: ${taskDocId}`)
+            progressBarData.text = "Experiment created. Running..."
             listenForExperimentResult(
               $networksList[$selectedNetworkIndex].metadata.id,
               taskDocId
             )
               .then((resultTask: Task) => {
+                task = resultTask
                 progressBarData.isPresent = false
                 console.log("Result", resultTask)
                 // @ts-ignore
-                experimentState = ExperimentState[resultTask.state]
+                task.state = ExperimentState[resultTask.state]
               })
               .catch((error) => {
-                experimentState = ExperimentState.ERROR
+                task.state = ExperimentState.ERROR
                 console.log(`Error listening for experiment result: ${error}`)
               })
           })
           .catch((error) => {
-            experimentState = ExperimentState.ERROR;
-            console.log(`Error creating task ${taskToBeCreated}`, error);
-          });
+            task.state = ExperimentState.ERROR
+            console.log(`Error creating task ${task}`, error)
+          })
       })
       .catch((error) => {
-        experimentState = ExperimentState.ERROR;
+        task.state = ExperimentState.ERROR
         console.log(
           `Error retrieving tasks for network ${$networksList[$selectedNetworkIndex]}: ${error}`
-        );
-      });
+        )
+      })
   }
 </script>
 
@@ -158,7 +168,7 @@
   in:fly={{ y: -50, duration: 250, delay: 300 }}
   out:fly={{ y: -50, duration: 250 }}
 >
-  {#if experimentState === ExperimentState.CREATE}
+  {#if task.state === ExperimentState.CREATE}
     <div class="background">
       <div>
         <li class="Model">
@@ -170,20 +180,14 @@
           <DropdownSelector
             placeholder={"Select a Model"}
             type={DropdownSelectorType.MLMODEL}
+            on:modelChange={handleModelChange}
           />
 
           <DropdownSelector
             placeholder={"Select a Task"}
             type={DropdownSelectorType.TASK}
+            on:taskChange={handleTaskChange}
           />
-          <!--
-          <DropdownMultiSelector
-            label={"Select X Columns"}
-            items={Object.keys($networksList[$selectedNetworkIndex].nodes[0])}
-            on:onSelectChanged={(e) => (xColumns = e.detail.selectedColumns)}
-          />
-          -->
-          
 
           <hr />
 
@@ -192,10 +196,21 @@
           <DropdownSelector
             placeholder={"Select a column to predict"}
             type={DropdownSelectorType.Y_COLUMN}
+            on:columnChange={handleColumnChange}
           />
-        
 
-
+          <div>
+            {#each nodeColumns as column}
+              <label>
+                <input
+                  type="checkbox"
+                  value={column}
+                  on:change={updateSelectedNodeColumns}
+                />
+                {column}
+              </label>
+            {/each}
+          </div>
 
           <hr />
 
@@ -206,13 +221,13 @@
             <li class="range">
               <input
                 type="range"
-                bind:value={epochs}
+                bind:value={task.epochs}
                 min="0"
                 max="1000"
                 step="10"
                 class="slider"
               />
-              <input type="number" bind:value={epochs} class="inputNumber" />
+              <input type="number" bind:value={task.epochs} class="inputNumber" />
             </li>
           </div>
           <div>
@@ -220,7 +235,7 @@
             <li class="range">
               <input
                 type="range"
-                bind:value={learningRate}
+                bind:value={task.learningRate}
                 min="0"
                 max="0.4"
                 step="0.001"
@@ -228,7 +243,7 @@
               />
               <input
                 type="number"
-                bind:value={learningRate}
+                bind:value={task.learningRate}
                 min="0"
                 max="0.4"
                 step="0.001"
@@ -240,7 +255,7 @@
           <div>
             <li>
               Training Percentage
-              {#if $selectedTaskType === TaskType.NODE_CLASSIFICATION}
+              {#if task.taskType === TaskType.NODE_CLASSIFICATION}
                 <CustomButton
                   type={"secondary"}
                   inverse={false}
@@ -253,8 +268,8 @@
               {#if isCustomizeModalOpen}
                 <PlotDatasetSplitter
                   on:saveSplitClicked={saveSplitClicked}
-                  {seed}
-                  {trainPercentage}
+                  seed={task.seed}
+                  trainPercentage={task.trainPercentage}
                 />
               {/if}
             </li>
@@ -262,7 +277,7 @@
             <li class="range">
               <input
                 type="range"
-                bind:value={trainPercentage}
+                bind:value={task.trainPercentage}
                 min="0"
                 max="1"
                 step="0.05"
@@ -270,7 +285,7 @@
               />
               <input
                 type="number"
-                bind:value={trainPercentage}
+                bind:value={task.trainPercentage}
                 min="0"
                 max="1"
                 step="0.05"
@@ -292,13 +307,13 @@
             <li class="range">
               <input
                 type="range"
-                bind:value={seed}
+                bind:value={task.seed}
                 min="0"
                 max="1000"
                 step="10"
                 class="slider"
               />
-              <input type="number" bind:value={seed} class="inputNumber" />
+              <input type="number" bind:value={task.seed} class="inputNumber" />
             </li>
           </div>
 
@@ -347,14 +362,13 @@
             <CustomButton
               type={"secondary"}
               inverse={false}
-              disabled={$selectedModelType === undefined ||
-                $selectedTaskType === undefined ||
-                epochs === 0 ||
-                learningRate === 0.0 ||
-                trainPercentage === 0 ||
-                trainPercentage === 1}
+              disabled={task.mlModelType === undefined ||
+                task.epochs === 0 ||
+                task.learningRate === 0.0 ||
+                task.trainPercentage === 0 ||
+                task.trainPercentage === 1}
               on:click={() => {
-                createTask();
+                createTask()
               }}>Create Task</CustomButton
             >
           </div>
@@ -364,24 +378,24 @@
       </div>
       <hr />
     </div>
-  {:else if experimentState === ExperimentState.PROGRESS}
+  {:else if task.state === ExperimentState.PROGRESS}
     <div class="progress_bar">
       <ProgressBar helperText={progressBarData.text} />
     </div>
-  {:else if experimentState === ExperimentState.RESULT}
+  {:else if task.state === ExperimentState.RESULT}
     <div class="newExperiment">
       <CustomButton
         type={"secondary"}
         inverse={false}
         on:click={() => {
-          startNewExperiment();
+          startNewExperiment()
         }}
         >Start New Experiment
       </CustomButton>
     </div>
     <hr />
-    <ExperimentResults />
-  {:else if experimentState === ExperimentState.ERROR}
+    <ExperimentResults {task} />
+  {:else if task.state === ExperimentState.ERROR}
     <p>Error</p>
   {/if}
 </div>

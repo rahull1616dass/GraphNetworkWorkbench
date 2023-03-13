@@ -4,16 +4,11 @@
   import { ImportModalType } from "../../definitions/importModalType";
   import FromWeb from "./AddNetwork/FromWeb.svelte";
   import UploadNetwork from "./AddNetwork/UploadNetwork/UploadNetwork.svelte";
-  import { testStoreValue } from "../../stores";
   import { getAuth } from "firebase/auth";
-  import { authUserStore, selectedMenuItem } from "../../stores";
+  import { authUserStore } from "../../stores";
   import HomeVisSpec from "../../data/HomeVisSpec";
-  import MiserablesData from "../../data/MiserablesVisSpec";
   import { default as vegaEmbed } from "vega-embed";
-  import { MenuItem } from "../../definitions/menuItem";
-  import logo from "../../assets/logo.svg";
-  import CustomModal from "../common/CustomModal.svelte";
-  import { fade, fly } from "svelte/transition";
+  import { fly } from "svelte/transition";
 
   let isLoggedIn: boolean = false;
   $: isLoggedIn =

@@ -27,6 +27,6 @@ ssh vingilot -t "
   if test -d /home/stud/tarasov/xtai_lab3/application.new; then rm -rf /home/stud/tarasov/xtai_lab3/application.new/*; fi;
   mkdir -p /home/stud/tarasov/xtai_lab3/application.new;
 "
-rsync -av backend/ml/deployment/production/* --exclude '*.sh' vingilot:/home/stud/tarasov/xtai_lab3/deployment.new
-rsync -av backend/ml/requirements.* vingilot:/home/stud/tarasov/xtai_lab3/deployment.new
-rsync -av --exclude docs --exclude README.md --exclude test --exclude deployment --exclude requirements.* backend/ml/* vingilot:/home/stud/tarasov/xtai_lab3/application.new
+rsync -a --exclude '*.sh' backend/ml/deployment/production/ vingilot:/home/stud/tarasov/xtai_lab3/deployment.new/
+rsync -a backend/ml/requirements.* vingilot:/home/stud/tarasov/xtai_lab3/deployment.new
+rsync -a --exclude docs --exclude README.md --exclude test --exclude deployment --exclude requirements.* backend/ml/* vingilot:/home/stud/tarasov/xtai_lab3/application.new

@@ -47,7 +47,13 @@ export const tasksConverter = {
       data.hiddenLayerSizes,
       data.seed,
       data.createdAt,
-      data.state
+      data.state,
+      data.xColumns,
+      data.yColumn,
+      data.expert_opinion,
+      data.accuracy,
+      data.losses,
+      data.predictions,
     )
   },
 }
