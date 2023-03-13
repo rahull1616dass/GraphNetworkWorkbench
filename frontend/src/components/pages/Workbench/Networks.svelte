@@ -191,6 +191,7 @@
     height: 100%;
     overflow: auto;
     //flex-wrap: nowrap;
+    background: white;
   }
 
   p {

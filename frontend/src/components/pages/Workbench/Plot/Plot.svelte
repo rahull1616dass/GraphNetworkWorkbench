@@ -237,7 +237,7 @@
   }
 </script>
 
-<div in:fly={{ y: -50, duration: 250, delay: 300 }}>
+<div class ="mainContent" in:fly={{ y: -50, duration: 250, delay: 300 }}>
   <div class="dropdown">
     <select
       class="selectDropdown"
@@ -253,7 +253,7 @@
       {/each}
     </select>
   </div>
-  
+
   {#if currentNetwork != undefined}
   <div class="stats">
     <div class="stats_header">
@@ -345,6 +345,9 @@
 </div>
 
 <style lang="scss">
+  .mainContent{
+    background: white;
+  }
   .content {
     /*border: 1px solid #e5e5e5;
     border-radius: 5px;*/
