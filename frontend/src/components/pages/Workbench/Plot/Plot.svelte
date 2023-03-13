@@ -198,8 +198,7 @@
   let detailedItem: Node | Link = undefined
   let isEditMode: boolean = false
   let isPlottable: boolean = true
-  $: isPlottable = $networksList[$selectedNetworkIndex].nodes.length < $maxNumberOfNodesForPlot
-
+  $: isPlottable = $networksList[0].nodes.length < $maxNumberOfNodesForPlot
   // Anytime the user updates a node or a link in the modal, update the network
   function updateItem(event: CustomEvent) {
     let updatedItem: Node | Link = event.detail.updatedItem
@@ -255,6 +254,23 @@
     </select>
   </div>
   
+  {#if currentNetwork != undefined}
+  <div class="stats">
+    <div class="stats_header">
+      <img src={statsIcon} class="stats_icon" alt="Stats Icon" />
+      <h3>Network Stats</h3>
+    </div>
+    <div class="stats_content">
+      <p>Name: {currentNetwork.metadata.name}</p>
+      <p>
+        Description: {currentNetwork.metadata.description}
+      </p>
+      <p>Nodes: {currentNetwork.nodes.length}</p>
+      <p>Edges: {currentNetwork.links.length}</p>
+    </div>
+  </div>
+  {/if}
+
   <div class="content">
     {#if currentNetwork === undefined}
       <div class="no_networks">
@@ -263,6 +279,7 @@
         </h1>
       </div>
     {:else}
+    
       {#if !isEditMode}
         <CustomButton type={"secondary"} on:click={() => (isEditMode = true)}
           >Enter Edit Mode</CustomButton
@@ -297,20 +314,6 @@
           <p>{editModeRequiredModalData.messageBody}</p>
         </Modal>
       {/if}
-      <div class="stats">
-        <div class="stats_header">
-          <img src={statsIcon} class="stats_icon" alt="Stats Icon" />
-          <h3>Network Stats</h3>
-        </div>
-        <div class="stats_content">
-          <p>Name: {currentNetwork.metadata.name}</p>
-          <p>
-            Description: {currentNetwork.metadata.description}
-          </p>
-          <p>Nodes: {currentNetwork.nodes.length}</p>
-          <p>Edges: {currentNetwork.links.length}</p>
-        </div>
-      </div>
     {/if}
   </div>
   
