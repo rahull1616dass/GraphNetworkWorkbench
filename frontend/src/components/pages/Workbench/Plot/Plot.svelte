@@ -347,26 +347,17 @@
 <style lang="scss">
   .mainContent{
     background: white;
-  }
-  .content {
-    /*border: 1px solid #e5e5e5;
-    border-radius: 5px;*/
-    background-color: white;
-    //margin-left: 20%;
-    margin: auto;
     display: flex;
     flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-between;
     align-items: center;
-    right: 0;
-    width: 80%;
-    height: 20%;
+  }
+  .content {
+    padding-top: 10px;
   }
   .stats {
-    position: absolute;
-    right: 10%;
-    background-color: white;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 0.5rem;
+    padding-top: 10px;
   }
 
   .stats_header {
@@ -398,11 +389,7 @@
   }
 
   .dropdown {
-    position: flex;
-    width: 50%;
-    background-color: whitesmoke;
-    margin-left: 25%;
-    margin-top: 1%;
+    padding-top:10px
   }
   .selectDropdown {
     width: 95%;
