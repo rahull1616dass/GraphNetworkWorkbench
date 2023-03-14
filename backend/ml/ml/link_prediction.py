@@ -1,3 +1,5 @@
+from typing import Callable
+
 import torch
 import mlflow
 import torch.nn
@@ -6,7 +8,7 @@ from torch.optim import Adam
 from torch_geometric.data import Data
 from torch.nn import BCEWithLogitsLoss
 import torch_geometric.transforms as T
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
 from torch_geometric.utils import negative_sampling
 
 from core.loggers import timeit
@@ -58,14 +60,42 @@ class LinkPredictor:
         loss = self.criterion(out, edge_label)
         loss.backward()
         self.optimizer.step()
-        return loss.item()
+        return round(loss.item(), 4)
+
+    def __get_y_pred(self, data: Data):
+        self.model.eval()
+        z = self.model.encode(data.x, data.edge_index)
+        out = self.model.decode(z, data.edge_label_index).view(-1).sigmoid()
+        y_true = data.edge_label.cpu().numpy()
+        return y_true, out.detach().cpu()
 
     @torch.no_grad()
-    def test(self, test_data: Data):
-        self.model.eval()
-        z = self.model.encode(test_data.x, test_data.edge_index)
-        out = self.model.decode(z, test_data.edge_label_index).view(-1).sigmoid()
-        return roc_auc_score(test_data.edge_label.cpu().numpy(), out.cpu().numpy())
+    def test(self, data: Data):
+        y_true, out = self.__get_y_pred(data)
+        y_pred = out.numpy()
+        return round(roc_auc_score(y_true, y_pred), 4)
+
+    def get_all_metrics(self, data: Data):
+        y_true, out = self.__get_y_pred(data)
+        y_bin_pred = torch.where(out >= 0.5, 1.0, 0.0).numpy()
+        y_cont_pred = out.numpy()
+
+        accuracy = round(accuracy_score(y_true, y_bin_pred), 4)
+        mlflow.log_metric("accuracy", accuracy)
+
+        precision = round(precision_score(y_true, y_bin_pred), 4)
+        mlflow.log_metric("precision", precision)
+
+        recall = round(recall_score(y_true, y_bin_pred), 4)
+        mlflow.log_metric("recall", recall)
+
+        f1 = round(f1_score(y_true, y_bin_pred), 4)
+        mlflow.log_metric("f1", f1)
+
+        roc_auc = round(roc_auc_score(y_true, y_cont_pred), 4)
+        mlflow.log_metric("ROC AUC", roc_auc)
+
+        return accuracy, precision, recall, f1, roc_auc
 
     @torch.no_grad()
     def predict(self, data: Data):
@@ -78,7 +108,7 @@ class LinkPredictor:
 def predict_edges(data: Data, params: MLParams):
     mlflow.set_experiment("Link Prediction")
 
-    with mlflow.start_run() as current_run:
+    with mlflow.start_run():
         mlflow.log_params(params.dict())
 
         device = set_up_device(params.seed)
@@ -95,9 +125,17 @@ def predict_edges(data: Data, params: MLParams):
 
         losses, val_roc_auc_scores =  predictor.train(train_data, val_data, params.epochs)
 
-        test_roc_auc_score = predictor.test(test_data)
-        mlflow.log_metric("test_roc_auc_curve", test_roc_auc_score)
+        accuracy, precision, recall, f1, roc_auc = predictor.get_all_metrics(test_data)
 
         predictions = predictor.predict(test_data)
 
-    return losses, val_roc_auc_scores, test_roc_auc_score, predictions.tolist()
+    return (
+        losses,
+        val_roc_auc_scores,
+        accuracy,
+        precision,
+        recall,
+        f1,
+        roc_auc,
+        predictions.tolist()
+    )

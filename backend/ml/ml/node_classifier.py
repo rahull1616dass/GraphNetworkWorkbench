@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import torch
 import mlflow
@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from dataclasses import dataclass
 from torch_geometric.data import Data
 import torch_geometric.transforms as T
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.preprocessing import LabelEncoder
 
 from core.loggers import timeit
@@ -52,10 +52,36 @@ class NodeClassifier:
             val_acc_scores.append(val_acc_score)
         return losses, val_acc_scores
 
-    def test(self, data: Data) -> float:
+    def __get_data_to_compare(self, data: Data):
         self.model.eval()
         out = self.model.layers(data.x, data.edge_index)
-        return accuracy_score(data.y[data.test_mask].cpu().numpy(), torch.argmax(out[data.test_mask], dim=1).unsqueeze(1).cpu().numpy())
+        y_true = data.y[data.test_mask].cpu().numpy()
+        y_predicted = torch.argmax(out[data.test_mask], dim=1).unsqueeze(1).cpu().numpy()
+        return y_true, y_predicted
+
+    def test(self, data: Data) -> float:
+        y_true, y_predicted = self.__get_data_to_compare(data)
+        return round(accuracy_score(y_true, y_predicted), 4)
+
+    def get_all_metrics(self, data: Data) -> Tuple:
+        y_true, y_predicted = self.__get_data_to_compare(data)
+
+        accuracy = round(accuracy_score(y_true, y_predicted), 4)
+        mlflow.log_metric("accuracy", accuracy)
+
+        precision = round(precision_score(y_true, y_predicted), 4)
+        mlflow.log_metric("precision", precision)
+
+        recall = round(recall_score(y_true, y_predicted), 4)
+        mlflow.log_metric("recall", recall)
+
+        f1 = round(f1_score(y_true, y_predicted), 4)
+        mlflow.log_metric("f1", f1)
+
+        roc_auc = round(roc_auc_score(y_true, y_predicted), 4)
+        mlflow.log_metric("ROC AUC", roc_auc)
+
+        return accuracy, precision, recall, f1, roc_auc
 
     def predict(self, data: Data) -> List:
         self.model.eval()
@@ -79,13 +105,21 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
         node_classifier = NodeClassifier(data_to_use.num_features, device, params, len(encoder.classes_))
         losses, val_acc_scores = node_classifier.train(data_to_use, params.epochs)
 
-        final_accuracy: float = node_classifier.test(data_to_use)
-        mlflow.log_metric("accuracy", final_accuracy)
+        accuracy, precision, recall, f1, roc_auc = node_classifier.get_all_metrics(data_to_use)
 
         predictions: List = encoder.inverse_transform(node_classifier.predict(data_to_use))
         test_node_indices = torch.unique(data_to_use.edge_index)[data_to_use.test_mask].cpu().numpy().tolist()
         node_idx_pred_class_pairs = {node_idx: str(pred_class)
                                      for node_idx, pred_class in zip(test_node_indices, predictions)}
 
-    return losses, val_acc_scores, final_accuracy, node_idx_pred_class_pairs
+    return (
+        losses,
+        val_acc_scores,
+        accuracy,
+        precision,
+        recall,
+        f1,
+        roc_auc,
+        node_idx_pred_class_pairs
+    )
     
