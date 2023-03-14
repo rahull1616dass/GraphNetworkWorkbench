@@ -1,18 +1,22 @@
 from typing import List, Dict
 
-from pydantic import BaseModel
+from core.camel import CamelModel
 
 
-class NodeClassResponse(BaseModel):
+class MLResponse(CamelModel):
     losses: List[float]
-    predictions: Dict
+    val_scores: List[float]
     accuracy: float
+    precision: float
+    recall: float
+    f1: float
+    auc: float
     expert_opinion: str
 
 
-class EdgePredResponse(BaseModel):
-    losses: List[int]
-    score: float
-    validation_scores: List[float]
+class NodeClassResponse(MLResponse):
+    predictions: Dict
+
+
+class EdgePredResponse(MLResponse):
     predictions: List
-    expert_opinion: str
