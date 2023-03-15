@@ -3,3 +3,5 @@ export const enum Endpoints {
     NETZSCLEUDER_NET = "net/",
     NETZSCHELEUDER_NETS = "nets"
 }
+
+export const COLUMN_IS_TRAIN = "is_train"

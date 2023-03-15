@@ -24,6 +24,7 @@
   import { ModalData } from "../../../definitions/modalData"
   import ExperimentResults from "../../common/ExperimentResults.svelte"
   import { delay } from "../../../util/generalUtil"
+  import { COLUMN_IS_TRAIN } from "../../../definitions/constants"
 
   let hiddenLayers = [{ first: true, checked: false, size: 10 }]
 
@@ -35,12 +36,12 @@
     100, // epochs,
     0.8, // trainPercentage
     0.01, // learningRate
-   undefined, // hiddenLayerSizes
-   $defaultSeed, // seed
-   undefined, // createdAt,
-   ExperimentState.CREATE, // experimentState,
-   [], // xColumns,
-    undefined, // yColumn,
+    undefined, // hiddenLayerSizes
+    $defaultSeed, // seed
+    undefined, // createdAt,
+    ExperimentState.CREATE, // experimentState,
+    [], // xColumns,
+    undefined // yColumn,
   )
 
   let isCustomizeModalOpen: boolean = false
@@ -59,14 +60,22 @@
     true,
     "Creating experiment..."
   )
+  let customizedSplitDefined: boolean = false
 
   // remove the is_train column from the nodeColumns array
-  $: nodeColumns = Object.keys(
-    currentNetwork.nodes[0]
-  ).filter((nodeColumns) => nodeColumns !== "is_train")
+  $: nodeColumns = Object.keys(currentNetwork.nodes[0]).filter(
+    (nodeColumns) => nodeColumns !== COLUMN_IS_TRAIN
+  )
+  $: if (Object.keys(currentNetwork.nodes[0]).includes(COLUMN_IS_TRAIN)) {
+    customizedSplitDefined = true
+  }
 
   $: task.hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
   $: currentNetwork = $networksList[$selectedNetworkIndex]
+
+  function resetCustomizedSplit() {
+    currentNetwork.nodes.forEach((node) => delete node[COLUMN_IS_TRAIN])
+  }
 
   function handleModelChange(event) {
     task.mlModelType = event.detail
@@ -134,10 +143,7 @@
           .then((taskDocId) => {
             console.log(`Task created with id: ${taskDocId}`)
             progressBarData.text = "Experiment created. Running..."
-            listenForExperimentResult(
-              currentNetwork.metadata.id,
-              taskDocId
-            )
+            listenForExperimentResult(currentNetwork.metadata.id, taskDocId)
               .then((resultTask: Task) => {
                 task = resultTask
                 progressBarData.isPresent = false
@@ -227,7 +233,11 @@
                 step="10"
                 class="slider"
               />
-              <input type="number" bind:value={task.epochs} class="inputNumber" />
+              <input
+                type="number"
+                bind:value={task.epochs}
+                class="inputNumber"
+              />
             </li>
           </div>
           <div>
@@ -264,6 +274,15 @@
                     (isCustomizeModalOpen = !isCustomizeModalOpen)}
                   >Customize</CustomButton
                 >
+                {#if customizedSplitDefined === true}
+                  <p>Customized training percentage used</p>
+                  <CustomButton
+                    type={"secondary"}
+                    inverse={false}
+                    fontsize={60}
+                    on:click={() => resetCustomizedSplit()}>Reset</CustomButton
+                  >
+                {/if}
               {/if}
               {#if isCustomizeModalOpen}
                 <PlotDatasetSplitter
@@ -282,6 +301,7 @@
                 max="1"
                 step="0.05"
                 class="slider"
+                disabled={customizedSplitDefined}
               />
               <input
                 type="number"

@@ -15,6 +15,7 @@
   import { createEventDispatcher } from "svelte"
   import CustomModal from "./CustomModal.svelte"
   import PlotPrediction from "./PlotPrediction.svelte"
+  import { COLUMN_IS_TRAIN } from "../../definitions/constants"
 
   export let seed: number = 0
   export let trainPercentage: number = 0.8
@@ -35,7 +36,7 @@
     }
     updateVisSpec(currentNetwork, VisSpec)
     if (isFirstLoad) {
-      setColorKey(VisSpec, "is_train")
+      setColorKey(VisSpec, COLUMN_IS_TRAIN)
     }
     vegaEmbed("#viz", VisSpec, { actions: false })
       .then((result) => {
