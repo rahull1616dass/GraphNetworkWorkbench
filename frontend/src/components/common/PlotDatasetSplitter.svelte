@@ -19,9 +19,21 @@
 
   export let seed: number = 0
   export let trainPercentage: number = 0.8
+  export let currentNetwork: Network = undefined
+  let networkToUpdate: Network = undefined
+  export let nameColumn: string = "name"
+  export let groupColumn: string = "group"
 
   let hoverData: HoverData = undefined
-  let currentNetwork: Network = undefined
+
+  let isTrainTestSplitValid: bool = false
+
+  $: if (currentNetwork != undefined) {
+    isTrainTestSplitValid = currentNetwork.nodes.every(
+      (node) => node.is_train != undefined
+    )
+  }
+  const HOVER_PIXEL_OFFSET: number = 200
   const dispatcher = createEventDispatcher()
 
   // Run an onMount function to initialize the plot
@@ -31,10 +43,10 @@
 
   function loadNetwork(isFirstLoad: boolean = false) {
     if (isFirstLoad) {
-      currentNetwork = cloneDeep($networksList[$selectedNetworkIndex])
-      currentNetwork = train_test_split(currentNetwork, seed, trainPercentage)
+      networkToUpdate = cloneDeep(currentNetwork)
+      networkToUpdate = train_test_split(networkToUpdate, seed, trainPercentage)
     }
-    updateVisSpec(currentNetwork, VisSpec)
+    updateVisSpec(networkToUpdate, VisSpec)
     if (isFirstLoad) {
       setColorKey(VisSpec, COLUMN_IS_TRAIN)
     }
@@ -48,13 +60,13 @@
           } else {
             console.log(
               `For node ${item.datum.name} is_train = ${
-                currentNetwork.nodes[item.datum.index].is_train
+                networkToUpdate.nodes[item.datum.index].is_train
               }`
             )
-            currentNetwork.nodes[item.datum.index].is_train = !currentNetwork.nodes[item.datum.index].is_train
+            networkToUpdate.nodes[item.datum.index].is_train = !networkToUpdate.nodes[item.datum.index].is_train
             console.log(
               `For node ${item.datum.name} is_train = ${
-                currentNetwork.nodes[item.datum.index].is_train
+                networkToUpdate.nodes[item.datum.index].is_train
               }`
             )
             loadNetwork(false)
@@ -65,36 +77,27 @@
           if (item != undefined && item.datum != undefined) {
             // @ts-ignore
             if (item != undefined && item.path != undefined) {
-              // @ts-ignore
-              console.log(item.path)
-              hoverData = new HoverData(
-                HoverType.LINK,
-                new Link(
-                  item.datum.source.datum.name,
-                  item.datum.target.datum.name,
-                  item.datum.value
-                ),
-                undefined,
-                // @ts-ignore
-                event.clientX,
-                // @ts-ignore
-                event.clientY
-              )
+              /*
+              Link is hovered. Since we do not support ML tasks that train with the links,
+              the link is not clickable and we do not show any hover data.
+              */
             } else {
               hoverData = new HoverData(
                 HoverType.NODE,
                 undefined,
                 new Node(
-                  item.datum.name,
+                  item.datum[nameColumn],
                   undefined,
-                  item.datum.group,
+                  item.datum[groupColumn],
                   item.datum.index,
-                  undefined
+                  undefined,
+                  // @ts-ignore
+                  networkToUpdate.nodes[item.datum.index].is_train
                 ),
                 // @ts-ignore
-                event.clientX,
+                event.clientX - HOVER_PIXEL_OFFSET,
                 // @ts-ignore
-                event.clientY
+                event.clientY - HOVER_PIXEL_OFFSET
               )
             }
           }
@@ -111,6 +114,12 @@
 <CustomModal on:close={() => console.log("cancel") }>
   <h4 slot="header">Customize Train/Test Split</h4>
   <div slot="body">
+    <div class="info">
+      <p>Green nodes: Test set</p><br />
+      <p>Red nodes: Training set</p>
+        Click on the nodes to change their training status. The color of the
+        nodes will change to reflect the new status.
+    </div>
     <div id="viz" />
 
     {#if hoverData !== undefined}
@@ -118,12 +127,19 @@
     {/if}
   </div>
 
+  <div class="condition">
+    For each of the unique value in the <b>{groupColumn}</b> column (the column you selected to 
+    be predicted), there has to be at least one node in the training set and one node in the test set.
+    Currently this condition is <b>{networkToUpdate.isTrainTestSplitValid ? "met" : "not met"}</b>.
+
+  </div>
+
   <div slot="footer">
     <CustomButton
       type={"secondary"}
       inverse={false}
       on:click={() => {
-        dispatcher("saveSplitClicked", { network: currentNetwork })
+        dispatcher("saveSplitClicked", { network: networkToUpdate })
       }}
     >
       Save

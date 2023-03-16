@@ -7,8 +7,16 @@
 <main>
   {#if hoverData.type === HoverType.NODE}
     <div class="node" style="--x: {hoverData.x}px; --y: {hoverData.y}px;">
-      {hoverData.node.name}<br />
+      {#if hoverData.node.name === undefined}
+        {hoverData.node.index}
+      {:else}
+        {hoverData.node.name}
+      {/if}<br />
       Group: {hoverData.node.group}
+      {#if hoverData.node.is_train !== undefined}
+        <br />
+        In the {hoverData.node.is_train ? "Train" : "Test"} set
+      {/if}
     </div>
   {:else if hoverData.type === HoverType.LINK}
     <div class="link" style="--x: {hoverData.x}px; --y: {hoverData.y}px;">

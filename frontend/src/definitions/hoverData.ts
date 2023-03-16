@@ -7,5 +7,6 @@ export class HoverData{
         readonly node: Node,
         readonly x: number = undefined,
         readonly y: number = undefined,
+        readonly is_train: boolean = undefined,
     ){}
 }

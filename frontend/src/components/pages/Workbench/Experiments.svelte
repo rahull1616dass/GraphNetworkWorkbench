@@ -268,7 +268,11 @@
 
           <div>
             <li>
+              {#if task.taskType === TaskType.NODE_CLASSIFICATION && customizedSplitDefined === true}
+              Train/Test Split
+              {:else}
               Training Percentage
+              {/if}
               {#if task.taskType === TaskType.NODE_CLASSIFICATION}
                 <CustomButton
                   type={"secondary"}
@@ -292,30 +296,32 @@
                 <PlotDatasetSplitter
                   on:saveSplitClicked={saveSplitClicked}
                   seed={task.seed}
+                  {currentNetwork}
+                  groupColumn={task.yColumn}
                   trainPercentage={task.trainPercentage}
                 />
               {/if}
             </li>
-
-            <li class="range">
-              <input
-                type="range"
-                bind:value={task.trainPercentage}
-                min="0"
-                max="1"
-                step="0.05"
-                class="slider"
-                disabled={customizedSplitDefined}
-              />
-              <input
-                type="number"
-                bind:value={task.trainPercentage}
-                min="0"
-                max="1"
-                step="0.05"
-                class="inputNumber"
-              />
-            </li>
+            {#if task.taskType !== TaskType.NODE_CLASSIFICATION || (task.taskType === TaskType.NODE_CLASSIFICATION && customizedSplitDefined === false)}
+              <li class="range">
+                <input
+                  type="range"
+                  bind:value={task.trainPercentage}
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  class="slider"
+                />
+                <input
+                  type="number"
+                  bind:value={task.trainPercentage}
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  class="inputNumber"
+                />
+              </li>
+            {/if}
           </div>
 
           <div>
