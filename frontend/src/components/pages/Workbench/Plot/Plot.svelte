@@ -52,11 +52,16 @@
     updateVisSpec(network, VisSpec)
     createVegaEmbed(VisSpec)
   }
-
+  
   function createVegaEmbed(embeddedNetwork: any) {
     vegaEmbed("#viz", embeddedNetwork, { actions: false })
       .then((result) => {
         viz = result.view
+        result.view.addSignalListener('linkDistance', (value, val) => {
+          result.view.width(10*val)
+          result.view.height(10*val)
+        });
+
         result.view.addEventListener("click", function (_, item) {
           console.log("CLICK", item)
           if (!isEditMode) {
@@ -265,6 +270,9 @@
       <p>
         Description: {currentNetwork.metadata.description}
       </p>
+      <!-- <p>
+        citation: {currentNetwork.metadata.}
+      </p> -->
       <p>Nodes: {currentNetwork.nodes.length}</p>
       <p>Edges: {currentNetwork.links.length}</p>
     </div>
