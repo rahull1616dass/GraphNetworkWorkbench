@@ -1,12 +1,7 @@
 from typing import List
-from pydantic import BaseModel, AnyHttpUrl
+from pydantic import AnyHttpUrl
 
-from stringcase import camelcase
-
-
-class CamelModel(BaseModel):
-    class Config:
-        alias_generator = camelcase
+from core.camel import CamelModel
 
 
 class MLRequest(CamelModel):
