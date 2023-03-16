@@ -1,6 +1,7 @@
 import cloneDeep from "lodash.clonedeep"
 import VisSpec from "../data/VisSpec"
 import type { VisualizationSpec } from "vega-embed"
+import { COLUMN_IS_TRAIN } from "../definitions/constants"
 import type { Network } from "../definitions/network"
 
 export function updateVisSpec(

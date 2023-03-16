@@ -156,7 +156,7 @@ exports.onTaskCreated = functions.firestore
                 // @ts-ignore
                 code: error.response.status,
                 state: "ERROR", //ExperimentState[ExperimentState.ERROR]
-                message: `Error in ML Service call: ${error.message}`
+                errorMessage: `Error in ML Service call: ${error.message}`
             }, context)
         })
     })

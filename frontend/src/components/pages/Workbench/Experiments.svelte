@@ -27,6 +27,7 @@
   import { COLUMN_IS_TRAIN } from "../../../definitions/constants"
 
   let hiddenLayers = [{ first: true, checked: false, size: 10 }]
+  let customizedSplitDefined: boolean = false
 
   // These values should be set by UI Elements later on
   let task = new Task(
@@ -34,7 +35,8 @@
     undefined, // mlModelType,
     undefined, // taskType,
     100, // epochs,
-    0.8, // trainPercentage
+    0.8, // trainPercentage,
+    customizedSplitDefined, //useCustomSplit
     0.01, // learningRate
     undefined, // hiddenLayerSizes
     $defaultSeed, // seed
@@ -60,10 +62,9 @@
     true,
     "Creating experiment..."
   )
-  let customizedSplitDefined: boolean = false
 
-  // remove the is_train column from the nodeColumns array
-  $: nodeColumns = Object.keys(currentNetwork.nodes[0]).filter(
+  // remove the is_train column from the selectableColumns array
+  $: selectableColumns = Object.keys(currentNetwork.nodes[0]).filter(
     (nodeColumns) => nodeColumns !== COLUMN_IS_TRAIN
   )
   $: if (Object.keys(currentNetwork.nodes[0]).includes(COLUMN_IS_TRAIN)) {
@@ -75,6 +76,7 @@
 
   function resetCustomizedSplit() {
     currentNetwork.nodes.forEach((node) => delete node[COLUMN_IS_TRAIN])
+    customizedSplitDefined = false
   }
 
   function handleModelChange(event) {
@@ -128,6 +130,7 @@
 
   async function createTask() {
     task.state = ExperimentState.PROGRESS
+    task.useCustomSplit = customizedSplitDefined
     // await delay(2000) // To simulate task being run. TODO: Remove this later on.
     await getExperimentTasks(currentNetwork.metadata.id)
       .then((tasks) => {
@@ -198,15 +201,16 @@
           <hr />
 
           <div>Configure Columns:</div>
-
-          <DropdownSelector
-            placeholder={"Select a column to predict"}
-            type={DropdownSelectorType.Y_COLUMN}
-            on:columnChange={handleColumnChange}
-          />
+          {#if task.taskType === TaskType.NODE_CLASSIFICATION}
+            <DropdownSelector
+              placeholder={"Select a column to predict"}
+              type={DropdownSelectorType.Y_COLUMN}
+              on:columnChange={handleColumnChange}
+            />
+          {/if}
 
           <div>
-            {#each nodeColumns as column}
+            {#each selectableColumns as column}
               <label>
                 <input
                   type="checkbox"
@@ -418,7 +422,7 @@
     <hr />
     <ExperimentResults {task} />
   {:else if task.state === ExperimentState.ERROR}
-    <p>Error</p>
+    <p>Error: {task.errorMessage}</p>
   {/if}
 </div>
 

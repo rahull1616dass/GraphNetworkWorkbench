@@ -9,9 +9,11 @@
     import Hover from "../pages/Workbench/Plot/Hover.svelte"
     import { HoverType } from "../../definitions/hoverType"
     import cloneDeep from "lodash.clonedeep"
+    import { PredictionResult } from "../../definitions/predictionResult"
+    import type { Task } from "../../definitions/task"
 
     let hoverData: HoverData = undefined
-    export let predictions: Record<string, string> = undefined
+    export let task: Task = undefined
     // Run an onMount function to initialize the plot
     onMount(() => { 
         loadNetwork()
@@ -19,8 +21,21 @@
   
     function loadNetwork() {
       let currentNetwork = cloneDeep($networksList[$selectedNetworkIndex])
+      currentNetwork.forEach((node) => {
+        // If node.index is not in predictions, then that node was in the training set
+        if (task.predictions[node.index] === undefined) {
+          node.result = PredictionResult.IN_TRAIN_SET
+        }
+        if(task.predictions[node.index] === task.yColumn[node.index]) {
+          node.result = PredictionResult.CORRECT
+        }else {
+          node.result = PredictionResult.WRONG
+        }
+      })
+      
+
       updateVisSpec(currentNetwork, VisSpec)
-      setColorKey(VisSpec, "group", ["#FF0000", "#097969"]) // TODO: Change group to prediction
+      setColorKey(VisSpec, "result", ["#808080", "#FF0000", "#097969"]) // TODO: Change group to prediction
       vegaEmbed("#viz", VisSpec, { actions: false })
         .then((result) => {
           result.view.addEventListener("mouseover", function (event, item) {

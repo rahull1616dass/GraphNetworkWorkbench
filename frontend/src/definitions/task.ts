@@ -10,6 +10,7 @@ export class Task {
     public taskType: TaskType = undefined,
     public epochs: number = undefined,
     public trainPercentage: number = undefined,
+    public useCustomSplit: boolean = undefined,
     public learningRate: number = undefined,
     public hiddenLayerSizes: number[] = undefined,
     public seed: number = undefined,
@@ -21,6 +22,7 @@ export class Task {
     public accuracy: number = undefined,
     public losses: number[] = undefined,
     public predictions: Record<string, string> = undefined,
+    public errorMessage: string = undefined
   ) {}
 
   public equals(other: Task): boolean {

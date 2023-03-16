@@ -25,6 +25,7 @@ export const tasksConverter = {
       taskType: task.taskType,
       epochs: task.epochs,
       trainPercentage: task.trainPercentage,
+      //useCustomSplit: task.useCustomSplit,
       learningRate: task.learningRate,
       hiddenLayerSizes: task.hiddenLayerSizes,
       seed: task.seed,
@@ -43,6 +44,7 @@ export const tasksConverter = {
       data.taskType,
       data.epochs,
       data.trainPercentage,
+      data.useCustomSplit,
       data.learningRate,
       data.hiddenLayerSizes,
       data.seed,
@@ -54,6 +56,7 @@ export const tasksConverter = {
       data.accuracy,
       data.losses,
       data.predictions,
+      data.errorMessage,
     )
   },
 }
