@@ -1,7 +1,7 @@
 """REST API"""
 from celery import chain
 from fastapi import APIRouter, Body
-from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.responses import RedirectResponse
 
 from core.loggers import get_logger
 from app.workflows import (
