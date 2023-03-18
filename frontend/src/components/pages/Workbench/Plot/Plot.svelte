@@ -58,8 +58,16 @@
       .then((result) => {
         viz = result.view
         result.view.addSignalListener('linkDistance', (value, val) => {
-          result.view.width(10*val)
-          result.view.height(10*val)
+          console.log(parentWidth)
+          if(parentWidth<((currentNetwork.nodes.length+val)*dynamicVegaCanvasConstant)){
+            parentStyle = parentStyleFlexStart
+          }
+          else{
+            parentStyle = parentStyleCentered
+          }
+
+          result.view.width((currentNetwork.nodes.length+val)*dynamicVegaCanvasConstant)
+          result.view.height((currentNetwork.nodes.length+val)*dynamicVegaCanvasConstant)
         });
 
         result.view.addEventListener("click", function (_, item) {
@@ -173,6 +181,16 @@
 
     // Anytime the networksList store value is updated, update the network
     if(isPlottable) loadNetwork(false)
+
+    const parentElement = document.querySelector(`.${parentClass}`);
+    parentWidth = parseInt(getComputedStyle(parentElement).getPropertyValue('width'), 10);
+    // vegaEmbed("#viz", VisSpec, { actions: false })
+    //   .then((result) => {
+
+    //   result.view.width((currentNetwork.nodes.length+startNodeDistance)*dynamicVegaCanvasConstant)
+    //   result.view.height((currentNetwork.nodes.length+startNodeDistance)*dynamicVegaCanvasConstant)
+    // })
+
   })
 
   let viz = undefined
@@ -205,6 +223,14 @@
   let isPlottable: boolean = true
   $: isPlottable = $networksList[0].nodes.length < $maxNumberOfNodesForPlot
   // Anytime the user updates a node or a link in the modal, update the network
+
+  const dynamicVegaCanvasConstant = 8
+  const startNodeDistance = 15
+  let parentStyle = `background: white; display: flex; flex-direction: column; align-items: center; flex-wrap: nowrap; justify-content: space-between;`;
+  const parentClass = 'mainContent'
+  let parentStyleCentered = `background: white; display: flex; flex-direction: column; align-items: center; flex-wrap: nowrap; justify-content: space-between;`;
+  let parentStyleFlexStart = `background: white; display: flex; flex-direction: column; align-items: flex-start; flex-wrap: nowrap; justify-content: space-between;`;
+  let parentWidth = 0
   function updateItem(event: CustomEvent) {
     let updatedItem: Node | Link = event.detail.updatedItem
     console.log("updating item", updatedItem)
@@ -242,7 +268,7 @@
   }
 </script>
 
-<div class ="mainContent" in:fly={{ y: -50, duration: 250, delay: 300 }}>
+<div class ={parentClass} style={parentStyle} in:fly={{ y: -50, duration: 250, delay: 300 }}>
   <div class="dropdown">
     <select
       class="selectDropdown"
@@ -353,19 +379,21 @@
 </div>
 
 <style lang="scss">
-  .mainContent{
-    background: white;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-  }
+  // .mainContent{
+  //   background: white;
+  //   display: flex;
+  //   flex-direction: column;
+  //   flex-wrap: nowrap;
+  //   justify-content: space-between;
+  //   align-items: flex-start;
+  // }
   .content {
     padding-top: 10px;
+    align-self: center;
   }
   .stats {
     padding-top: 10px;
+    align-self: center;
   }
 
   .stats_header {
@@ -397,7 +425,8 @@
   }
 
   .dropdown {
-    padding-top:10px
+    padding-top:10px;
+    align-self: center;
   }
   .selectDropdown {
     width: 95%;
