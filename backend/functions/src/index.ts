@@ -50,7 +50,7 @@ export const RESPONSE_CODE = {
     UNPROCESSABLE_ENTITY: 422,
 }
 
-const ML_SERVICE_URL = "http://34.89.131.139:8000"
+const ML_SERVICE_URL = "http://34.159.70.187:8000/"
 
 // Relevant: https://firebase.google.com/docs/storage/extend-with-functions
 export async function getNetworkDownloadUrls(
