@@ -23,15 +23,34 @@
   let networkToUpdate: Network = undefined
   export let nameColumn: string = "name"
   export let groupColumn: string = "group"
-
   let hoverData: HoverData = undefined
 
-  let isTrainTestSplitValid: bool = false
+  let shouldCheckSplits: boolean = false
+  const groupSplits = {}
+  let isTrainTestSplitValid: boolean = false
 
-  $: if (currentNetwork != undefined) {
-    isTrainTestSplitValid = currentNetwork.nodes.every(
-      (node) => node.is_train != undefined
+  $: if (shouldCheckSplits === true) {
+    // Get all the unique values in currentNetwork.nodes[groupColumn]
+    const uniqueGroups = Array.from(
+      new Set(networkToUpdate.nodes.map((node) => node[groupColumn]))
     )
+    isTrainTestSplitValid = uniqueGroups.every((group) => {
+      const nodesInGroup = networkToUpdate.nodes.filter(
+        (node) => node[groupColumn] == group
+      )
+      const nodesInGroupTrain = nodesInGroup.filter(
+        (node) => node[COLUMN_IS_TRAIN] == true
+      )
+      const nodesInGroupTest = nodesInGroup.filter(
+        (node) => node[COLUMN_IS_TRAIN] == false
+      )
+      groupSplits[group] = {
+        train: nodesInGroupTrain.length,
+        test: nodesInGroupTest.length,
+      }
+      return nodesInGroupTrain.length > 0 && nodesInGroupTest.length > 0
+    })
+    shouldCheckSplits = false
   }
   const HOVER_PIXEL_OFFSET: number = 200
   const dispatcher = createEventDispatcher()
@@ -39,6 +58,7 @@
   // Run an onMount function to initialize the plot
   onMount(() => {
     loadNetwork(true)
+    shouldCheckSplits = true
   })
 
   function loadNetwork(isFirstLoad: boolean = false) {
@@ -60,16 +80,20 @@
           } else {
             console.log(
               `For node ${item.datum.name} is_train = ${
+                // @ts-ignore
                 networkToUpdate.nodes[item.datum.index].is_train
               }`
             )
+            // @ts-ignore
             networkToUpdate.nodes[item.datum.index].is_train = !networkToUpdate.nodes[item.datum.index].is_train
             console.log(
               `For node ${item.datum.name} is_train = ${
+                // @ts-ignore
                 networkToUpdate.nodes[item.datum.index].is_train
               }`
             )
             loadNetwork(false)
+            shouldCheckSplits = true
           }
         })
         result.view.addEventListener("mouseover", function (event, item) {
@@ -120,6 +144,14 @@
         Click on the nodes to change their training status. The color of the
         nodes will change to reflect the new status.
     </div>
+    <div class="condition">
+      For each of the unique value in the <b>{groupColumn}</b> column (the column you selected to 
+      be predicted), there has to be at least one node in the training set and one node in the test set.
+      {#each Object.entries(groupSplits) as [group, groupSplit]}
+        <p>Group {group}: {groupSplit.train} nodes in training set, {groupSplit.test} nodes in test set.</p>
+      {/each}
+      <p>Currently this condition is <b>{isTrainTestSplitValid ? "met" : "not met"}</b>.</p>
+    </div>
     <div id="viz" />
 
     {#if hoverData !== undefined}
@@ -127,17 +159,11 @@
     {/if}
   </div>
 
-  <div class="condition">
-    For each of the unique value in the <b>{groupColumn}</b> column (the column you selected to 
-    be predicted), there has to be at least one node in the training set and one node in the test set.
-    Currently this condition is <b>{networkToUpdate.isTrainTestSplitValid ? "met" : "not met"}</b>.
-
-  </div>
-
   <div slot="footer">
     <CustomButton
       type={"secondary"}
       inverse={false}
+      disabled={!isTrainTestSplitValid}
       on:click={() => {
         dispatcher("saveSplitClicked", { network: networkToUpdate })
       }}
