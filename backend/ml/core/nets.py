@@ -3,10 +3,12 @@ from itertools import chain
 
 import torch
 from more_itertools import windowed
-from torch_geometric.nn import SAGEConv, GCNConv, MessagePassing, Sequential
 from torch.nn import ReLU, Softmax
+from torch_geometric.nn import (
+    SAGEConv, GCNConv, GATConv, TAGConv, SGConv, MessagePassing, Sequential)
 
-models_mapping = {every_model.__name__: every_model for every_model in (SAGEConv, GCNConv)}
+models_mapping = {every_model.__name__: every_model
+                  for every_model in (SAGEConv, GCNConv, GATConv, TAGConv, SGConv)}
 
 
 def create_layers_sequence(model_type: str, features_number: int, hidden_layers_sizes: List[int]) -> List:
@@ -15,7 +17,6 @@ def create_layers_sequence(model_type: str, features_number: int, hidden_layers_
     """We have hidden_layers_sizes as the array of layer sizes, but for building the model we would need to have 
     the array of par value like (input_data_size, output_data_size)"""
     hidden_layers_params = list(windowed(chain([features_number], hidden_layers_sizes), 2))
-    number_of_layers = len(hidden_layers_params)
 
     layers = []
     for layer_params in hidden_layers_params:
