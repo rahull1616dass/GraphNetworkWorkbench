@@ -9,7 +9,7 @@ class MLRequest(CamelModel):
     edges_file_url: AnyHttpUrl
     epochs: int = 100
     x_columns: List[str]
-    train_percentage: float = 0.85
+    train_percentage: float
     hidden_layer_sizes: List[int]
     learning_rate: float = 0.01
     ml_model_type: str
@@ -18,3 +18,4 @@ class MLRequest(CamelModel):
 
 class ClassificationRequest(MLRequest):
     y_column: str
+    train_percentage: float | None = None
