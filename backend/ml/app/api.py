@@ -1,7 +1,7 @@
 """REST API"""
 from celery import chain
 from fastapi import APIRouter, Body
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 
 from core.loggers import get_logger
 from app.workflows import (
@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 
 @api.post("/link_pred")
 async def link_prediction(request: MLRequest = Body()):
-    losses, val_scores, accuracy, precision, recall, f1, auc_roc, predictions =  await link_prediction_workflow(request)
+    losses, val_scores, accuracy, precision, recall, f1, auc_roc, predictions = await link_prediction_workflow(request)
     expert_opinion = await run_workflow(
         chain(get_pred_expert_opinion_task.s(request, losses, val_scores, accuracy, precision, recall, f1, auc_roc)))
 
@@ -39,7 +39,9 @@ async def link_prediction(request: MLRequest = Body()):
 
 @api.post("/node_class")
 async def node_classification(request: ClassificationRequest = Body()):
-    losses, val_scores, accuracy, precision, recall, f1, auc_roc, predictions =  await node_classification_workflow(request)
+    losses, val_scores, accuracy, precision, recall, f1, auc_roc, predictions, train_percentage = \
+        await node_classification_workflow(request)
+    request.train_percentage = train_percentage
     expert_opinion = await run_workflow(
         chain(get_class_expert_opinion_task.s(request, losses, val_scores, accuracy, precision, recall, f1, auc_roc)))
 
