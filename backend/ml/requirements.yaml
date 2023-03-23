@@ -27,3 +27,4 @@ dependencies:
   - dill=0.3.6=pyhd8ed1ab_1
   - more-itertools=8.12.0=pyhd3eb1b0_0
   - openai=0.27.0=pyhd8ed1ab_0
+  - stringcase=1.2.0=py_0
