@@ -8,8 +8,8 @@ import torch.nn.functional as F
 from dataclasses import dataclass
 from torch_geometric.data import Data
 import torch_geometric.transforms as T
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
 from core.loggers import timeit
 from core.params import MLParams
@@ -37,7 +37,7 @@ class NodeClassifier:
 
         loss.backward()
         self.optimizer.step()
-        return loss.item()
+        return round(loss.item(), 4)
     
     def train(self, data: Data, epochs: int = 100):
 
@@ -96,10 +96,18 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
 
     with mlflow.start_run():
         device = set_up_device(params.seed)
-        transforms = T.Compose([
-            T.RandomNodeSplit(split="train_rest", num_test=0.2, num_val=0),
-            T.ToDevice(device)
-        ])
+
+        if params.train_percentage is None:
+            transforms = T.ToDevice(device)
+            used_for_training = torch.sum(data.train_mask).item()
+            all_nodes = torch.numel(data.train_mask)
+            train_percentage = round(used_for_training / all_nodes, 4)
+        else:
+            transforms = T.Compose([
+                T.RandomNodeSplit(split="train_rest", num_test=1-params.train_percentage, num_val=0),
+                T.ToDevice(device)
+            ])
+            train_percentage = params.train_percentage
         data_to_use: Data = transforms(data)
 
         node_classifier = NodeClassifier(data_to_use.num_features, device, params, len(encoder.classes_))
@@ -120,6 +128,7 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
         recall,
         f1,
         roc_auc,
-        node_idx_pred_class_pairs
+        node_idx_pred_class_pairs,
+        train_percentage
     )
     
