@@ -64,8 +64,8 @@
   )
 
   let progressDataTable = {
-    rows: undefined,
-    headers: undefined,
+    rows: [],
+    headers: [{key: "parameter", value:"Parameter"}, {key: "value", value:"Value"}],
   }
 
   // remove the is_train column from the selectableColumns array
@@ -139,18 +139,18 @@
   }
 
   function createExperimentDataTable(){
-    progressDataTable.headers = Object.keys(task).filter((key) => task[key] !== undefined && task[key] !== null)
-    progressDataTable.headers = progressDataTable.headers.map((key) => {
-      return { key: key, value: key }
+    let parameters = Object.keys(task).filter((key) => task[key] !== undefined && task[key] !== null)
+    progressDataTable.rows = parameters.map((parameter) => {
+      // If task[parameter] is an array, convert it to a string
+      if (Array.isArray(task[parameter])) {
+        task[parameter] = task[parameter].toString()
+      }
+      return {parameter: parameter, value: task[parameter]}
     })
-    let row = {id: 0}
-    progressDataTable.headers.forEach((header) => {
-      if (Array.isArray(task[header.key])) {
-        row[header.key] = task[header.key].join(", ")
-      } else row[header.key] = task[header.key]
+    // For each row in rows, create an id field with id as the index of the row
+    progressDataTable.rows.forEach((row, index) => {
+      row.id = index
     })
-    console.log("zx")
-    progressDataTable.rows = [row]
   }
 
   async function createTask() {
