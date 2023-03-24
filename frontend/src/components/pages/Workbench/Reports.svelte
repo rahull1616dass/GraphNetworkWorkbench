@@ -7,6 +7,7 @@
   import type { Task } from "../../../definitions/task"
   import { ModalData } from "../../../definitions/modalData"
   import { fly } from "svelte/transition"
+  import ExperimentResults from "../../common/ExperimentResults.svelte"
 
   let tasks: Task[] = []
   let errorData: ModalData = undefined
@@ -77,7 +78,7 @@
         }))}
       >
         <svelte:fragment slot="expanded-row" let:row>
-          <pre>{JSON.stringify(row, null, 2)}</pre>
+            <ExperimentResults task={tasks[row.id]} currentNetwork={$networksList[$selectedNetworkIndex]} />
         </svelte:fragment>
       </DataTable>
     {/if}
