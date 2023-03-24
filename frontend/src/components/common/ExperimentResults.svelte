@@ -4,8 +4,10 @@
   import PlotLoss from "./PlotLoss.svelte"
   import PlotPrediction from "./PlotPrediction.svelte"
   import type { Task } from "../../definitions/task"
+  import type { Network } from "../../definitions/network"
 
   export let task: Task = undefined
+  export let currentNetwork: Network = undefined
 </script>
 
 <div class="container">
@@ -45,7 +47,7 @@
         Green nodes/edges for correct predictions, red nodes/edges for false
         predictions
       </p>
-      <PlotPrediction {task} />
+      <PlotPrediction {task} {currentNetwork} />
     </div>
 
     <div slot="footer" />

@@ -11,13 +11,16 @@
     import cloneDeep from "lodash.clonedeep"
     import { PredictionResult } from "../../definitions/predictionResult"
     import type { Task } from "../../definitions/task"
+    import type { Network } from "../../definitions/network"
 
     let hoverData: HoverData = undefined
     // Dynamically adjust the hover offset based on screen size
     const HOVER_OFFSET = {
-      x: 150,
-      y: 50,
+      x: 100,
+      y: 200,
     }
+    export let currentNetwork: Network = undefined
+
     export let task: Task = undefined
     // Run an onMount function to initialize the plot
     onMount(() => { 
@@ -25,21 +28,26 @@
     })
   
     function loadNetwork() {
-      let currentNetwork = cloneDeep($networksList[$selectedNetworkIndex])
-      currentNetwork.forEach((node) => {
+      let networkToPlot: Network = cloneDeep(currentNetwork)
+      networkToPlot.nodes.forEach((node) => {
         // If node.index is not in predictions, then that node was in the training set
+        // @ts-ignore
         if (task.predictions[node.index] === undefined) {
+          // @ts-ignore
           node.result = PredictionResult.IN_TRAIN_SET
         }
-        if(task.predictions[node.index] === task.yColumn[node.index]) {
+        // @ts-ignore
+        else if(task.predictions[node.index] === node[task.yColumn].toString()) {
+          // @ts-ignore
           node.result = PredictionResult.CORRECT
         }else {
+          // @ts-ignore
           node.result = PredictionResult.WRONG
         }
       })
       
 
-      updateVisSpec(currentNetwork, VisSpec)
+      updateVisSpec(networkToPlot, VisSpec)
       setColorKey(VisSpec, "result", ["#808080", "#FF0000", "#097969"]) // TODO: Change group to prediction
       vegaEmbed("#viz", VisSpec, { actions: false })
         .then((result) => {

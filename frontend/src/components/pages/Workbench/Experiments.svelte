@@ -479,7 +479,7 @@
       </CustomButton>
     </div>
     <hr />
-    <ExperimentResults {task} />
+    <ExperimentResults {task} {currentNetwork} />
   {:else if task.state === ExperimentState.ERROR}
     <p>Error: {task.errorMessage}</p>
   {/if}
