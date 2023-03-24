@@ -13,6 +13,11 @@
     import type { Task } from "../../definitions/task"
 
     let hoverData: HoverData = undefined
+    // Dynamically adjust the hover offset based on screen size
+    const HOVER_OFFSET = {
+      x: 150,
+      y: 50,
+    }
     export let task: Task = undefined
     // Run an onMount function to initialize the plot
     onMount(() => { 
@@ -54,9 +59,9 @@
                   ),
                   undefined,
                   // @ts-ignore
-                  event.clientX,
+                  event.clientX - HOVER_OFFSET.x,
                   // @ts-ignore
-                  event.clientY
+                  event.clientY - HOVER_OFFSET.y
                 )
               } else {
                 hoverData = new HoverData(
@@ -70,9 +75,9 @@
                     undefined
                   ),
                   // @ts-ignore
-                  event.clientX,
+                  event.clientX - HOVER_OFFSET.x,
                   // @ts-ignore
-                  event.clientY
+                  event.clientY - HOVER_OFFSET.y
                 )
               }
             }
