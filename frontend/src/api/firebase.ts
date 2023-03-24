@@ -40,7 +40,7 @@ import {
 import { get } from "svelte/store"
 import { Network, Metadata, Node, Link } from "../definitions/network"
 import { metadataConverter, tasksConverter } from "./firebase_converters"
-import { blobToFile, parseNetwork } from "../util/networkParserUtil"
+import { blobToFile, parseNetwork, removeEmptyFields } from "../util/networkParserUtil"
 import type { Task } from "../definitions/task"
 import { ExperimentState } from "../definitions/experimentState"
 
@@ -368,12 +368,16 @@ export async function deleteNetwork(networkId: string): Promise<void> {
 }
 // ---- Network ----
 
+
+
 // ---- Experiments/Tasks ----
 export async function setExperimentTask(
   network: Network,
   task: Task
 ): Promise<string> {
   return new Promise((resolve, reject) => {
+    network.nodes = network.nodes.map((node) => { return removeEmptyFields(node) })
+    network.links = network.links.map((link) => { return removeEmptyFields(link) })
     let files = network.toFiles()
     addDoc(
       collection(

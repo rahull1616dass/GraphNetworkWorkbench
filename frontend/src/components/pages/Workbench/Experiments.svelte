@@ -67,12 +67,16 @@
   $: selectableColumns = Object.keys(currentNetwork.nodes[0]).filter(
     (nodeColumns) => nodeColumns !== COLUMN_IS_TRAIN
   )
-  $: if (Object.keys(currentNetwork.nodes[0]).includes(COLUMN_IS_TRAIN)) {
-    customizedSplitDefined = true
-  }
-
   $: task.hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
   $: currentNetwork = $networksList[$selectedNetworkIndex]
+  $: customizedSplitDefined = checkCustomizedSplit()
+
+  function checkCustomizedSplit(): boolean {
+    return currentNetwork !== undefined && currentNetwork.nodes.every(
+      (node) =>
+        node[COLUMN_IS_TRAIN] !== undefined && node[COLUMN_IS_TRAIN] !== null
+    )
+  }
 
   function resetCustomizedSplit() {
     currentNetwork.nodes.forEach((node) => delete node[COLUMN_IS_TRAIN])
@@ -125,6 +129,7 @@
   function saveSplitClicked(event: CustomEvent) {
     currentNetwork = event.detail.network
     isCustomizeModalOpen = false
+    customizedSplitDefined = true
     console.log("Current Network", currentNetwork)
   }
 
@@ -269,9 +274,9 @@
           <div>
             <li>
               {#if task.taskType === TaskType.NODE_CLASSIFICATION && customizedSplitDefined === true}
-              Train/Test Split
+                Train/Test Split
               {:else}
-              Training Percentage
+                Training Percentage
               {/if}
               {#if task.taskType === TaskType.NODE_CLASSIFICATION}
                 <CustomButton
@@ -395,7 +400,8 @@
               disabled={task.mlModelType === undefined ||
                 task.epochs === 0 ||
                 task.learningRate === 0.0 ||
-                task.trainPercentage === 0 ||
+                (!customizedSplitDefined && task.trainPercentage === 0) ||
+                (task.trainPercentage === 0 && task.taskType === TaskType.NODE_CLASSIFICATION && checkCustomizedSplit() === true) ||
                 task.yColumn === undefined ||
                 task.xColumns.length === 0 ||
                 task.trainPercentage === 1}

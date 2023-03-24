@@ -77,7 +77,14 @@ async function parseCSV(file: File): Promise<ParseResult> {
   })
 }
 
-
+export function removeEmptyFields(data: any) {
+  Object.keys(data).forEach((key) => {
+    if (data[key] === null || data[key] === undefined) {
+      delete data[key]
+    }
+  })
+  return data
+}
 
 export function JSZipObjectToFile(zipObject: JSZip.JSZipObject): Promise<File> {
   return new Promise((resolve, reject) => {
