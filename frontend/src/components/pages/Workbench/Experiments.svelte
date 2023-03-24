@@ -24,6 +24,7 @@
   import { ModalData } from "../../../definitions/modalData"
   import ExperimentResults from "../../common/ExperimentResults.svelte"
   import { delay } from "../../../util/generalUtil"
+  import Countup from "svelte-countup"
   import { COLUMN_IS_TRAIN } from "../../../definitions/constants"
 
   let hiddenLayers = [{ first: true, checked: false, size: 10 }]
@@ -65,7 +66,10 @@
 
   let progressDataTable = {
     rows: [],
-    headers: [{key: "parameter", value:"Parameter"}, {key: "value", value:"Value"}],
+    headers: [
+      { key: "parameter", value: "Parameter" },
+      { key: "value", value: "Value" },
+    ],
   }
 
   // remove the is_train column from the selectableColumns array
@@ -77,9 +81,12 @@
   $: customizedSplitDefined = checkCustomizedSplit()
 
   function checkCustomizedSplit(): boolean {
-    return currentNetwork !== undefined && currentNetwork.nodes.every(
-      (node) =>
-        node[COLUMN_IS_TRAIN] !== undefined && node[COLUMN_IS_TRAIN] !== null
+    return (
+      currentNetwork !== undefined &&
+      currentNetwork.nodes.every(
+        (node) =>
+          node[COLUMN_IS_TRAIN] !== undefined && node[COLUMN_IS_TRAIN] !== null
+      )
     )
   }
 
@@ -138,14 +145,17 @@
     console.log("Current Network", currentNetwork)
   }
 
-  function createExperimentDataTable(){
-    let parameters = Object.keys(task).filter((key) => task[key] !== undefined && task[key] !== null)
+  function createExperimentDataTable() {
+    let parameters = Object.keys(task).filter(
+      (key) => task[key] !== undefined && task[key] !== null
+    )
     progressDataTable.rows = parameters.map((parameter) => {
       // If task[parameter] is an array, convert it to a string
+      let taskValue = task[parameter]
       if (Array.isArray(task[parameter])) {
-        task[parameter] = task[parameter].toString()
+        taskValue = task[parameter].join(", ")
       }
-      return {parameter: parameter, value: task[parameter]}
+      return { parameter: parameter, value: taskValue }
     })
     // For each row in rows, create an id field with id as the index of the row
     progressDataTable.rows.forEach((row, index) => {
@@ -422,7 +432,9 @@
                 task.epochs === 0 ||
                 task.learningRate === 0.0 ||
                 (!customizedSplitDefined && task.trainPercentage === 0) ||
-                (task.trainPercentage === 0 && task.taskType === TaskType.NODE_CLASSIFICATION && checkCustomizedSplit() === true) ||
+                (task.trainPercentage === 0 &&
+                  task.taskType === TaskType.NODE_CLASSIFICATION &&
+                  checkCustomizedSplit() === true) ||
                 task.yColumn === undefined ||
                 task.xColumns.length === 0 ||
                 task.trainPercentage === 1}
@@ -440,9 +452,20 @@
   {:else if task.state === ExperimentState.PROGRESS}
     <div class="progress_bar">
       <ProgressBar helperText={progressBarData.text} />
+      It has been running for
+      <Countup
+        initial={0}
+        value={100}
+        duration={1000000}
+        step={1}
+        roundto={1}
+        format={true}
+      />
+      seconds
       <DataTable
         headers={progressDataTable.headers}
-        rows={progressDataTable.rows}/>
+        rows={progressDataTable.rows}
+      />
     </div>
   {:else if task.state === ExperimentState.RESULT}
     <div class="newExperiment">
