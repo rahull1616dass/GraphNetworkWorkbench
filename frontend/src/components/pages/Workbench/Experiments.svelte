@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ExperimentState } from "../../../definitions/experimentState"
-  import { ProgressBar } from "carbon-components-svelte"
+  import { DataTable, ProgressBar } from "carbon-components-svelte"
   import { ProgressBarData } from "../../../definitions/progressBarData"
   import { Task } from "../../../definitions/task"
   import { TaskType } from "../../../definitions/taskType"
@@ -62,6 +62,11 @@
     true,
     "Creating experiment..."
   )
+
+  let progressDataTable = {
+    rows: undefined,
+    headers: undefined,
+  }
 
   // remove the is_train column from the selectableColumns array
   $: selectableColumns = Object.keys(currentNetwork.nodes[0]).filter(
@@ -133,9 +138,25 @@
     console.log("Current Network", currentNetwork)
   }
 
+  function createExperimentDataTable(){
+    progressDataTable.headers = Object.keys(task).filter((key) => task[key] !== undefined && task[key] !== null)
+    progressDataTable.headers = progressDataTable.headers.map((key) => {
+      return { key: key, value: key }
+    })
+    let row = {id: 0}
+    progressDataTable.headers.forEach((header) => {
+      if (Array.isArray(task[header.key])) {
+        row[header.key] = task[header.key].join(", ")
+      } else row[header.key] = task[header.key]
+    })
+    console.log("zx")
+    progressDataTable.rows = [row]
+  }
+
   async function createTask() {
     task.state = ExperimentState.PROGRESS
     task.useCustomSplit = customizedSplitDefined
+    createExperimentDataTable()
     // await delay(2000) // To simulate task being run. TODO: Remove this later on.
     await getExperimentTasks(currentNetwork.metadata.id)
       .then((tasks) => {
@@ -419,6 +440,9 @@
   {:else if task.state === ExperimentState.PROGRESS}
     <div class="progress_bar">
       <ProgressBar helperText={progressBarData.text} />
+      <DataTable
+        headers={progressDataTable.headers}
+        rows={progressDataTable.rows}/>
     </div>
   {:else if task.state === ExperimentState.RESULT}
     <div class="newExperiment">

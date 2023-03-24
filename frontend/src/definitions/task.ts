@@ -20,6 +20,10 @@ export class Task {
     public yColumn: string = undefined,
     public expertOpinion: string = undefined,
     public accuracy: number = undefined,
+    public precision: number = undefined,
+    public recall: number = undefined,
+    public f1: number = undefined,
+    public auc: number = undefined,
     public losses: number[] = undefined,
     public predictions: Record<string, string> = undefined,
     public errorMessage: string = undefined

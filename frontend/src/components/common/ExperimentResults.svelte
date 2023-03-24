@@ -13,9 +13,10 @@
     <h4 slot="header">Details</h4>
     <div slot="body">
       <p>Accuracy:{task.accuracy}</p>
-      <p>F1 score:</p>
-      <p>Precision:</p>
-      <p>Recall:</p>
+      <p>F1 score:{task.f1}</p>
+      <p>Precision:{task.precision}</p>
+      <p>Recall:{task.recall}</p>
+      <p>AUC:{task.auc}</p>
     </div>
 
     <div slot="footer" />
@@ -44,7 +45,7 @@
         Green nodes/edges for correct predictions, red nodes/edges for false
         predictions
       </p>
-      <PlotPrediction predictions={task.predictions} />
+      <PlotPrediction {task} />
     </div>
 
     <div slot="footer" />
