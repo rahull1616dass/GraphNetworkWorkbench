@@ -26,8 +26,9 @@
 
   <CardView>
     <h4 slot="header">Loss Function</h4>
-    <div slot="body" />
+    <div slot="body" >
       <PlotLoss losses={task.losses} />
+    </div>
     <div slot="footer" />
   </CardView>
 
