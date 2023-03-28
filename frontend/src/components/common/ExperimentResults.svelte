@@ -15,17 +15,19 @@
   export let currentNetwork: Network = undefined
 
   let experimentPlots = {
-    "plotLoss": undefined,
-    "plotNodeEmbeddding": undefined,
-    "plotPrediction": undefined,
+    plotLoss: undefined,
+    plotNodeEmbeddding: undefined,
+    plotPrediction: undefined,
   }
 
   async function downloadPDF() {
     const cardsPerPage: number = 1
     const imageScalingFactor: number = 0.2
     const pdf: jsPDF = new jsPDF({ format: "a4", orientation: "p" })
+    pdf.setFontSize(20)
 
-    const cardElements: NodeListOf<Element> = document.querySelectorAll(".container > *")
+    const cardElements: NodeListOf<Element> =
+      document.querySelectorAll(".container > *")
 
     for (let i = 0; i < cardElements.length; i++) {
       const cardElement = cardElements[i] as HTMLElement
@@ -33,6 +35,7 @@
       if (cardElement.querySelector(".vega-embed")) {
         // If the card contains a Vega-Embed chart
         const vegaView = experimentPlots[cardElement.id] as View
+        const title = cardElement.getAttribute("data-title")
         if (vegaView) {
           try {
             const imgURL = await vegaView.toImageURL("png")
@@ -42,12 +45,17 @@
 
             const page = Math.floor(i / cardsPerPage)
             const xOffset = 50 //i % 2 === 0 ? 50 : 50 + img.width / 2
-            const yOffset = 50//100 + (img.height + 50) * (i % cardsPerPage)
+            const yOffset = 50 //100 + (img.height + 50) * (i % cardsPerPage)
 
             if (page > 0 && i % cardsPerPage === 0) {
               pdf.addPage("a4", "p")
             }
-
+            pdf.text(
+              title,
+              pdf.internal.pageSize.getWidth() / 2,
+              30,
+              { align: "center" }
+            )
             pdf.addImage({
               imageData: img,
               format: "PNG",
@@ -89,7 +97,7 @@
 </script>
 
 <div class="container">
-  <CardView>
+  <CardView title="Metrics">
     <h4 slot="header">Details</h4>
     <div slot="body">
       <p>Accuracy:{task.accuracy}</p>
@@ -102,7 +110,7 @@
     <div slot="footer" />
   </CardView>
 
-  <CardView id="plotLoss">
+  <CardView id="plotLoss" title="Loss Function">
     <h4 slot="header">Loss Function</h4>
     <div slot="body">
       <PlotLoss
@@ -115,18 +123,20 @@
     <div slot="footer" />
   </CardView>
 
-  <CardView id="plotNodeEmbedding">
+  <CardView id="plotNodeEmbedding" title="Node Embeddings">
     <h4 slot="header">Node Embedding</h4>
     <div slot="body">
-      <Embedding on:plotLoaded={(e) => {
-        experimentPlots["plotNodeEmbedding"] = e.detail
-      }}/>
+      <Embedding
+        on:plotLoaded={(e) => {
+          experimentPlots["plotNodeEmbedding"] = e.detail
+        }}
+      />
     </div>
 
     <div slot="footer" />
   </CardView>
 
-  <CardView id="plotPrediction">
+  <CardView id="plotPrediction" title="Prediction Results">
     <h4 slot="header">Network Results</h4>
     <div slot="body">
       <p>
