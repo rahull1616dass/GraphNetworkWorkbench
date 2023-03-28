@@ -1,7 +1,8 @@
 <script lang="ts">
+  export let id: string = undefined
 </script>
 
-<div class="CardView">
+<div class="CardView" {id}>
   <slot name="header" />
   <hr />
   <slot name="body" />
