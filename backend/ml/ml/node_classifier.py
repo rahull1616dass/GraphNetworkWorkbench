@@ -31,7 +31,7 @@ class NodeClassifier:
         self.model.train()
         self.optimizer.zero_grad()
 
-        out = self.model.layers(data.x, data.edge_index)
+        out = self.model(data.x, data.edge_index)
 
         loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
 
@@ -54,7 +54,7 @@ class NodeClassifier:
 
     def __get_data_to_compare(self, data: Data):
         self.model.eval()
-        out = self.model.layers(data.x, data.edge_index)
+        out = self.model(data.x, data.edge_index)
         y_true = data.y[data.test_mask].cpu().numpy()
         y_predicted = torch.argmax(out[data.test_mask], dim=1).unsqueeze(1).cpu().numpy()
         return y_true, y_predicted
@@ -85,7 +85,7 @@ class NodeClassifier:
 
     def predict(self, data: Data) -> List:
         self.model.eval()
-        out = self.model.layers(data.x, data.edge_index)
+        out = self.model(data.x, data.edge_index)
         predicted_classes = torch.argmax(out[data.test_mask], dim=1)
         return predicted_classes.detach().cpu().numpy().tolist()
 

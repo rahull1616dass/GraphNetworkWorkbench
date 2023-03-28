@@ -2,8 +2,8 @@ from typing import List
 from itertools import chain
 
 import torch
+from torch.nn import ReLU
 from more_itertools import windowed
-from torch.nn import ReLU, Softmax
 from torch_geometric.nn import (
     SAGEConv, GCNConv, GATConv, TAGConv, SGConv, MessagePassing, Sequential)
 
@@ -15,7 +15,7 @@ def create_layers_sequence(model_type: str, features_number: int, hidden_layers_
     model_to_use: MessagePassing = models_mapping[model_type]
 
     """We have hidden_layers_sizes as the array of layer sizes, but for building the model we would need to have 
-    the array of par value like (input_data_size, output_data_size)"""
+    the array of pair value like (input_data_size, output_data_size)"""
     hidden_layers_params = list(windowed(chain([features_number], hidden_layers_sizes), 2))
 
     layers = []
@@ -29,13 +29,12 @@ class NodeClassificationNet(torch.nn.Module):
         super().__init__()
         layers = create_layers_sequence(model_type, features_number, hidden_layers_sizes)
         layers += [
-            (models_mapping[model_type](hidden_layers_sizes[-1], classes_number), 'x, edge_index -> x'),
-            Softmax(dim=1)
+            (models_mapping[model_type](hidden_layers_sizes[-1], classes_number), 'x, edge_index -> x')
         ]
         self.layers = Sequential('x, edge_index', layers)
 
     def forward(self, x, edge_index):
-        return self.layers(x, edge_index)
+        return torch.softmax(self.layers(x, edge_index), dim=1)
 
 
 class EdgePredictionNet(torch.nn.Module):

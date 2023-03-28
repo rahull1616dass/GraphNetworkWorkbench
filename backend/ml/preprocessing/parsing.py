@@ -13,14 +13,17 @@ from core.loggers import timeit
 from core.params import MLParams, ClassificationParams
 
 
-# TODO: If this project will be further developed this parsing file has to be changed: saving graphs in two csv files makes the task of parsing different(directed/undirected, weighted/unweighted graphs) graphs really like reinventing the wheel. It is better to keep supporting .graphml files because networkx exist for both python and JS and can parse it without writing any additional code.
+# TODO: If this project will be further developed this parsing file has to be changed: saving graphs in two csv files
+#  makes the task of parsing different(directed/undirected, weighted/unweighted graphs) graphs really like reinventing
+#  the wheel. It is better to keep supporting .graphml files because networkx exist for both python and JS and can
+#  parse it without writing any additional code.
+
 
 def generate_custom_masks(nodes_df: pd.DataFrame):
     train_mask = torch.tensor((nodes_df["is_train"]==1).values)
     test_mask = ~train_mask
     val_mask = torch.zeros_like(train_mask, dtype=torch.bool)
     return train_mask, val_mask, test_mask
-
 
 
 def get_basic_data(data_files: Dict[str, str], params: MLParams, label_encoder: LabelEncoder = None) -> Data:
