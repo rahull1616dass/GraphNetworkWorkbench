@@ -49,7 +49,7 @@ class EdgePredictionNet(torch.nn.Module):
         super().__init__()
         all_layers, non_act_layers = create_layers_sequence(model_type, features_number, hidden_layers_sizes)
         self.layers = Sequential('x, edge_index', all_layers)
-        self.non_act_layers = Sequential('x, edge_index', non_act_layers)
+        self.non_act_layers = Sequential('x, edge_index', non_act_layers[:-1])
 
     def encode(self, x, edge_index):
         return self.layers(x, edge_index)
