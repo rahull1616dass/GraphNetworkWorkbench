@@ -6,6 +6,7 @@ import torch.nn
 from tqdm import tqdm
 from torch.optim import Adam
 from torch_geometric.data import Data
+from sklearn.decomposition import PCA
 from torch.nn import BCEWithLogitsLoss
 import torch_geometric.transforms as T
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
@@ -103,6 +104,13 @@ class LinkPredictor:
         z = self.model.encode(data.x, data.edge_index)
         return self.model.decode_all(z).cpu().numpy()
 
+    @torch.no_grad()
+    def get_2d_node_embeddings(self, data: Data):
+        self.model.eval()
+        embeddings = self.model.non_act_layers(data.x, data.edge_index)
+        embeddings_2d = PCA(n_components=2).fit_transform(embeddings.detach().cpu().numpy())
+        return embeddings_2d
+
 
 @timeit
 def predict_edges(data: Data, params: MLParams):
@@ -113,14 +121,19 @@ def predict_edges(data: Data, params: MLParams):
 
         device = set_up_device(params.seed)
 
-        transform = T.Compose([
+        common_transform = T.Compose([
             T.NormalizeFeatures(),
             T.ToDevice(device),
             T.RandomLinkSplit(
                 num_val=1 - params.train_percentage,
                 is_undirected=False, add_negative_train_samples=False)
         ])
-        train_data, val_data, test_data = transform(data)
+        data_to_use = common_transform(data)
+
+        split_transform = T.RandomLinkSplit(
+            num_val=1 - params.train_percentage, is_undirected=False, add_negative_train_samples=False)
+        train_data, val_data, test_data = split_transform(data_to_use)
+
         predictor = LinkPredictor(data.num_features, device, params)
 
         losses, val_roc_auc_scores =  predictor.train(train_data, val_data, params.epochs)
@@ -128,6 +141,8 @@ def predict_edges(data: Data, params: MLParams):
         accuracy, precision, recall, f1, roc_auc = predictor.get_all_metrics(test_data)
 
         predictions = predictor.predict(test_data)
+
+        embeddings = predictor.get_2d_node_embeddings(data_to_use)
 
     return (
         losses,
@@ -137,5 +152,6 @@ def predict_edges(data: Data, params: MLParams):
         recall,
         f1,
         roc_auc,
-        predictions.tolist()
+        predictions.tolist(),
+        embeddings.tolist()
     )
