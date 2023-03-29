@@ -123,10 +123,7 @@ def predict_edges(data: Data, params: MLParams):
 
         common_transform = T.Compose([
             T.NormalizeFeatures(),
-            T.ToDevice(device),
-            T.RandomLinkSplit(
-                num_val=1 - params.train_percentage,
-                is_undirected=False, add_negative_train_samples=False)
+            T.ToDevice(device)
         ])
         data_to_use = common_transform(data)
 
