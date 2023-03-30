@@ -84,7 +84,7 @@
           mlModelType: task.mlModelType,
           epochs: task.epochs,
           trainPercentage: task.trainPercentage,
-          createdAt: task.createdAt,
+          createdAt: task.createdAt.toDate().toLocaleString(),
         }))}
       >
         <svelte:fragment slot="expanded-row" let:row>
