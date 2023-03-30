@@ -75,41 +75,19 @@ export default {
     ],
     "scales": [
         {
-            "name": "color",
+            "name": "nodeColor",
             "type": "ordinal",
             "domain": { "data": "node-data", "field": "group" },
             "range": { "scheme": "category10" }
-        },
-        {
+          },
+          {
             "name": "linkColor",
             "type": "ordinal",
-            "domain": {"data": "link-data", "field": "result"},
-            "range": {"scheme": "category10"}
-        }
+            "domain": { "data": "link-data", "field": "group" },
+            "range": { "scheme": "category10" }
+          }
     ],
     "marks": [
-        {
-            "type": "path",
-            "from": { "data": "link-data" },
-            "interactive": true,
-            "encode": {
-                "update": {
-                    "stroke": {"scale": "linkColor", "field": "datum.your_link_attribute"},
-                    "strokeWidth": { "field": "value" }
-                }
-            },
-            "transform": [
-                {
-                    "type": "linkpath",
-                    "require": { "signal": "force" },
-                    "shape": "line",
-                    "sourceX": "datum.source.x",
-                    "sourceY": "datum.source.y",
-                    "targetX": "datum.target.x",
-                    "targetY": "datum.target.y"
-                }
-            ]
-        },
         {
             "name": "nodes",
             "type": "symbol",
@@ -125,7 +103,7 @@ export default {
             ],
             "encode": {
                 "enter": {
-                    "fill": { "scale": "color", "field": "group" },
+                    "fill": { "scale": "nodeColor", "field": "group" },
                     "stroke": { "value": "white" },
 
                     "xfocus": { "signal": "cx" },
@@ -170,7 +148,8 @@ export default {
             "from": { "data": "link-data" },
             "interactive": true,
             "encode": {
-                "update": { "stroke": { "value": "#880808" }, "strokeWidth": { "field": "value" } }
+                "stroke": { "scale": "linkColor", "field": "group" },
+                "strokeWidth": { "field": "value" }
             },
             "transform": [
                 {

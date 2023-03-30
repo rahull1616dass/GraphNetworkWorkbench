@@ -26,10 +26,15 @@ export function updateVisSpec(
   if (network.links[1].source.datum !== undefined) {
     visSpec.data[0].values = network.nodes.map((node) => {
       return {
+        // @ts-ignore
         name: node.name,
+        // @ts-ignore
         group: node.group,
+        // @ts-ignore
         index: node.index,
+        // @ts-ignore
         is_train: node.is_train,
+        // @ts-ignore
       }
     })
     visSpec.data[1].values = network.links.map((link) => {
@@ -38,6 +43,7 @@ export function updateVisSpec(
         source: link.source.index,
         // @ts-ignore
         target: link.target.index,
+        // @ts-ignore
         value: link.value,
       }
     })
@@ -45,6 +51,7 @@ export function updateVisSpec(
     visSpec.data[0].values = network.nodes
     visSpec.data[1].values = network.links
   }
+  // @ts-ignore
   if(network.nodes[0].is_train !== undefined){
     visSpec = setColorKey(visSpec, COLUMN_IS_TRAIN, ["#ff0000", "#00ff00"])
   }
@@ -52,22 +59,29 @@ export function updateVisSpec(
 }
 
 export function setColorKey(
-  visSpec: VisualizationSpec,
-  colorKey: string,
-  colorPalette: string[] = undefined,
-  taskType: TaskType = TaskType.NODE_CLASSIFICATION
-): VisualizationSpec {
-  /*
-  Set what key to use for coloring the nodes or the edges, depending on the task at hand.
-  */
-  const index = taskType === TaskType.NODE_CLASSIFICATION ? 0 : 1
-  // @ts-ignore
-  visSpec.scales[index].domain.field = colorKey
-  if (colorPalette !== undefined) {
+    visSpec: VisualizationSpec,
+    colorKey: string,
+    colorPalette: string[] = undefined,
+    taskType: TaskType = TaskType.NODE_CLASSIFICATION
+  ): VisualizationSpec {
+    /*
+    Set what key to use for coloring the nodes or the edges, depending on the task at hand.
+    */
+    const scaleName = taskType === TaskType.NODE_CLASSIFICATION ? "nodeColor" : "linkColor";
+    const marksIndex = taskType === TaskType.NODE_CLASSIFICATION ? 0 : 1;
+    const colorProperty = taskType === TaskType.NODE_CLASSIFICATION ? "fill" : "stroke";
+  
     // @ts-ignore
-    visSpec.scales[index].range = colorPalette
+    const scale = visSpec.scales.find((scale) => scale.name === scaleName);
+    scale.domain.field = colorKey;
+    if (colorPalette !== undefined) {
+      scale.range = colorPalette;
+    }
+  
+    // @ts-ignore
+    visSpec.marks[marksIndex].encode.enter[colorProperty].scale = scaleName;
+    // @ts-ignore
+    visSpec.marks[marksIndex].encode.enter[colorProperty].field = colorKey;
+    return visSpec;
   }
-  // @ts-ignore
-  visSpec.marks[index].encode.enter.fill.field = colorKey
-  return visSpec
-}
+  
