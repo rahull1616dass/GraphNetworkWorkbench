@@ -289,7 +289,7 @@
   
   <div class="dropdown">
     <select
-      class="selectDropdown"
+      class="select"
       bind:value={index}
       on:click={() => selected(index)}
     >
@@ -397,6 +397,31 @@
 </div>
 
 <style lang="scss">
+  .select {
+    width: 60%;
+    height: 100%;
+    font-family: var(font-family);
+    font-size: 14px;
+    font-weight: 400;
+    background-color: white;
+    padding: 1%;
+    margin: 2%;
+    cursor: pointer;
+    border-radius: 1px;
+    border-color: whitesmoke;
+    box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.2);
+  }
+  .optionDropdown {
+    font-family: var(font-family);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--lightblack);
+    background-color: white;
+    cursor: pointer;
+    cursor:hover {
+      background-color: red;
+    }
+  }
   // .mainContent{
   //   background: white;
   //   display: flex;

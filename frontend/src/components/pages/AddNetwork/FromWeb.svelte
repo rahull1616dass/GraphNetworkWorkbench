@@ -9,6 +9,7 @@
   import { MenuItem } from "../../../definitions/menuItem"
   import { ProgressBarData } from "../../../definitions/progressBarData"
   import InfoBox from "../../common/InfoBox.svelte";
+  import InfoText from "../../common/InfoText.svelte";
 
   let infoBoxContent = "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
   $: isInfoModalOpen = false
@@ -53,9 +54,9 @@
       <ProgressBar helperText={progressBarData.text} />
     </div>
   {:else}
-    <h1>Network Names</h1>
+    <InfoText margintop={0} marginbottom={2}>Here are the networks from Netzschleuder, you can choose network to import</InfoText>
     <Accordion>
-      <input type="text" bind:value={searchTerm} placeholder="Search..." />
+      <input class="search-input" type="text" bind:value={searchTerm} placeholder="Search..." />
       <div class="OuterContailer">
         <div class="networks">
           {#each filteredItems as networkName}
@@ -70,6 +71,28 @@
 </main>
 
 <style lang="scss">
+
+.search-input {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    transition: all 0.2s ease-in-out;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .search-input:focus {
+    border-color: var(--wueblue);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .search-input::placeholder {
+    color: #888;
+    font-style: italic;
+  }
+  
   main {
     padding: 1rem;
   }

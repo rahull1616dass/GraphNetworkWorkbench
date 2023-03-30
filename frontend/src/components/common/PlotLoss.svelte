@@ -9,6 +9,9 @@
   export let losses: number[] = undefined
 
   onMount(() => {
+    if (losses === undefined) {
+      return
+    }
     // @ts-ignore
     LossVisSpec.data.values = losses.map((l, i) => ({ epoch: i + 1, loss: l }))
     // @ts-ignore
