@@ -72,7 +72,7 @@
       nodeData = networkToPlot.nodes.map((node) => ({
         name: node.name,
         index: node.index,
-        result: node.result.,
+        result: node.result
       }))
       dispatch('nodeData', nodeData)
 
@@ -116,7 +116,7 @@
           networkToPlot.links.push({
             source: source,
             target: target,
-            result: PredictionResult.WRONG,
+            result: PredictionResult.WRONG
           })
         }
       }
