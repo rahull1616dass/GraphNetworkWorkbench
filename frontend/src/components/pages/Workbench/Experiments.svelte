@@ -288,6 +288,10 @@
       </div>
     {:else if currentIndex === 1}
       <div class="content">
+        <InfoText>
+          Select the necessary information to create an experiment.
+        </InfoText>
+        
         {#if task.taskType === TaskType.NODE_CLASSIFICATION}
             <DropdownSelector
               placeholder={"Select a column to predict"}
@@ -296,6 +300,9 @@
             />
           {/if}
 
+          <hr/>
+            Select the columns to use as features.
+            <hr/>
           <div>
             {#each selectableColumns as column}
               <label>
@@ -761,7 +768,7 @@
   }
 
   .content {
-    margin: 0 1rem;
+    margin: 0 2rem;
   }
   .inputNumber {
     width: 15%;
