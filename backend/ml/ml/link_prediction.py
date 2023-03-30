@@ -143,7 +143,7 @@ def predict_edges(data: Data, params: MLParams):
 
         edge_index = test_data.edge_index.cpu().numpy().tolist()
         real_pairs = [(source, target) for source, target in zip(edge_index[0], edge_index[1])]
-        predicted_pairs = {(source, target): (source, target) in real_pairs
+        predicted_pairs = {f"{source}-{target}": (source, target) in real_pairs
                            for source, target in zip(predictions[0], predictions[1])}
 
         embeddings = predictor.get_2d_node_embeddings(data_to_use)
