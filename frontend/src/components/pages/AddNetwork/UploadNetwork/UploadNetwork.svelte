@@ -22,7 +22,6 @@
   import CustomButton from "../../../common/CustomButton.svelte"
   import InfoBox from "../../../common/InfoBox.svelte"
   import { fade, slide, scale, fly } from "svelte/transition"
-
   onMount(() => {
     /*
     Once the user selects an import type from the modal, the selectedImportType is changed to 
@@ -45,6 +44,19 @@
   */
   // Note that `files` is of type `FileList`, not an Array:
   // https://developer.mozilla.org/en-US/docs/Web/API/FileList
+
+  let infoBoxContentNodeFile = `
+    Currently, only csv files are supported. It is required that the network consists of two files: <br />
+    <ul>
+      <li>nodes.csv</li>
+      <li>edges.csv</li>
+    </ul>
+    Each file has to have a header row which contains the column names. There are special column names, that may be required or may have a special function assigned to them (see below). Other than that, the user is free to add any number of additional columns with arbitrary names that will function as node or edge features depending on the file. <br /><br />
+    The nodes.csv file must contain either 'name' or 'index', or both. If the nodes are not named, then the user must provide at least the index column where each row is assigned a unique index from 0 to n-1 where n is the number of nodes. If the name column is present, then the index column is optional as this can be automatically generated from each row's position. 'name' is a special column and if present, it will be shown as the node's name in the Visualize page when the node is hovered on. <br />
+    'group' is another special column that can be used to assign a group to each node. Visualize page will then color the nodes according to their group. <br /><br />
+    The edges.csv file must contain the 'source' and 'target' columns that specify which nodes the edge connects to. Currently only undirected edges are supported in the Visualize Page, although the specific ordering can be relevant for the machine learning algorithms that run on the network. Note that 'source' and 'target' must be integers that correspond to the indices of nodes as either explicitly specified in the nodes.csv file or automatically generated from the nodes.csv file.
+  `;
+  let infoBoxContentEdgeFile = 'Only csv files are supported. Network must consist of two files: '
 
   // TODO OnClose callback doesn't work for now
   let nodeFiles: File[] = []
@@ -291,31 +303,7 @@
         <InfoBox
           bind:isInfoModalOpen
           headerText="File Guide"
-          bodyText="Currently, only csv files are supported. It is required that the
-        network consists of two files:  
-         - nodes.csv 
-         - edges.csv 
-        Each file has to have a header row which contains the column names. There
-        are special column names, that may be required or may have a special function
-        assigned to them (see below). Other than that, the user is free to add
-        any number of additional columns with arbitrary names that will function
-        as node or edge features depending on the file. <br /> <br />
-        The nodes.csv file must contain either 'name' or 'index', or both. If the
-        nodes are not named, then the user must provide at least the index column
-        where each row is assigned a unique index from 0 to n-1 where n is the
-        number of nodes. If the name column is present, then the index column is
-        optional as this can be automatically generated from each row's position.
-        'name' is a special column and if present, it will be shown as the node's
-        name in the Visualize page when the node is hovered on. <br /> 'group'
-        is another special column that can be used to assign a group to each
-        node. Visualize page will then color the nodes according to their
-        group. <br /> <br /> The edges.csv file must contain the 'source' and 'target'
-        columns that specify which nodes the edge connects to. Currently only undirected
-        edges are supported in the Visualize Page, although the specific ordering
-        can be relevant for the machine learning algorithms that run on the network.
-        Note that 'source' and 'target' must be integers that correspond to the
-        indices of nodes as either explicitly specified in the nodes.csv file or
-        automatically generated from the nodes.csv file."
+          bodyText={infoBoxContentNodeFile}
         />
       </div>
       <div>
@@ -327,31 +315,7 @@
         <InfoBox
           bind:isInfoModalOpen
           headerText="File Guide"
-          bodyText="Currently, only csv files are supported. It is required that the
-        network consists of two files:  
-         - nodes.csv 
-         - edges.csv 
-        Each file has to have a header row which contains the column names. There
-        are special column names, that may be required or may have a special function
-        assigned to them (see below). Other than that, the user is free to add
-        any number of additional columns with arbitrary names that will function
-        as node or edge features depending on the file. <br /> <br />
-        The nodes.csv file must contain either 'name' or 'index', or both. If the
-        nodes are not named, then the user must provide at least the index column
-        where each row is assigned a unique index from 0 to n-1 where n is the
-        number of nodes. If the name column is present, then the index column is
-        optional as this can be automatically generated from each row's position.
-        'name' is a special column and if present, it will be shown as the node's
-        name in the Visualize page when the node is hovered on. <br /> 'group'
-        is another special column that can be used to assign a group to each
-        node. Visualize page will then color the nodes according to their
-        group. <br /> <br /> The edges.csv file must contain the 'source' and 'target'
-        columns that specify which nodes the edge connects to. Currently only undirected
-        edges are supported in the Visualize Page, although the specific ordering
-        can be relevant for the machine learning algorithms that run on the network.
-        Note that 'source' and 'target' must be integers that correspond to the
-        indices of nodes as either explicitly specified in the nodes.csv file or
-        automatically generated from the nodes.csv file."
+          bodyText={infoBoxContentEdgeFile}
         />
       </div>
     </div>

@@ -51,7 +51,7 @@ const cleanFieldName = (fieldName: string) => {
   return fieldName.replace(/^[\s#_]+|[\s]+/g, '');
 }
 
-async function parseCSV(file: File): Promise<ParseResult> {
+async function parseCSV(file: File, uploadedFileType: UploadedFileType): Promise<ParseResult> {
   return await new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
@@ -60,8 +60,9 @@ async function parseCSV(file: File): Promise<ParseResult> {
       transformHeader: (header) => {
         return cleanFieldName(header)
       },
-      complete: (results) => {
-        if (!results.meta.fields.includes("index")) {
+      complete: (results, file) => {
+        // Only add index field for node files
+        if (uploadedFileType === UploadedFileType.NODE_FILE && !results.meta.fields.includes("index")) {
           results.data.forEach((row, index) => {
             row["index"] = index
           })
@@ -76,6 +77,7 @@ async function parseCSV(file: File): Promise<ParseResult> {
     })
   })
 }
+
 
 export function removeEmptyFields(data: any) {
   Object.keys(data).forEach((key) => {

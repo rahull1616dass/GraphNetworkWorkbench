@@ -29,10 +29,7 @@ def get_basic_data(data_files: Dict[str, str], params: MLParams, label_encoder: 
 
     graph = nx.Graph()
 
-    if len(edges.columns) == 2:
-        graph.add_edges_from(list(edges.itertuples(index=False)))
-    else:
-        graph.add_weighted_edges_from(list(edges.itertuples(index=False)))
+    graph.add_edges_from(list(edges[["source", "target"]].itertuples(index=False)))
 
     for every_column in params.x_columns:
         if pd.api.types.is_string_dtype(nodes[every_column]):

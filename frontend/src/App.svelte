@@ -92,6 +92,7 @@
   {:else if isLoggedIn === true}
     <ul id="menuLogin" class="menuLogin">
       <Tabs />
+      <div class="content">
       {#if $selectedMenuItem === MenuItem.HOME}
         <Home />
       {:else if $selectedMenuItem === MenuItem.NETWORKS}
@@ -111,10 +112,12 @@
       {:else if $selectedMenuItem === MenuItem.TEST}
         <Test />
       {/if}
+    </div>
     </ul>
   {:else if isLoggedIn === false}
     <ul>
       <Tabs />
+      <div class="content">
       {#if $selectedMenuItem === MenuItem.HOME}
         <Home />
       {:else if $selectedMenuItem === MenuItem.LOGIN}
@@ -122,13 +125,29 @@
       {:else if $selectedMenuItem === MenuItem.REGISTER}
         <Register />
       {/if}
+    </div>
     </ul>
   {/if}
-
-  <Footer />
+    <div class="footer-container">
+      <Footer />
+    </div>
+  
 </div>
 
 <style lang="scss">
+  .footer-container {
+    width: 100%;
+  }
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .content {
+    padding-top: 70px;
+    padding-bottom: 70px;
+    flex: 1;
+  }
   .menuLogin {
     height: 100%;
   }

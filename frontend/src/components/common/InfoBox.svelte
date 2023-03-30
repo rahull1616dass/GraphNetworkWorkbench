@@ -25,7 +25,7 @@
       }}
     >
       <h4 slot="header">{headerText}</h4>
-      <div slot="body">{bodyText}</div>
+      <div slot="body">{@html bodyText}</div>
       <div slot="footer">
         <CustomButton type={"secondary"} inverse={false}
           on:click={() => {
@@ -41,7 +41,9 @@
 
 <style>
   .infobox {
-    position: flex;
-    margin: auto;
+    position: fixed;
+    top: 9vh; /* Adjust the position according to your needs */
+    right: 2vw; /* Adjust the position according to your needs */
+    z-index: 1000; /* Optional: Ensures the InfoBox is on top of other elements */
   }
 </style>

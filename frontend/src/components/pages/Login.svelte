@@ -5,54 +5,54 @@
     PasswordInput,
     Modal,
     ProgressBar,
-  } from "carbon-components-svelte";
-  import { LoginUser } from "../../definitions/user";
-  import { loginUser } from "../../api/firebase";
-  import { ModalData } from "../../definitions/modalData";
-  import { ProgressBarData } from "../../definitions/progressBarData";
-  import { selectedMenuItem } from "../../stores";
-  import { MenuItem } from "../../definitions/menuItem";
-  import CustomButton from "../common/CustomButton.svelte";
-  import { fly, fade } from "svelte/transition";
+  } from "carbon-components-svelte"
+  import { LoginUser } from "../../definitions/user"
+  import { loginUser } from "../../api/firebase"
+  import { ModalData } from "../../definitions/modalData"
+  import { ProgressBarData } from "../../definitions/progressBarData"
+  import { selectedMenuItem } from "../../stores"
+  import { MenuItem } from "../../definitions/menuItem"
+  import CustomButton from "../common/CustomButton.svelte"
+  import { fly, fade } from "svelte/transition"
 
-  let modalData = new ModalData();
+  let modalData = new ModalData()
   let progressBarData: ProgressBarData = new ProgressBarData(
     false,
     "Logging in..."
-  );
-  let user: LoginUser = new LoginUser();
-  let isSuccess: boolean = false;
+  )
+  let user: LoginUser = new LoginUser()
+  let isSuccess: boolean = false
 
   const onLoginButtotnClicked = () => {
-    progressBarData.isPresent = true;
+    progressBarData.isPresent = true
     loginUser(user)
       .then((user: LoginUser) => {
-        isSuccess = true;
-        onLoginComplete("Success😎! You are logged in.");
-        $selectedMenuItem = MenuItem.HOME;
+        isSuccess = true
+        onLoginComplete("Success😎! You are logged in.")
+        $selectedMenuItem = MenuItem.HOME
       })
       .catch((error: any) => {
-        let errorMessage: string;
+        let errorMessage: string
         switch (error.code) {
           case "auth/wrong-password":
-            errorMessage = `Password or email address is not correct.`;
-            break;
+            errorMessage = `Password or email address is not correct.`
+            break
           case "auth/user-not-found":
-            errorMessage = `User with email address ${user.email} not found. Try registering first.`;
-            break;
+            errorMessage = `User with email address ${user.email} not found. Try registering first.`
+            break
           default:
-            errorMessage = error.message;
-            break;
+            errorMessage = error.message
+            break
         }
-        onLoginComplete(errorMessage);
-      });
-  };
+        onLoginComplete(errorMessage)
+      })
+  }
 
   function onLoginComplete(message: string) {
-    console.log(message);
-    modalData.messageBody = message;
-    modalData.isOpen = true;
-    progressBarData.isPresent = false;
+    console.log(message)
+    modalData.messageBody = message
+    modalData.isOpen = true
+    progressBarData.isPresent = false
   }
 </script>
 
@@ -65,7 +65,7 @@
   <div class="login-form">
     <Form
       on:submit={(e) => {
-        e.preventDefault();
+        e.preventDefault()
       }}
     >
       <TextInput
@@ -109,9 +109,9 @@
       bind:open={modalData.isOpen}
       modalHeading={modalData.messageHeader}
       on:close={() => {
-        modalData.isOpen = false;
+        modalData.isOpen = false
         if (isSuccess) {
-          $selectedMenuItem = MenuItem.HOME;
+          $selectedMenuItem = MenuItem.HOME
         }
       }}>{modalData.messageBody}</Modal
     >

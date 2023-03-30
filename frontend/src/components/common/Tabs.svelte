@@ -56,11 +56,15 @@
     background-color: whitesmoke;
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.5);
     display: flex;
-    flex-direction: row;
     align-content: center;
     justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: nowrap;
+    align-items: center;
+    position: fixed;
+    top: 0; /* Adjust the position according to your needs */
+    left: 0; /* Adjust the position according to your needs */
+    width: 100%;
+    z-index: 1000; /* Optional: Ensures the InfoBox is on top of other elements */
+    
   }
   .image {
     display: flex;

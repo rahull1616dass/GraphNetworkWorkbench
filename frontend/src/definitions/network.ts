@@ -37,8 +37,8 @@ export class Link{
     constructor(
         readonly source: string = undefined,
         readonly target: string = undefined,
-        readonly value: (string|number)[] = undefined,
-        readonly __parsed_extra: object = undefined,
+        //readonly value: (string|number)[] = undefined,
+        //readonly __parsed_extra: object = undefined,
     ){}
 
     public equals(other: Link): boolean{
@@ -51,11 +51,11 @@ export class Link{
 export class Node{
     constructor(
         public name: string = undefined,
-        readonly id: string = undefined,
+        //readonly id: string = undefined,
         readonly group: number = undefined,
         readonly index: number = undefined,
-        readonly pos: string[] = undefined,
+        //readonly pos: string[] = undefined,
         public is_train: number = undefined,
-        readonly __parsed_extra: object = undefined,
+        //readonly __parsed_extra: object = undefined,
     ){}
 }
