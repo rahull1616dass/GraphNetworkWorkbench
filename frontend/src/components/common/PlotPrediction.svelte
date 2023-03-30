@@ -26,7 +26,6 @@
 
   export let nodeData: Array<{ name: string, index: number, result: string }> = []
 
-
   export let task: Task = undefined
   // Run an onMount function to initialize the plot
   onMount(() => {
@@ -121,6 +120,14 @@
           })
         }
       }
+      const edgeData = networkToPlot.links.map((link) => ({
+      source: link.source,
+      target: link.target,
+      result: link.result,
+    }));
+
+    dispatch("edgeData", edgeData);
+
     }
     updateVisSpec(networkToPlot, VisSpec)
     setColorKey(
