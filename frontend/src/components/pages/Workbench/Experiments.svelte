@@ -105,11 +105,16 @@
     await getExperimentTasks(currentNetwork.metadata.id)
       .then((tasks) => {
         previousTasks = tasks  
-        previousTasks.forEach((prevTask) => {
-          if (prevTask.state === ExperimentState.PROGRESS) {
-            task = prevTask
+        for(let previousTask of previousTasks){
+          // @ts-ignore
+          if(ExperimentState[previousTask.state] === ExperimentState.PROGRESS){
+            listenExpResult(previousTask.id)
+            task = previousTask
+            task.state = ExperimentState.PROGRESS
+            createExperimentDataTable()
+            break
           }
-        })
+        }
       })
       .catch((error) => {
         task.state = ExperimentState.ERROR
@@ -117,6 +122,21 @@
           `Error retrieving tasks for network ${currentNetwork}: ${error}`
         )
       })
+  }
+
+  function listenExpResult(taskDocId: string){
+    listenForExperimentResult(currentNetwork.metadata.id, taskDocId)
+          .then((resultTask: Task) => {
+            task = resultTask
+            progressBarData.isPresent = false
+            console.log("Result", resultTask)
+            // @ts-ignore
+            task.state = ExperimentState[resultTask.state]
+          })
+          .catch((error) => {
+            task.state = ExperimentState.ERROR
+            console.log(`Error listening for experiment result: ${error}`)
+          })
   }
 
   function goLeft() {
@@ -231,18 +251,7 @@
       .then((taskDocId) => {
         console.log(`Task created with id: ${taskDocId}`)
         progressBarData.text = "Experiment created. Running..."
-        listenForExperimentResult(currentNetwork.metadata.id, taskDocId)
-          .then((resultTask: Task) => {
-            task = resultTask
-            progressBarData.isPresent = false
-            console.log("Result", resultTask)
-            // @ts-ignore
-            task.state = ExperimentState[resultTask.state]
-          })
-          .catch((error) => {
-            task.state = ExperimentState.ERROR
-            console.log(`Error listening for experiment result: ${error}`)
-          })
+        listenExpResult(taskDocId)
       })
       .catch((error) => {
         task.state = ExperimentState.ERROR
