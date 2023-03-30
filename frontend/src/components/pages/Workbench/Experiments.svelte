@@ -527,7 +527,7 @@
       <Countup
         initial={0}
         value={100}
-        duration={1000000}
+        duration={100000}
         step={1}
         roundto={1}
         format={true}
