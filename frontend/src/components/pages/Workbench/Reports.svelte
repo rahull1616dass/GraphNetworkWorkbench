@@ -14,7 +14,7 @@
   let tasks: Task[] = []
   let errorData: ModalData = undefined
 
-  let infoBoxContent = "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
+  let infoBoxContent = "<ul><li><p>View a comprehensive record of your past experiments for a selected network, with a table of tasks and performance metrics. Click on any row to explore the experiment in detail using visualizations and learned representations.</p><p>The Reports page empowers you to iteratively improve your models and approaches based on past results, ultimately fostering a better understanding and application of graph learning techniques.</p></li></ul>";
   $: isInfoModalOpen = false
 
   // onMount(() => updateTasks());

@@ -131,11 +131,11 @@ def predict_edges(data: Data, params: MLParams):
                 num_val=0,
                 num_test=1 - params.train_percentage,
                 is_undirected=False, add_negative_train_samples=False)
-        train_data, val_data, test_data = split_transform(data_to_use)
+        train_data, _, test_data = split_transform(data_to_use)
 
         predictor = LinkPredictor(data.num_features, device, params)
 
-        losses, val_roc_auc_scores = predictor.train(train_data, val_data, params.epochs)
+        losses, val_roc_auc_scores = predictor.train(train_data, test_data, params.epochs)
 
         accuracy, precision, recall, f1, roc_auc = predictor.get_all_metrics(test_data)
 
