@@ -3,6 +3,7 @@ import VisSpec from "../data/VisSpec"
 import type { VisualizationSpec } from "vega-embed"
 import { COLUMN_IS_TRAIN } from "../definitions/constants"
 import type { Network } from "../definitions/network"
+import { TaskType } from "../definitions/taskType"
 
 export function updateVisSpec(
   network: Network,
@@ -54,19 +55,20 @@ export function updateVisSpec(
 export function setColorKey(
   visSpec: VisualizationSpec,
   colorKey: string,
-  colorPalette: string[] = undefined
+  colorPalette: string[] = undefined,
+  taskType: TaskType = TaskType.NODE_CLASSIFICATION
 ): VisualizationSpec {
   /*
-  Set what key to use for coloring the nodes.
+  Set what key to use for coloring the nodes or the edges, depending on the task at hand.
   */
-
+  const index = taskType === TaskType.NODE_CLASSIFICATION ? 0 : 1
   // @ts-ignore
-  visSpec.scales[0].domain.field = colorKey
+  visSpec.scales[index].domain.field = colorKey
   if (colorPalette !== undefined) {
     // @ts-ignore
-    visSpec.scales[0].range = colorPalette
+    visSpec.scales[index].range = colorPalette
   }
   // @ts-ignore
-  visSpec.marks[0].encode.enter.fill.field = colorKey
+  visSpec.marks[index].encode.enter.fill.field = colorKey
   return visSpec
 }
