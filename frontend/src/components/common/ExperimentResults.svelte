@@ -21,79 +21,85 @@
   }
 
   async function downloadPDF() {
-    const cardsPerPage: number = 1
-    const imageScalingFactor: number = 0.2
-    const pdf: jsPDF = new jsPDF({ format: "a4", orientation: "p" })
-    pdf.setFontSize(20)
+  const cardsPerPage: number = 1;
+  const xOffset = 50;
+  const pdf: jsPDF = new jsPDF({ format: "a4", orientation: "p" });
+  pdf.setFontSize(20);
 
-    const cardElements: NodeListOf<Element> =
-      document.querySelectorAll(".container > *")
+  const cardElements: NodeListOf<Element> =
+    document.querySelectorAll(".container > *");
 
-    for (let i = 0; i < cardElements.length; i++) {
-      const cardElement = cardElements[i] as HTMLElement
+  for (let i = 0; i < cardElements.length; i++) {
+    const cardElement = cardElements[i] as HTMLElement;
 
-      if (cardElement.querySelector(".vega-embed")) {
-        // If the card contains a Vega-Embed chart
-        const vegaView = experimentPlots[cardElement.id] as View
-        const title = cardElement.getAttribute("data-title")
-        if (vegaView) {
-          try {
-            const imgURL = await vegaView.toImageURL("png")
-            const img = new Image()
-            img.src = imgURL
-            await new Promise((resolve) => (img.onload = resolve))
+    if (cardElement.querySelector(".vega-embed")) {
+      // If the card contains a Vega-Embed chart
+      const vegaView = experimentPlots[cardElement.id] as View;
+      const title = cardElement.getAttribute("data-title");
+      if (vegaView) {
+        try {
+          const imgURL = await vegaView.toImageURL("png");
+          const img = new Image();
+          img.src = imgURL;
+          await new Promise((resolve) => (img.onload = resolve));
 
-            const page = Math.floor(i / cardsPerPage)
-            const xOffset = 50 //i % 2 === 0 ? 50 : 50 + img.width / 2
-            const yOffset = 50 //100 + (img.height + 50) * (i % cardsPerPage)
+          const availableWidth = pdf.internal.pageSize.getWidth() - 2 * xOffset;
+          const widthScalingFactor = availableWidth / img.width;
+          const imageScalingFactor = widthScalingFactor;
 
-            if (page > 0 && i % cardsPerPage === 0) {
-              pdf.addPage("a4", "p")
-            }
-            pdf.text(
-              title,
-              pdf.internal.pageSize.getWidth() / 2,
-              30,
-              { align: "center" }
-            )
-            pdf.addImage({
-              imageData: img,
-              format: "PNG",
-              x: xOffset,
-              y: yOffset,
-              width: img.width * imageScalingFactor,
-              height: img.height * imageScalingFactor,
-            })
-          } catch (error) {
-            console.error("Error exporting Vega chart:", error)
+          const page = Math.floor(i / cardsPerPage);
+          const yOffset = 50 + (img.height * imageScalingFactor + 50) * (i % cardsPerPage);
+
+          if (page > 0 && i % cardsPerPage === 0) {
+            pdf.addPage("a4", "p");
           }
+          pdf.text(
+            title,
+            pdf.internal.pageSize.getWidth() / 2,
+            30,
+            { align: "center" }
+          );
+          pdf.addImage({
+            imageData: img,
+            format: "PNG",
+            x: xOffset,
+            y: yOffset,
+            width: img.width * imageScalingFactor,
+            height: img.height * imageScalingFactor,
+          });
+        } catch (error) {
+          console.error("Error exporting Vega chart:", error);
         }
-      } else {
-        // If the card does not contain a Vega-Embed chart
-        const canvas = await html2canvas(cardElement)
-        const imgData = canvas.toDataURL("image/png")
-
-        const page = Math.floor(i / cardsPerPage)
-        const xOffset = 50 // i % 2 === 0 ? 50 : 50 + canvas.width / 2
-        const yOffset = 50 //100 + (canvas.height + 50) * (i % cardsPerPage)
-
-        if (page > 0 && i % cardsPerPage === 0) {
-          pdf.addPage("a4", "p")
-        }
-
-        pdf.addImage({
-          imageData: imgData,
-          format: "PNG",
-          x: xOffset,
-          y: yOffset,
-          width: canvas.width * imageScalingFactor,
-          height: canvas.height * imageScalingFactor,
-        })
       }
-    }
+    } else {
+      // If the card does not contain a Vega-Embed chart
+      const canvas = await html2canvas(cardElement);
+      const imgData = canvas.toDataURL("image/png");
 
-    pdf.save("results.pdf")
+      const availableWidth = pdf.internal.pageSize.getWidth() - 2 * xOffset;
+      const widthScalingFactor = availableWidth / canvas.width;
+      const imageScalingFactor = widthScalingFactor;
+
+      const page = Math.floor(i / cardsPerPage);
+      const yOffset = 50 + (canvas.height * imageScalingFactor + 50) * (i % cardsPerPage);
+
+      if (page > 0 && i % cardsPerPage === 0) {
+        pdf.addPage("a4", "p");
+      }
+
+      pdf.addImage({
+        imageData: imgData,
+        format: "PNG",
+        x: xOffset,
+        y: yOffset,
+        width: canvas.width * imageScalingFactor,
+        height: canvas.height * imageScalingFactor,
+      });
+    }
   }
+
+  pdf.save("results.pdf");
+}
 </script>
 
 <div class="container">

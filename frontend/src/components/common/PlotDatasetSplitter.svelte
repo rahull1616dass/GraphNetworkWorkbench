@@ -53,7 +53,8 @@
     })
     shouldCheckSplits = false
   }
-  const HOVER_PIXEL_OFFSET: number = 200
+  const HOVER_PIXEL_OFFSETY: number = 200
+  const HOVER_PIXEL_OFFSETX: number = 50
   const dispatcher = createEventDispatcher()
 
   // Run an onMount function to initialize the plot
@@ -122,9 +123,9 @@
                   networkToUpdate.nodes[item.datum.index].is_train
                 ),
                 // @ts-ignore
-                event.pageX - HOVER_PIXEL_OFFSET - containerRect.left,
+                event.pageX + HOVER_PIXEL_OFFSETX - containerRect.left,
                 // @ts-ignore
-                event.pageY - HOVER_PIXEL_OFFSET - containerRect.top
+                event.pageY + HOVER_PIXEL_OFFSETY - containerRect.top
               )
             }
           }
