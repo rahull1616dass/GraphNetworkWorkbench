@@ -37,7 +37,7 @@ RABBITMQ_USER=guest
 RABBITMQ_PASSWORD=guest
 MLFLOW_URI="./mlflow"
 CHATGPT_API_KEY="API_key"
-EXPERT_MODEL="model_you_would_like_to_use"
+EXPERT_MODEL="gpt-3.5-turbo"
 ```
 
 start task manager workers

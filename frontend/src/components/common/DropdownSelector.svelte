@@ -107,9 +107,8 @@
     width: 60%;
     height: 100%;
     font-family: var(font-family);
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--wueblue);
+    font-size: 14px;
+    font-weight: 400;
     background-color: white;
     padding: 1%;
     margin: 2%;

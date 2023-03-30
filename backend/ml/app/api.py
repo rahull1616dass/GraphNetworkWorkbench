@@ -19,7 +19,8 @@ logger = get_logger(__name__)
 
 @api.post("/link_pred")
 async def link_prediction(request: MLRequest = Body()):
-    losses, val_scores, accuracy, precision, recall, f1, auc_roc, predictions = await link_prediction_workflow(request)
+    losses, val_scores, accuracy, precision, recall, f1, auc_roc, predictions, embeddings = \
+        await link_prediction_workflow(request)
     expert_opinion = await run_workflow(
         chain(get_pred_expert_opinion_task.s(request, losses, val_scores, accuracy, precision, recall, f1, auc_roc)))
 
@@ -32,6 +33,7 @@ async def link_prediction(request: MLRequest = Body()):
         f1=f1,
         auc=auc_roc,
         predictions=predictions,
+        embeddings=embeddings,
         expertOpinion=expert_opinion
     )
     return response.dict(by_alias=True)
@@ -39,7 +41,7 @@ async def link_prediction(request: MLRequest = Body()):
 
 @api.post("/node_class")
 async def node_classification(request: ClassificationRequest = Body()):
-    losses, val_scores, accuracy, precision, recall, f1, auc_roc, predictions, train_percentage = \
+    losses, val_scores, accuracy, precision, recall, f1, auc_roc, predictions, embeddings, train_percentage = \
         await node_classification_workflow(request)
     request.train_percentage = train_percentage
     expert_opinion = await run_workflow(
@@ -54,6 +56,7 @@ async def node_classification(request: ClassificationRequest = Body()):
         f1=f1,
         auc=auc_roc,
         predictions=predictions,
+        embeddings=embeddings,
         expertOpinion=expert_opinion
     )
     return response.dict(by_alias=True)
