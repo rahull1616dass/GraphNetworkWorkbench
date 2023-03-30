@@ -8,6 +8,10 @@
   import { selectedMenuItem } from "../../../stores"
   import { MenuItem } from "../../../definitions/menuItem"
   import { ProgressBarData } from "../../../definitions/progressBarData"
+  import InfoBox from "../../common/InfoBox.svelte";
+
+  let infoBoxContent = "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
+  $: isInfoModalOpen = false
 
   onMount(async () => {
     /*
@@ -34,6 +38,14 @@
     item.includes(searchTerm)
   )
 </script>
+
+<div class="info">
+  <InfoBox
+    bind:isInfoModalOpen
+    headerText="My Networks Guide"
+    bodyText={infoBoxContent}
+  />
+</div>
 
 <main>
   {#if progressBarData.isPresent}

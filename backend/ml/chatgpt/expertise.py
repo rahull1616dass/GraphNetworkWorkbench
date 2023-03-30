@@ -14,7 +14,7 @@ def get_basic_arguments(request: MLRequest, losses: List[float], validation_scor
         ", ".join(map(str, request.hidden_layer_sizes)),
         len(request.x_columns),
         request.train_percentage,
-        1 - request.train_percentage,
+        round(1 - request.train_percentage, 4),
         request.learning_rate,
         request.epochs,
         ", ".join(map(str, losses[-10:])),
@@ -40,8 +40,11 @@ async def get_expert_advice_about_class(
              f"number of layers and their sizes. Also learning rate, feature, target columns and number of " \
              f"iterations. Which advice would you give directly to such user based on below data how to optimize the " \
              f"model?"
-    response = await openai.Completion.acreate(engine=settings.expert_model, prompt=prompt, max_tokens=200)
-    return response.choices[0].text
+    response = await openai.ChatCompletion.acreate(
+        model=settings.expert_model,
+        messages=[{"role": "assistant", "content": prompt}],
+        max_tokens=200)
+    return response.choices[0].message.content
 
 
 @timeit
@@ -62,5 +65,8 @@ async def get_expert_advice_about_pred(
              f"the ROC AUC score is {roc}.. User can only control type of the model, number of layers and their " \
              f"sizes. Also learning rate, feature columns and number of iterations. Which advice would you give " \
              f"directly to such user based on below data how to optimize the model?"
-    response = await openai.Completion.acreate(engine=settings.expert_model, prompt=prompt, max_tokens=200)
-    return response.choices[0].text
+    response = await openai.ChatCompletion.acreate(
+        model=settings.expert_model,
+        messages=[{"role": "assistant", "content": prompt}],
+        max_tokens=200)
+    return response.choices[0].message.content
