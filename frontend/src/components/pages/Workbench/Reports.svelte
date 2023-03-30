@@ -7,6 +7,7 @@
   import type { Task } from "../../../definitions/task"
   import { ModalData } from "../../../definitions/modalData"
   import { fly } from "svelte/transition"
+  import CustomButton from "../../common/CustomButton.svelte"
   import ExperimentResults from "../../common/ExperimentResults.svelte"
 
   let tasks: Task[] = []

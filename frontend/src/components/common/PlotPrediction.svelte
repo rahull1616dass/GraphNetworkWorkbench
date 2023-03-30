@@ -12,7 +12,9 @@
     import { PredictionResult } from "../../definitions/predictionResult"
     import type { Task } from "../../definitions/task"
     import type { Network } from "../../definitions/network"
+    import { createEventDispatcher } from "svelte"
 
+    const dispatch = createEventDispatcher()
     let hoverData: HoverData = undefined
     // Dynamically adjust the hover offset based on screen size
     const HOVER_OFFSET = {
@@ -51,6 +53,7 @@
       setColorKey(VisSpec, "result", ["#808080", "#FF0000", "#097969"]) // TODO: Change group to prediction
       vegaEmbed("#viz", VisSpec, { actions: false })
         .then((result) => {
+          dispatch("predictionPlotLoaded", result.view)
           result.view.addEventListener("mouseover", function (event, item) {
             console.log("MOUSEOVER", item)
             if (item != undefined && item.datum != undefined) {

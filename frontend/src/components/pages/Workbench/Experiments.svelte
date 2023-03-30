@@ -27,7 +27,7 @@
   import Countup from "svelte-countup"
   import { COLUMN_IS_TRAIN } from "../../../definitions/constants"
 
-  let hiddenLayers = [{ first: true, checked: false, size: 10 }]
+  let hiddenLayers = [{ permanent: true, checked: false, size: 10 }, { permanent: true, checked: false, size: 10 }]
   let customizedSplitDefined: boolean = false
 
   // These values should be set by UI Elements later on
@@ -128,14 +128,14 @@
 
   function addHiddenLayer() {
     hiddenLayers = hiddenLayers.concat({
-      first: false,
+      permanent: false,
       checked: false,
       size: 10,
     })
   }
 
   function clearHiddenLayer() {
-    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.first)
+    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.permanent)
   }
 
   function saveSplitClicked(event: CustomEvent) {
@@ -392,7 +392,7 @@
                   <input type="checkbox" bind:checked={hiddenLayer.checked} />
                   <input
                     type="range"
-                    min="1"
+                    min="2"
                     max="20"
                     step="1"
                     class="slider"

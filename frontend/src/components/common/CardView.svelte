@@ -1,7 +1,9 @@
 <script lang="ts">
+  export let id: string = undefined
+  export let title: string = undefined
 </script>
 
-<div class="CardView">
+<div class="CardView" {id} data-title={title}>
   <slot name="header" />
   <hr />
   <slot name="body" />
