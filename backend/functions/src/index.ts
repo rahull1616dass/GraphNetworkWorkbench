@@ -15,7 +15,7 @@ import axios from "axios"
 import * as admin from "firebase-admin"
 import type { QueryDocumentSnapshot } from "firebase-functions/v1/firestore"
 import { GetSignedUrlResponse, GetSignedUrlConfig } from "@google-cloud/storage"
-import {stringify} from 'flatted'
+//import {stringify} from 'flatted'
 
 const cors = require("cors")({ origin: true });
 
@@ -145,7 +145,7 @@ exports.onTaskCreated = functions.firestore
             Because taskResult may contain circular references, 
             we need to use flatted to stringify it.
             */
-            console.log(stringify(taskResult.data))
+            //console.log(stringify(taskResult.data))
             taskResult.data.state = "RESULT" //ExperimentState[ExperimentState.RESULT]
             return writeToTaskDocument(taskResult.data, context)
 
