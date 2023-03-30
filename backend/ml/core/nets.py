@@ -59,4 +59,4 @@ class EdgePredictionNet(torch.nn.Module):
 
     def decode_all(self, z):
         prob_adj = z @ z.t()
-        return (prob_adj > 0).nonzero(as_tuple=False).t()
+        return (prob_adj > 0.5).nonzero(as_tuple=False).t()

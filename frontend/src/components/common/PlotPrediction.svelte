@@ -24,6 +24,8 @@
   }
   export let currentNetwork: Network = undefined
 
+  export let nodeData: Array<{ name: string, index: number, result: string }> = []
+
   export let task: Task = undefined
   // Run an onMount function to initialize the plot
   onMount(() => {
@@ -66,6 +68,13 @@
           node.result = PredictionResult.WRONG
         }
       })
+
+      nodeData = networkToPlot.nodes.map((node) => ({
+        name: node.name,
+        index: node.index,
+        result: node.result
+      }))
+      dispatch('nodeData', nodeData)
 
       updateVisSpec(networkToPlot, VisSpec)
       setColorKey(

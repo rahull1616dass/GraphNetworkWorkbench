@@ -12,12 +12,5 @@ class MLResponse(CamelModel):
     f1: float
     auc: float
     expert_opinion: str
-    embeddings: List
-
-
-class NodeClassResponse(MLResponse):
+    embeddings: Dict
     predictions: Dict
-
-
-class EdgePredResponse(MLResponse):
-    predictions: List

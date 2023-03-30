@@ -14,6 +14,9 @@
   export let task: Task = undefined
   export let currentNetwork: Network = undefined
 
+  let nodeDataResult
+  let edgeDataResult
+
   let experimentPlots = {
     plotLoss: undefined,
     plotNodeEmbeddding: undefined,
@@ -67,10 +70,17 @@
             width: img.width * imageScalingFactor,
             height: img.height * imageScalingFactor,
           });
+          
+          if(title === "Prediction Results"){
+            await addNodeData(pdf);
+            await addEdgeData(pdf);
+          }
+
         } catch (error) {
           console.error("Error exporting Vega chart:", error);
         }
       }
+
     } else {
       // If the card does not contain a Vega-Embed chart
       const canvas = await html2canvas(cardElement);
@@ -78,7 +88,7 @@
 
       const availableWidth = pdf.internal.pageSize.getWidth() - 2 * xOffset;
       const widthScalingFactor = availableWidth / canvas.width;
-      const imageScalingFactor = widthScalingFactor;
+      const imageScalingFactor = widthScalingFactor * 0.5;
 
       const page = Math.floor(i / cardsPerPage);
       const yOffset = 50 + (canvas.height * imageScalingFactor + 50) * (i % cardsPerPage);
@@ -100,6 +110,60 @@
 
   pdf.save("results.pdf");
 }
+
+function formatNodeData(node) {
+  let result:string = node.result == 1?"In Training":node.result == 2?"Correct":node.result ==3?"Wrong":"Not Defined"
+  return `name: ${node.name}, index: ${node.index}, result: ${result}`;
+}
+
+function formatEdgeData(edge) {
+  let result:string = edge.result == 1?"In Training":edge.result == 2?"Correct":edge.result ==3?"Wrong":"Not Defined"
+  return `source: ${edge.source}, target: ${edge.target}, result: ${edge.result}`;
+}
+
+async function addNodeData(pdf: jsPDF) {
+    const yOffsetStart = 50;
+    const yOffsetIncrement = 20;
+    const xOffsetNodeData = 50;
+    let yOffsetNodeData = yOffsetStart;
+
+    pdf.addPage("a4", "p");
+    pdf.text("Node Results", pdf.internal.pageSize.getWidth() / 2, yOffsetNodeData, { align: "center" });
+    yOffsetNodeData += yOffsetIncrement;
+
+    nodeDataResult.forEach((node) => {
+      pdf.text(formatNodeData(node), xOffsetNodeData, yOffsetNodeData);
+      yOffsetNodeData += yOffsetIncrement;
+
+      // Check if yOffsetNodeData exceeds the page height, and if so, add a new page and reset yOffsetNodeData
+      if (yOffsetNodeData >= pdf.internal.pageSize.getHeight() - yOffsetStart) {
+        pdf.addPage("a4", "p");
+        yOffsetNodeData = yOffsetStart;
+      }
+    });
+  }
+
+  async function addEdgeData(pdf: jsPDF) {
+    const yOffsetStart = 50;
+    const yOffsetIncrement = 20;
+    const xOffsetEdgeData = 50;
+    let yOffsetEdgeData = yOffsetStart;
+
+    pdf.addPage("a4", "p");
+    pdf.text("Edge Results", pdf.internal.pageSize.getWidth() / 2, yOffsetEdgeData, { align: "center" });
+    yOffsetEdgeData += yOffsetIncrement;
+
+    edgeDataResult.forEach((edge) => {
+      pdf.text(formatEdgeData(edge), xOffsetEdgeData, yOffsetEdgeData);
+      yOffsetEdgeData += yOffsetIncrement;
+
+      // Check if yOffsetEdgeData exceeds the page height, and if so, add a new page and reset yOffsetEdgeData
+      if (yOffsetEdgeData >= pdf.internal.pageSize.getHeight() - yOffsetStart) {
+        pdf.addPage("a4", "p");
+        yOffsetEdgeData = yOffsetStart;
+      }
+    });
+  }
 </script>
 
 <div class="container">
@@ -155,6 +219,13 @@
         on:predictionPlotLoaded={(e) => {
           experimentPlots["plotPrediction"] = e.detail
         }}
+        on:nodeData={(e) => {
+          nodeDataResult = e.detail
+        }}
+        on:edgeData={(e) => {
+          edgeDataResult = e.detail
+        }}
+
       />
     </div>
 
