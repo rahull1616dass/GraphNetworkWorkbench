@@ -15,7 +15,7 @@ onMount(() => {
 })
 
 function loadEmbedding(){
-    EmbeddingVisSpec.data.values = embedding.map(([x, y]) => ({ x, y }));
+    //EmbeddingVisSpec.data.values = embedding.map(([x, y]) => ({ x, y }));
     vegaEmbed("#embedding", EmbeddingVisSpec).then((result) => {
         dispatcher("plotLoaded", result.view)
     })
