@@ -73,6 +73,7 @@
           { key: "mlModelType", value: "ML Model" },
           { key: "epochs", value: "Epochs" },
           { key: "trainPercentage", value: "Train Percentage" },
+          { key: "createdAt", value: "Created At"}
         ]}
         rows={tasks.map((task) => ({
           // @ts-ignore
@@ -83,6 +84,7 @@
           mlModelType: task.mlModelType,
           epochs: task.epochs,
           trainPercentage: task.trainPercentage,
+          createdAt: task.createdAt,
         }))}
       >
         <svelte:fragment slot="expanded-row" let:row>

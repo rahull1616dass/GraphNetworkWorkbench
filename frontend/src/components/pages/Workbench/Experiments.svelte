@@ -350,7 +350,9 @@
           </InfoText>
 
           <div>
-            <li>Epochs</li>
+            <li>
+              Epochs
+            </li>
             <li class="range">
               <input
                 type="range"
@@ -414,8 +416,7 @@
                     on:click={() => resetCustomizedSplit()}>Reset</CustomButton
                   >
                 {/if}
-              {/if}
-              {#if isCustomizeModalOpen}
+                {#if isCustomizeModalOpen}
                 <PlotDatasetSplitter
                   on:saveSplitClicked={saveSplitClicked}
                   on:closePopup={closePlotPopup}
@@ -425,6 +426,8 @@
                   trainPercentage={task.trainPercentage}
                 />
               {/if}
+              {/if}
+              
             </li>
             {#if task.taskType !== TaskType.NODE_CLASSIFICATION || (task.taskType === TaskType.NODE_CLASSIFICATION && customizedSplitDefined === false)}
               <li class="range">
