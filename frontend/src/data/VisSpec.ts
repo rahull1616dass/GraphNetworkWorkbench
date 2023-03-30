@@ -79,9 +79,37 @@ export default {
             "type": "ordinal",
             "domain": { "data": "node-data", "field": "group" },
             "range": { "scheme": "category10" }
+        },
+        {
+            "name": "linkColor",
+            "type": "ordinal",
+            "domain": {"data": "link-data", "field": "result"},
+            "range": {"scheme": "category10"}
         }
     ],
     "marks": [
+        {
+            "type": "path",
+            "from": { "data": "link-data" },
+            "interactive": true,
+            "encode": {
+                "update": {
+                    "stroke": {"scale": "linkColor", "field": "datum.your_link_attribute"},
+                    "strokeWidth": { "field": "value" }
+                }
+            },
+            "transform": [
+                {
+                    "type": "linkpath",
+                    "require": { "signal": "force" },
+                    "shape": "line",
+                    "sourceX": "datum.source.x",
+                    "sourceY": "datum.source.y",
+                    "targetX": "datum.target.x",
+                    "targetY": "datum.target.y"
+                }
+            ]
+        },
         {
             "name": "nodes",
             "type": "symbol",

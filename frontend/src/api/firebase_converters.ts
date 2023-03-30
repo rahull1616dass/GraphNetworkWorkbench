@@ -52,7 +52,7 @@ export const tasksConverter = {
       data.state,
       data.xColumns,
       data.yColumn,
-      data.expert_opinion,
+      data.expertOpinion,
       data.accuracy,
       data.precision,
       data.recall,
