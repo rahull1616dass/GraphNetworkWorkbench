@@ -394,6 +394,7 @@
               {#if isCustomizeModalOpen}
                 <PlotDatasetSplitter
                   on:saveSplitClicked={saveSplitClicked}
+                  on:closePopup={closePlotPopup}
                   seed={task.seed}
                   {currentNetwork}
                   groupColumn={task.yColumn}
