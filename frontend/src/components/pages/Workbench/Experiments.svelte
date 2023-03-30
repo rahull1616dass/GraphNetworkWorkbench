@@ -27,6 +27,9 @@
   import Countup from "svelte-countup"
   import { COLUMN_IS_TRAIN } from "../../../definitions/constants"
   import InfoBox from "../../common/InfoBox.svelte";
+  import LeftArrow from "../../common/LeftArrow.svelte"
+  import RightArrow from "../../common/RightArrow.svelte"
+  import InfoText from "../../common/InfoText.svelte";
 
   let infoBoxContent = "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
   $: isInfoModalOpen = false
@@ -83,6 +86,17 @@
   $: task.hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
   $: currentNetwork = $networksList[$selectedNetworkIndex]
   $: customizedSplitDefined = checkCustomizedSplit()
+
+  let currentIndex = 0;
+  const totalContent = 7;
+
+  function goLeft() {
+    currentIndex = (currentIndex - 1 + totalContent) % totalContent;
+  }
+
+  function goRight() {
+    currentIndex = (currentIndex + 1) % totalContent;
+  }
 
   function checkCustomizedSplit(): boolean {
     return (
@@ -227,7 +241,233 @@
 >
 
   {#if task.state === ExperimentState.CREATE}
-    <div class="background">
+
+  <div class="container">
+    {#if currentIndex !== 0}
+      <LeftArrow on:click="{goLeft}" />
+    {/if}
+  
+    {#if currentIndex === 0}
+    
+      <div class="content">
+        <InfoText>
+          Select the necessary information to create an experiment.
+        </InfoText>
+
+        <DropdownSelector
+        placeholder={"Select a Network"}
+        type={DropdownSelectorType.NETWORK}
+      />
+
+      <DropdownSelector
+        placeholder={"Select a Model"}
+        type={DropdownSelectorType.MLMODEL}
+        on:modelChange={handleModelChange}
+      />
+
+      <DropdownSelector
+        placeholder={"Select a Task"}
+        type={DropdownSelectorType.TASK}
+        on:taskChange={handleTaskChange}
+      />
+
+      </div>
+    {:else if currentIndex === 1}
+      <div class="content">
+        {#if task.taskType === TaskType.NODE_CLASSIFICATION}
+            <DropdownSelector
+              placeholder={"Select a column to predict"}
+              type={DropdownSelectorType.Y_COLUMN}
+              on:columnChange={handleColumnChange}
+            />
+          {/if}
+
+          <div>
+            {#each selectableColumns as column}
+              <label>
+                <input
+                  type="checkbox"
+                  value={column}
+                  on:change={updateSelectedNodeColumns}
+                />
+                {column}
+              </label>
+            {/each}
+          </div>
+      </div>
+    {:else if currentIndex === 2}
+      <div class="content">
+
+        <div>
+          <li>Epochs</li>
+          <li class="range">
+            <input
+              type="range"
+              bind:value={task.epochs}
+              min="0"
+              max="1000"
+              step="10"
+              class="slider"
+            />
+            <input
+              type="number"
+              bind:value={task.epochs}
+              class="inputNumber"
+            />
+          </li>
+        </div>
+        <div>
+          <li>Learning Rate</li>
+          <li class="range">
+            <input
+              type="range"
+              bind:value={task.learningRate}
+              min="0"
+              max="0.4"
+              step="0.001"
+              class="slider"
+            />
+            <input
+              type="number"
+              bind:value={task.learningRate}
+              min="0"
+              max="0.4"
+              step="0.001"
+              class="inputNumber"
+            />
+          </li>
+        </div>
+
+        <div>
+          <li>
+            {#if task.taskType === TaskType.NODE_CLASSIFICATION && customizedSplitDefined === true}
+              Train/Test Split
+            {:else}
+              Training Percentage
+            {/if}
+            {#if task.taskType === TaskType.NODE_CLASSIFICATION}
+              <CustomButton
+                type={"secondary"}
+                inverse={false}
+                fontsize={60}
+                on:click={() =>
+                  (isCustomizeModalOpen = !isCustomizeModalOpen)}
+                >Customize</CustomButton
+              >
+              {#if customizedSplitDefined === true}
+                <p>Customized training percentage used</p>
+                <CustomButton
+                  type={"secondary"}
+                  inverse={false}
+                  fontsize={60}
+                  on:click={() => resetCustomizedSplit()}>Reset</CustomButton
+                >
+              {/if}
+            {/if}
+            {#if isCustomizeModalOpen}
+              <PlotDatasetSplitter
+                on:saveSplitClicked={saveSplitClicked}
+                seed={task.seed}
+                {currentNetwork}
+                groupColumn={task.yColumn}
+                trainPercentage={task.trainPercentage}
+              />
+            {/if}
+          </li>
+          {#if task.taskType !== TaskType.NODE_CLASSIFICATION || (task.taskType === TaskType.NODE_CLASSIFICATION && customizedSplitDefined === false)}
+            <li class="range">
+              <input
+                type="range"
+                bind:value={task.trainPercentage}
+                min="0"
+                max="1"
+                step="0.05"
+                class="slider"
+              />
+              <input
+                type="number"
+                bind:value={task.trainPercentage}
+                min="0"
+                max="1"
+                step="0.05"
+                class="inputNumber"
+              />
+            </li>
+          {/if}
+        </div>
+
+        <div>
+          <li>
+            Seed
+            <CustomButton
+              type={"secondary"}
+              inverse={false}
+              on:click={() => randomize()}
+              fontsize={60}>Randomize</CustomButton
+            >
+          </li>
+          <li class="range">
+            <input
+              type="range"
+              bind:value={task.seed}
+              min="0"
+              max="1000"
+              step="10"
+              class="slider"
+            />
+            <input type="number" bind:value={task.seed} class="inputNumber" />
+          </li>
+        </div>
+      </div>
+
+      {:else if currentIndex === 3}
+      <div>
+        <li>Add/Delete Hidden Layers</li>
+        <li class="hiddenLayers">
+          {#each hiddenLayers as hiddenLayer, index}
+            <div class:checked={hiddenLayer.checked}>
+              <label for="hiddenLayer">Hidden Layer {index + 1}</label>
+              <input type="checkbox" bind:checked={hiddenLayer.checked} />
+              <input
+                type="range"
+                min="2"
+                max="20"
+                step="1"
+                class="slider"
+                bind:value={hiddenLayer.size}
+              />
+              {hiddenLayer.size}
+            </div>
+          {/each}
+
+          <div class="hiddenLayerButtons">
+            <CustomButton
+              type={"secondary"}
+              inverse={false}
+              fontsize={100}
+              on:click={() => addHiddenLayer()}>Add New Layer</CustomButton
+            >
+
+            -
+            <CustomButton
+              type={"delete"}
+              inverse={false}
+              fontsize={100}
+              on:click={() => clearHiddenLayer()}
+              >Delete Selected Layer</CustomButton
+            >
+          </div>
+        </li>
+      </div>
+    {/if}
+  
+    {#if currentIndex !== totalContent - 1}
+      <RightArrow on:click="{goRight}" />
+    {/if}
+  </div>
+
+    
+    <!-- <div class="background">
       <div>
         <li class="Model">
           <DropdownSelector
@@ -461,7 +701,7 @@
         <li class="Modal" />
       </div>
       <hr />
-    </div>
+    </div> -->
   {:else if task.state === ExperimentState.PROGRESS}
     <div class="progress_bar">
       <ProgressBar helperText={progressBarData.text} />
@@ -499,6 +739,15 @@
 </div>
 
 <style lang="scss">
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .content {
+    margin: 0 1rem;
+  }
   .inputNumber {
     width: 15%;
     padding: 1%;
