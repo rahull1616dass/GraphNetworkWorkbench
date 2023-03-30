@@ -25,6 +25,7 @@
   export let groupColumn: string = "group"
   let hoverData: HoverData = undefined
 
+
   let shouldCheckSplits: boolean = false
   const groupSplits = {}
   let isTrainTestSplitValid: boolean = false
@@ -98,6 +99,8 @@
         })
         result.view.addEventListener("mouseover", function (event, item) {
           console.log("MOUSEOVER", item)
+          const container = document.getElementById("viz");
+          const containerRect = container.getBoundingClientRect();
           if (item != undefined && item.datum != undefined) {
             // @ts-ignore
             if (item != undefined && item.path != undefined) {
@@ -119,9 +122,9 @@
                   networkToUpdate.nodes[item.datum.index].is_train
                 ),
                 // @ts-ignore
-                event.clientX - HOVER_PIXEL_OFFSET,
+                event.pageX - HOVER_PIXEL_OFFSET - containerRect.left,
                 // @ts-ignore
-                event.clientY - HOVER_PIXEL_OFFSET
+                event.pageY - HOVER_PIXEL_OFFSET - containerRect.top
               )
             }
           }
@@ -135,7 +138,7 @@
   }
 </script>
 
-<CustomModal on:close={() => console.log("cancel") }>
+<CustomModal on:close={() => dispatcher("closePopup") }>
   <h4 slot="header">Customize Train/Test Split</h4>
   <div slot="body">
     <div class="info">

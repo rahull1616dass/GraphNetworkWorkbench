@@ -145,6 +145,11 @@
     console.log("Current Network", currentNetwork)
   }
 
+  function closePlotPopup (event: CustomEvent){
+    console.log("Close")
+    isCustomizeModalOpen = false
+  }
+
   function createExperimentDataTable() {
     let parameters = Object.keys(task).filter(
       (key) => task[key] !== undefined && task[key] !== null
@@ -206,6 +211,15 @@
           `Error retrieving tasks for network ${currentNetwork}: ${error}`
         )
       })
+  }
+
+  $: {
+    if (isCustomizeModalOpen) {
+      window.scrollTo(0, 0);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
   }
 </script>
 
@@ -331,6 +345,7 @@
               {#if isCustomizeModalOpen}
                 <PlotDatasetSplitter
                   on:saveSplitClicked={saveSplitClicked}
+                  on:closePopup={closePlotPopup}
                   seed={task.seed}
                   {currentNetwork}
                   groupColumn={task.yColumn}
