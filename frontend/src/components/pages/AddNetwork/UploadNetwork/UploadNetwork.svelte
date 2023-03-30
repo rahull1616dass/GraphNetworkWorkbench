@@ -56,7 +56,6 @@
     'group' is another special column that can be used to assign a group to each node. Visualize page will then color the nodes according to their group. <br /><br />
     The edges.csv file must contain the 'source' and 'target' columns that specify which nodes the edge connects to. Currently only undirected edges are supported in the Visualize Page, although the specific ordering can be relevant for the machine learning algorithms that run on the network. Note that 'source' and 'target' must be integers that correspond to the indices of nodes as either explicitly specified in the nodes.csv file or automatically generated from the nodes.csv file.
   `;
-  let infoBoxContentEdgeFile = 'Only csv files are supported. Network must consist of two files: '
 
   // TODO OnClose callback doesn't work for now
   let nodeFiles: File[] = []
@@ -293,31 +292,27 @@
       </div>
     </div>
 
-    <div class="grid">
+    <div >
       <div>
         <CustomInput id="nodeFile" bind:files={nodeFiles}
           >Upload Node File</CustomInput
         >
       </div>
-      <div class="info">
-        <InfoBox
-          bind:isInfoModalOpen
-          headerText="File Guide"
-          bodyText={infoBoxContentNodeFile}
-        />
-      </div>
+
       <div>
         <CustomInput id="edgeFile" bind:files={edgeFiles}
           >Upload Edge File</CustomInput
         >
       </div>
-      <div class="info">
-        <InfoBox
-          bind:isInfoModalOpen
-          headerText="File Guide"
-          bodyText={infoBoxContentEdgeFile}
-        />
-      </div>
+
+    </div>
+
+    <div class="info">
+      <InfoBox
+        bind:isInfoModalOpen
+        headerText="File Guide"
+        bodyText={infoBoxContentNodeFile}
+      />
     </div>
 
     {#if progressBarData.isPresent}

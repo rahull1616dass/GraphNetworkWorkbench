@@ -20,17 +20,20 @@
 >
   <div class="network_color" style="--bg-color: {network.metadata.color}" />
 
-  <ol class="content">
-    <li class="network_name">
-      {network.metadata.name}
-    </li>
-    <!-- <li class="network_description">
-      {network.metadata.description}
-    </li> -->
-    <li class="network_details">
-      <img src={networkIcon} class="network_icon" alt="Network Icon" />
-      {network.nodes.length} nodes, {network.links.length} edges
-    </li>
+  <div class="container">
+    <ol class="content">
+      <li class="network_name">
+        {network.metadata.name}
+      </li>
+
+      <li class="network_details">
+        <img src={networkIcon} class="network_icon" alt="Network Icon" />
+        {network.nodes.length} nodes, {network.links.length} edges
+      </li>
+
+      
+    </ol>
+
     <div class="delete">
       <ImageButton
         on:click={() => {
@@ -40,10 +43,27 @@
         styleClass="deleteButtonClass"
       />
     </div>
-  </ol>
+  </div>
+  
 </div>
 
+
 <style lang="scss">
+  .container {
+  display: flex;
+  align-items: flex-start;
+}
+
+.content {
+  flex: 1;
+}
+
+.delete {
+  position: sticky ;
+  top: 0;
+  right: 0;
+}
+
   .root {
     display: flex;
     width: 80%;
@@ -59,22 +79,6 @@
     }
   }
 
-  .delete {
-    margin-left: 10%;
-    // margin-left: auto;
-    // margin-right: 10%;
-    align-items: right;
-    justify-self: right;
-  }
-
-  .content {
-    display: flex;
-    text-align: left;
-    // flex-direction: row;
-    // flex-wrap: nowrap;
-    // justify-content: center;
-    // align-items: center;
-  }
   .network_color {
     width: 10px;
     height: 50px;

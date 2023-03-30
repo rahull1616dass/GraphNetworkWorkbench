@@ -4,6 +4,7 @@
   import PlotLoss from "../common/PlotLoss.svelte"
   import DropdownMultiSelector from "../common/DropdownMultiSelector.svelte"
   import { networksList, selectedNetworkIndex } from "../../stores"
+  import Countup from "svelte-countup"
 
   let seed = 0
   let trainPercentage = 0.8
@@ -26,6 +27,7 @@
   }}
 />
 --> 
+
 <PlotLoss {losses}/>
 
 <style lang="scss">

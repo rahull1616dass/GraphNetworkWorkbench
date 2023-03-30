@@ -13,7 +13,11 @@ from core.loggers import timeit
 from core.params import MLParams, ClassificationParams
 
 
-# TODO: If this project will be further developed this parsing file has to be changed: saving graphs in two csv files makes the task of parsing different(directed/undirected, weighted/unweighted graphs) graphs really like reinventing the wheel. It is better to keep supporting .graphml files because networkx exist for both python and JS and can parse it without writing any additional code.
+# TODO: If this project will be further developed this parsing file has to be changed: saving graphs in two csv files
+#  makes the task of parsing different(directed/undirected, weighted/unweighted graphs) graphs really like reinventing
+#  the wheel. It is better to keep supporting .graphml files because networkx exist for both python and JS and can
+#  parse it without writing any additional code.
+
 
 def generate_custom_masks(nodes_df: pd.DataFrame):
     train_mask = torch.tensor((nodes_df["is_train"]==1).values)
@@ -22,17 +26,13 @@ def generate_custom_masks(nodes_df: pd.DataFrame):
     return train_mask, val_mask, test_mask
 
 
-
 def get_basic_data(data_files: Dict[str, str], params: MLParams, label_encoder: LabelEncoder = None) -> Data:
     nodes = pd.read_csv(data_files["nodes"])
     edges = pd.read_csv(data_files["edges"])
 
     graph = nx.Graph()
 
-    if len(edges.columns) == 2:
-        graph.add_edges_from(list(edges.itertuples(index=False)))
-    else:
-        graph.add_weighted_edges_from(list(edges.itertuples(index=False)))
+    graph.add_edges_from(list(edges[["source", "target"]].itertuples(index=False)))
 
     for every_column in params.x_columns:
         if pd.api.types.is_string_dtype(nodes[every_column]):

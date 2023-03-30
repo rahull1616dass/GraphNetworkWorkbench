@@ -7,6 +7,7 @@ from torch.optim import Adam
 import torch.nn.functional as F
 from dataclasses import dataclass
 from torch_geometric.data import Data
+from sklearn.decomposition import PCA
 import torch_geometric.transforms as T
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
@@ -31,7 +32,7 @@ class NodeClassifier:
         self.model.train()
         self.optimizer.zero_grad()
 
-        out = self.model.layers(data.x, data.edge_index)
+        out = self.model(data.x, data.edge_index)
 
         loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
 
@@ -54,7 +55,7 @@ class NodeClassifier:
 
     def __get_data_to_compare(self, data: Data):
         self.model.eval()
-        out = self.model.layers(data.x, data.edge_index)
+        out = self.model(data.x, data.edge_index)
         y_true = data.y[data.test_mask].cpu().numpy()
         y_predicted = torch.argmax(out[data.test_mask], dim=1).unsqueeze(1).cpu().numpy()
         return y_true, y_predicted
@@ -85,9 +86,15 @@ class NodeClassifier:
 
     def predict(self, data: Data) -> List:
         self.model.eval()
-        out = self.model.layers(data.x, data.edge_index)
+        out = self.model(data.x, data.edge_index)
         predicted_classes = torch.argmax(out[data.test_mask], dim=1)
         return predicted_classes.detach().cpu().numpy().tolist()
+
+    def get_2d_node_embeddings(self, data: Data):
+        self.model.eval()
+        embeddings = self.model.non_act_layers(data.x, data.edge_index)
+        embeddings_2d = PCA(n_components=2).fit_transform(embeddings.detach().cpu().numpy())
+        return embeddings_2d
 
 
 @timeit
@@ -120,6 +127,8 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
         node_idx_pred_class_pairs = {node_idx: str(pred_class)
                                      for node_idx, pred_class in zip(test_node_indices, predictions)}
 
+        embeddings = node_classifier.get_2d_node_embeddings(data_to_use)
+
     return (
         losses,
         val_acc_scores,
@@ -129,6 +138,7 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
         f1,
         roc_auc,
         node_idx_pred_class_pairs,
+        embeddings.tolist(),
         train_percentage
     )
     
