@@ -128,6 +128,8 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
                                      for node_idx, pred_class in zip(test_node_indices, predictions)}
 
         embeddings = node_classifier.get_2d_node_embeddings(data_to_use)
+        embeddings_dict = {idx: (round(float(x_y_pair[0]), 4), round(float(x_y_pair[1]), 4))
+                           for idx, x_y_pair in enumerate(embeddings)}
 
     return (
         losses,
@@ -138,7 +140,7 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
         f1,
         roc_auc,
         node_idx_pred_class_pairs,
-        embeddings.tolist(),
+        embeddings_dict,
         train_percentage
     )
     

@@ -147,6 +147,8 @@ def predict_edges(data: Data, params: MLParams):
                            for source, target in zip(predictions[0], predictions[1])}
 
         embeddings = predictor.get_2d_node_embeddings(data_to_use)
+        embeddings_dict = {idx: (round(float(x_y_pair[0]), 4), round(float(x_y_pair[1]), 4))
+                           for idx, x_y_pair in enumerate(embeddings)}
 
     return (
         losses,
@@ -157,5 +159,5 @@ def predict_edges(data: Data, params: MLParams):
         f1,
         roc_auc,
         predicted_pairs,
-        embeddings.tolist()
+        embeddings_dict
     )
