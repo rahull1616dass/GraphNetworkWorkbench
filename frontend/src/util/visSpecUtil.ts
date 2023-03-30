@@ -61,27 +61,20 @@ export function updateVisSpec(
 export function setColorKey(
     visSpec: VisualizationSpec,
     colorKey: string,
-    colorPalette: string[] = undefined,
-    taskType: TaskType = TaskType.NODE_CLASSIFICATION
+    colorPalette: string[] = undefined
   ): VisualizationSpec {
     /*
-    Set what key to use for coloring the nodes or the edges, depending on the task at hand.
+    Set what key to use for coloring the nodes.
     */
-    const scaleName = taskType === TaskType.NODE_CLASSIFICATION ? "nodeColor" : "linkColor";
-    const marksIndex = taskType === TaskType.NODE_CLASSIFICATION ? 0 : 1;
-    const colorProperty = taskType === TaskType.NODE_CLASSIFICATION ? "fill" : "stroke";
   
     // @ts-ignore
-    const scale = visSpec.scales.find((scale) => scale.name === scaleName);
-    scale.domain.field = colorKey;
+    visSpec.scales[0].domain.field = colorKey
     if (colorPalette !== undefined) {
-      scale.range = colorPalette;
+      // @ts-ignore
+      visSpec.scales[0].range = colorPalette
     }
-  
     // @ts-ignore
-    visSpec.marks[marksIndex].encode.enter[colorProperty].scale = scaleName;
-    // @ts-ignore
-    visSpec.marks[marksIndex].encode.enter[colorProperty].field = colorKey;
-    return visSpec;
+    visSpec.marks[0].encode.enter.fill.field = colorKey
+    return visSpec
   }
   

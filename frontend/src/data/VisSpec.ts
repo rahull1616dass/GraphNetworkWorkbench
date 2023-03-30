@@ -75,17 +75,11 @@ export default {
     ],
     "scales": [
         {
-            "name": "nodeColor",
+            "name": "color",
             "type": "ordinal",
             "domain": { "data": "node-data", "field": "group" },
             "range": { "scheme": "category10" }
-          },
-          {
-            "name": "linkColor",
-            "type": "ordinal",
-            "domain": { "data": "link-data", "field": "group" },
-            "range": { "scheme": "category10" }
-          }
+        }
     ],
     "marks": [
         {
@@ -103,7 +97,7 @@ export default {
             ],
             "encode": {
                 "enter": {
-                    "fill": { "scale": "nodeColor", "field": "group" },
+                    "fill": { "scale": "color", "field": "group" },
                     "stroke": { "value": "white" },
 
                     "xfocus": { "signal": "cx" },
@@ -126,18 +120,19 @@ export default {
                     "static": { "signal": "static" },
                     "signal": "force",
                     "forces": [
+
                         { "force": "center", "x": { "signal": "cx" }, "y": { "signal": "cy" } },
+
                         { "force": "x", "x": "xfocus", "strength": { "signal": "gravityX" } },
+
                         { "force": "y", "y": "yfocus", "strength": { "signal": "gravityY" } },
+
                         { "force": "collide", "radius": { "signal": "linkDistance" } },
+
+
                         { "force": "nbody", "strength": { "signal": "nodeCharge" } },
-                        {
-                            "force": "link",
-                            "links": "link-data",
-                            "distance": { "signal": "linkDistance" },
-                            "source": "source",
-                            "target": "target"
-                        }
+
+                        { "force": "link", "links": "link-data", "distance": { "signal": "linkDistance" } }
                     ]
                 }
             ]
@@ -145,12 +140,9 @@ export default {
         {
             "type": "path",
             "from": { "data": "link-data" },
-            "interactive": false,
+            "interactive": true,
             "encode": {
-                "update": {
-                    "stroke": { "scale": "linkColor", "field": "group" },
-                    "strokeWidth": { "field": "value" }
-                }
+                "update": { "stroke": { "value": "#880808" }, "strokeWidth": { "field": "value" } }
             },
             "transform": [
                 {
