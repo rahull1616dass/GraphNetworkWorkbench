@@ -1,8 +1,8 @@
 <script lang="ts">
-  import CustomButton from "../common/CustomButton.svelte";
-  import ImageButton from "../common/ImageButton.svelte";
-  import { ProgressBarData } from "../../definitions/progressBarData";
-  import { getAuth } from "firebase/auth";
+  import CustomButton from "../common/CustomButton.svelte"
+  import ImageButton from "../common/ImageButton.svelte"
+  import { ProgressBarData } from "../../definitions/progressBarData"
+  import { getAuth } from "firebase/auth"
   import {
     selectedMenuItem,
     authUserStore,
@@ -10,67 +10,67 @@
     networksList,
     selectedNetworkIndex,
     fetchedNetworkOnce,
-  } from "../../stores";
-  import { MenuItem } from "../../definitions/menuItem";
-  import Home from "../pages/Home.svelte";
-  import { debug } from "svelte/internal";
-  import { getProfileImage, UploadProfileImage } from "../../api/firebase";
-  import { fetchedProfilePicture } from "../../stores";
-  import { onMount } from "svelte";
-  import { fly, fade } from "svelte/transition";
+  } from "../../stores"
+  import { MenuItem } from "../../definitions/menuItem"
+  import Home from "../pages/Home.svelte"
+  import { debug } from "svelte/internal"
+  import { getProfileImage, UploadProfileImage } from "../../api/firebase"
+  import { fetchedProfilePicture } from "../../stores"
+  import { onMount } from "svelte"
+  import { fly, fade } from "svelte/transition"
 
   let progressBarData: ProgressBarData = new ProgressBarData(
     true,
     "Loading Profile..."
-  );
+  )
 
   let user = localStorage.getItem("loginUser")
     ? JSON.parse(localStorage.getItem("loginUser"))
-    : undefined;
-  let username = user.email.split("@")[0];
-  let profileImage;
-  let InputE1;
+    : undefined
+  let username = user.email.split("@")[0]
+  let profileImage
+  let InputE1
   export const performLogout = () => {
-    progressBarData.text = "Logging out...";
-    progressBarData.isPresent = true;
-    console.log(getAuth().currentUser);
+    progressBarData.text = "Logging out..."
+    progressBarData.isPresent = true
+    console.log(getAuth().currentUser)
 
     getAuth()
       .signOut()
       .then(() => {
-        console.log("User signed out");
-        $authUserStore = undefined;
-        $loginUserStore = undefined;
-        $networksList = [];
-        progressBarData.isPresent = false;
-        $selectedMenuItem = MenuItem.HOME;
-        $fetchedNetworkOnce = false;
+        console.log("User signed out")
+        $authUserStore = undefined
+        $loginUserStore = undefined
+        $networksList = []
+        progressBarData.isPresent = false
+        $selectedMenuItem = MenuItem.HOME
+        $fetchedNetworkOnce = false
       })
       .catch((error) => {
-        console.log(`Error while signing out: ${error}`);
-        progressBarData.isPresent = false;
-      });
-  };
+        console.log(`Error while signing out: ${error}`)
+        progressBarData.isPresent = false
+      })
+  }
 
   async function handleProfileEdit(event) {
-    const file = event.target.files[0];
+    const file = event.target.files[0]
     await UploadProfileImage(file).then(() => {
-      profileImage = URL.createObjectURL(file);
-    });
+      profileImage = URL.createObjectURL(file)
+    })
   }
 
   const onClickProfileEdit = () => {
-    console.log("Clicking");
+    console.log("Clicking")
 
-    InputE1.click();
-  };
+    InputE1.click()
+  }
 
   onMount(() => {
-    getProfileImage();
+    getProfileImage()
     fetchedProfilePicture.subscribe((image) => {
-      if (image != null) profileImage = URL.createObjectURL(image);
-    });
-  });
+      if (image != null) profileImage = URL.createObjectURL(image)
+    })
+  })
 </script>
 
 <div
