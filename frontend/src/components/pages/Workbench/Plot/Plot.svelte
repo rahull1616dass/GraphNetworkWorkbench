@@ -293,14 +293,14 @@
     </div>
     <div class="stats_content">
       <p>Name: {currentNetwork.metadata.name}</p>
-      <p>
-        Description: {currentNetwork.metadata.description}
-      </p>
       <!-- <p>
         citation: {currentNetwork.metadata.}
       </p> -->
       <p>Nodes: {currentNetwork.nodes.length}</p>
       <p>Edges: {currentNetwork.links.length}</p>
+      {#each Object.entries(currentNetwork.metadata) as [key, value]}
+          <p>{key}: {value}</p>
+      {/each}
     </div>
   </div>
   {/if}
