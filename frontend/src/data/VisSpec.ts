@@ -126,19 +126,18 @@ export default {
                     "static": { "signal": "static" },
                     "signal": "force",
                     "forces": [
-
                         { "force": "center", "x": { "signal": "cx" }, "y": { "signal": "cy" } },
-
                         { "force": "x", "x": "xfocus", "strength": { "signal": "gravityX" } },
-
                         { "force": "y", "y": "yfocus", "strength": { "signal": "gravityY" } },
-
                         { "force": "collide", "radius": { "signal": "linkDistance" } },
-
-
                         { "force": "nbody", "strength": { "signal": "nodeCharge" } },
-
-                        { "force": "link", "links": "link-data", "distance": { "signal": "linkDistance" } }
+                        {
+                            "force": "link",
+                            "links": "link-data",
+                            "distance": { "signal": "linkDistance" },
+                            "source": "source",
+                            "target": "target"
+                        }
                     ]
                 }
             ]
@@ -146,10 +145,12 @@ export default {
         {
             "type": "path",
             "from": { "data": "link-data" },
-            "interactive": true,
+            "interactive": false,
             "encode": {
-                "stroke": { "scale": "linkColor", "field": "group" },
-                "strokeWidth": { "field": "value" }
+                "update": {
+                    "stroke": { "scale": "linkColor", "field": "group" },
+                    "strokeWidth": { "field": "value" }
+                }
             },
             "transform": [
                 {
