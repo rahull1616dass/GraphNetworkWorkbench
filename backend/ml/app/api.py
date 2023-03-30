@@ -10,7 +10,7 @@ from app.workflows import (
 )
 from app.workflows import run_workflow
 from core.requests import MLRequest, ClassificationRequest
-from core.responses import NodeClassResponse, EdgePredResponse
+from core.responses import MLResponse
 from task_manager.tasks import get_class_expert_opinion_task, get_pred_expert_opinion_task
 
 api = APIRouter()
@@ -24,7 +24,7 @@ async def link_prediction(request: MLRequest = Body()):
     expert_opinion = await run_workflow(
         chain(get_pred_expert_opinion_task.s(request, losses, val_scores, accuracy, precision, recall, f1, auc_roc)))
 
-    response = EdgePredResponse(
+    response = MLResponse(
         losses=losses,
         valScores=val_scores,
         accuracy=accuracy,
@@ -47,7 +47,7 @@ async def node_classification(request: ClassificationRequest = Body()):
     expert_opinion = await run_workflow(
         chain(get_class_expert_opinion_task.s(request, losses, val_scores, accuracy, precision, recall, f1, auc_roc)))
 
-    response = NodeClassResponse(
+    response = MLResponse(
         losses=losses,
         valScores=val_scores,
         accuracy=accuracy,

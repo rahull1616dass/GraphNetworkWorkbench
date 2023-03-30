@@ -10,6 +10,7 @@
   import CustomButton from "../../common/CustomButton.svelte"
   import ExperimentResults from "../../common/ExperimentResults.svelte"
   import InfoBox from "../../common/InfoBox.svelte";
+  import { ExperimentState } from "../../../definitions/experimentState"
 
   let tasks: Task[] = []
   let errorData: ModalData = undefined
@@ -28,6 +29,8 @@
     await getExperimentTasks($networksList[$selectedNetworkIndex].metadata.id)
       .then((incomingTasks) => {
         tasks = incomingTasks
+        // @ts-ignore
+        tasks = tasks.filter((task) => ExperimentState[task.state] !== ExperimentState.PROGRESS)
         for (var i = 0; i < tasks.length; i++) {
           // @ts-ignore
           tasks[i].index = i
@@ -70,6 +73,7 @@
           { key: "mlModelType", value: "ML Model" },
           { key: "epochs", value: "Epochs" },
           { key: "trainPercentage", value: "Train Percentage" },
+          { key: "createdAt", value: "Created At"}
         ]}
         rows={tasks.map((task) => ({
           // @ts-ignore
@@ -80,6 +84,7 @@
           mlModelType: task.mlModelType,
           epochs: task.epochs,
           trainPercentage: task.trainPercentage,
+          createdAt: task.createdAt.toDate().toLocaleString(),
         }))}
       >
         <svelte:fragment slot="expanded-row" let:row>
