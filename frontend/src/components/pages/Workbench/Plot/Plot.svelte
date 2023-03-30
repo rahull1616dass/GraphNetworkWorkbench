@@ -31,7 +31,8 @@
   import cloneDeep from "lodash.clonedeep"
   import InfoBox from "../../../common/InfoBox.svelte";
 
-  let infoBoxContent = "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
+  let infoBoxContent = 
+  "<p>View and customize the nodes and edges of the selected network. Enter edit mode to modify the node group and other properties, then save the changes and run experiments.</p>";
   $: isInfoModalOpen = false
 
   function loadNetwork(isItemUpdated: boolean) {
@@ -279,7 +280,7 @@
 <div class="info">
   <InfoBox
     bind:isInfoModalOpen
-    headerText="My Networks Guide"
+    headerText="Network Visualization Guide"
     bodyText={infoBoxContent}
   />
 </div>

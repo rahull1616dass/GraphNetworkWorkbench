@@ -17,8 +17,8 @@
     MenuItem.EXPERIMENTS,
     MenuItem.REPORTS,
     MenuItem.PROFILE,
-    MenuItem.FROM_WEB,
-    MenuItem.TEST,
+    // MenuItem.FROM_WEB,
+    // MenuItem.TEST,
   ]
   let menuItemsLogout: MenuItem[] = [
     MenuItem.HOME,

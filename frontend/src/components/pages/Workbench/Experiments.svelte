@@ -32,7 +32,8 @@
   import InfoText from "../../common/InfoText.svelte";
 
   let infoBoxContent =
-    "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
+  '<p>Select a network, model, and task. Choose which columns to predict and use as features. Customize the hyperparameters, such as epochs, training percentage, and learning rate.</p><p>You can also customize the network layers by adding or changing the number of neurons in each layer. Once everything is specified, create the task. Note that you must select all the necessary fields before creating the task.</p>'
+  
   $: isInfoModalOpen = false;
 
   let hiddenLayers = [
@@ -248,7 +249,7 @@
 <div class="info">
   <InfoBox
     bind:isInfoModalOpen
-    headerText="My Networks Guide"
+    headerText="Experiments Guide"
     bodyText={infoBoxContent}
   />
 </div>
