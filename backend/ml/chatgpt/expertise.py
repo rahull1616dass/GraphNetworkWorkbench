@@ -7,7 +7,7 @@ from core.loggers import timeit
 from core.requests import MLRequest, ClassificationRequest
 
 
-def get_basic_arguments(request: MLRequest, losses: List[float], validation_scores: List[float])-> Tuple:
+def get_basic_arguments(request: MLRequest, losses: List[float], validation_scores: List[float]) -> Tuple:
     return (
         len(request.hidden_layer_sizes),
         request.ml_model_type,
