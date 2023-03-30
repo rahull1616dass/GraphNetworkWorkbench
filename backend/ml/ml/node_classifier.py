@@ -70,13 +70,13 @@ class NodeClassifier:
         accuracy = round(accuracy_score(y_true, y_predicted), 4)
         mlflow.log_metric("accuracy", accuracy)
 
-        precision = round(precision_score(y_true, y_predicted), 4)
+        precision = round(precision_score(y_true, y_predicted, average="macro"), 4)
         mlflow.log_metric("precision", precision)
 
-        recall = round(recall_score(y_true, y_predicted), 4)
+        recall = round(recall_score(y_true, y_predicted, average="macro"), 4)
         mlflow.log_metric("recall", recall)
 
-        f1 = round(f1_score(y_true, y_predicted), 4)
+        f1 = round(f1_score(y_true, y_predicted, average="macro"), 4)
         mlflow.log_metric("f1", f1)
 
         roc_auc = round(roc_auc_score(y_true, y_predicted), 4)
