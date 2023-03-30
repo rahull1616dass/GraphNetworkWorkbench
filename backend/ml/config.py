@@ -27,4 +27,5 @@ class Settings(BaseSettings):
 
         return cls._instance
 
+
 settings = Settings()
