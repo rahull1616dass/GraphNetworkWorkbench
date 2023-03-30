@@ -97,6 +97,10 @@
         })
         result.view.addEventListener("mouseover", function (event, item) {
           console.log("MOUSEOVER", item)
+          const container = document.getElementById("viz");
+          const containerRect = container.getBoundingClientRect();
+          
+          // console.log(window.)
           if (item != undefined && item.datum != undefined) {
             // @ts-ignore
             if (item != undefined && item.path != undefined) {
@@ -111,9 +115,9 @@
                 ),
                 undefined,
                 // @ts-ignore
-                event.clientX,
+                event.pageX,
                 // @ts-ignore
-                event.clientY
+                event.pageY
               )
             } else {
               hoverData = new HoverData(
@@ -127,9 +131,9 @@
                   undefined
                 ),
                 // @ts-ignore
-                event.clientX,
+                event.pageX,
                 // @ts-ignore
-                event.clientY
+                event.pageY
               )
             }
           }
