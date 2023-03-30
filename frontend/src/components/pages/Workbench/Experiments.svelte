@@ -26,6 +26,10 @@
   import { delay } from "../../../util/generalUtil"
   import Countup from "svelte-countup"
   import { COLUMN_IS_TRAIN } from "../../../definitions/constants"
+  import InfoBox from "../../common/InfoBox.svelte";
+
+  let infoBoxContent = "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
+  $: isInfoModalOpen = false
 
   let hiddenLayers = [{ permanent: true, checked: false, size: 10 }, { permanent: true, checked: false, size: 10 }]
   let customizedSplitDefined: boolean = false
@@ -209,10 +213,19 @@
   }
 </script>
 
+<div class="info">
+  <InfoBox
+    bind:isInfoModalOpen
+    headerText="My Networks Guide"
+    bodyText={infoBoxContent}
+  />
+</div>
+
 <div
   in:fly={{ y: -50, duration: 250, delay: 300 }}
   out:fly={{ y: -50, duration: 250 }}
 >
+
   {#if task.state === ExperimentState.CREATE}
     <div class="background">
       <div>

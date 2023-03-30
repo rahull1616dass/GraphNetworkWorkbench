@@ -17,7 +17,10 @@
   import FromWeb from "../AddNetwork/FromWeb.svelte";
   import UploadNetwork from "../AddNetwork/UploadNetwork/UploadNetwork.svelte";
   import ImportModal from "../../common/ImportModal.svelte";
+  import InfoBox from "../../common/InfoBox.svelte";
 
+  let infoBoxContent = "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
+  $: isInfoModalOpen = false
   let isImportModalOpen: boolean = false;
   let selectedImportType: ImportModalType = ImportModalType.NONE;
 
@@ -73,6 +76,14 @@
   }
 </script>
 
+<div class="info">
+  <InfoBox
+    bind:isInfoModalOpen
+    headerText="My Networks Guide"
+    bodyText={infoBoxContent}
+  />
+</div>
+
 <div
   in:fly={{ y: -50, duration: 250, delay: 300 }}
   out:fly={{ y: -50, duration: 250 }}
@@ -108,12 +119,14 @@
             tabchange = event.detail.selectedIndex;
           }}
           on:deleteItem={(event) => {
-            networkIndexToDelete = event.detail.selectedIndex;
+            networkIndexToDelete = event.detail.selectedIndex;networksList
             deleteModalData.isOpen = true;
           }}
         />
       {/each}
     </div>
+
+    
 
     {#if deleteModalData.isOpen}
       <CustomModal on:close={() => (deleteModalData.isOpen = false)}>

@@ -29,6 +29,10 @@
 
   //import JSON from "json-strictify"
   import cloneDeep from "lodash.clonedeep"
+  import InfoBox from "../../../common/InfoBox.svelte";
+
+  let infoBoxContent = "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
+  $: isInfoModalOpen = false
 
   function loadNetwork(isItemUpdated: boolean) {
     if (isItemUpdated) {
@@ -268,7 +272,16 @@
   }
 </script>
 
+<div class="info">
+  <InfoBox
+    bind:isInfoModalOpen
+    headerText="My Networks Guide"
+    bodyText={infoBoxContent}
+  />
+</div>
+
 <div class ={parentClass} style={parentStyle} in:fly={{ y: -50, duration: 250, delay: 300 }}>
+  
   <div class="dropdown">
     <select
       class="selectDropdown"
