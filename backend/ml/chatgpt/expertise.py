@@ -14,7 +14,7 @@ def get_basic_arguments(request: MLRequest, losses: List[float], validation_scor
         ", ".join(map(str, request.hidden_layer_sizes)),
         len(request.x_columns),
         request.train_percentage,
-        1 - request.train_percentage,
+        round(1 - request.train_percentage, 4),
         request.learning_rate,
         request.epochs,
         ", ".join(map(str, losses[-10:])),
