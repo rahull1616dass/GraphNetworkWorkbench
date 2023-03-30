@@ -132,7 +132,7 @@
   <CardView id="plotNodeEmbedding" title="Node Embeddings">
     <h4 slot="header">Node Embedding</h4>
     <div slot="body">
-      <Embedding
+      <Embedding {task} 
         on:plotLoaded={(e) => {
           experimentPlots["plotNodeEmbedding"] = e.detail
         }}

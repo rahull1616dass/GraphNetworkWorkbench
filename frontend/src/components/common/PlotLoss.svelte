@@ -16,13 +16,13 @@
     LossVisSpec.data.values = losses.map((l, i) => ({ epoch: i + 1, loss: l }))
     // @ts-ignore
     LossVisSpec.signals = [{ name: "losses", value: losses }]
-    vegaEmbed("#embedding", LossVisSpec).then((result) => {
+    vegaEmbed("#loss", LossVisSpec).then((result) => {
       dispatcher("plotLoaded", result.view)
     })
   })
 </script>
 
-<div id="embedding" />
+<div id="loss" />
 
 <style lang="scss">
   /* Your styling here */
