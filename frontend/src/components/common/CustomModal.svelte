@@ -62,7 +62,7 @@
     padding: 2em;
     border-radius: 0.2em;
     background: white;
-    z-index: 1;
+    z-index: 10;
   }
   .svg-icon {
     position: absolute;
