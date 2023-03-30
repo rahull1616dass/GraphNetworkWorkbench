@@ -17,7 +17,7 @@
     }}
     defaultImageSource={infoIcon}
   />
-
+</div>
   {#if isInfoModalOpen}
     <CustomModal
       on:close={() => {
@@ -37,12 +37,12 @@
       </div>
     </CustomModal>
   {/if}
-</div>
+
 
 <style>
   .infobox {
     position: fixed;
-    top: 9vh; /* Adjust the position according to your needs */
+    top: 10vh; /* Adjust the position according to your needs */
     right: 2vw; /* Adjust the position according to your needs */
     z-index: 1000; /* Optional: Ensures the InfoBox is on top of other elements */
   }

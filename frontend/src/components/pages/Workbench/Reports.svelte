@@ -9,9 +9,13 @@
   import { fly } from "svelte/transition"
   import CustomButton from "../../common/CustomButton.svelte"
   import ExperimentResults from "../../common/ExperimentResults.svelte"
+  import InfoBox from "../../common/InfoBox.svelte";
 
   let tasks: Task[] = []
   let errorData: ModalData = undefined
+
+  let infoBoxContent = "Networks are the building blocks of the workbench. You can create a network by uploading a file or by importing a network from the web by clicking on the 'Create Network' button.";
+  $: isInfoModalOpen = false
 
   // onMount(() => updateTasks());
 
@@ -84,6 +88,16 @@
       </DataTable>
     {/if}
   </div>
+
+  
+</div>
+
+<div class="info">
+  <InfoBox
+    bind:isInfoModalOpen
+    headerText="My Networks Guide"
+    bodyText={infoBoxContent}
+  />
 </div>
 
 <style lang="scss">
