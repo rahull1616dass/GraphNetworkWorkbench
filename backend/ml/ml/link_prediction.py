@@ -141,7 +141,7 @@ def predict_edges(data: Data, params: MLParams):
 
         predictions = predictor.predict(test_data)
 
-        edge_index = test_data.edge_index.cpu().numpy().tolist()
+        edge_index = data_to_use.edge_index.cpu().numpy().tolist()
         real_pairs = [(source, target) for source, target in zip(edge_index[0], edge_index[1])]
         predicted_pairs = {f"{source}-{target}": (source, target) in real_pairs
                            for source, target in predictions}

@@ -102,6 +102,8 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
     mlflow.set_experiment("Node Classification")
 
     with mlflow.start_run():
+        mlflow.log_params(params.dict())
+
         device = set_up_device(params.seed)
 
         if params.train_percentage is None:
