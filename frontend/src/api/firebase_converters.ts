@@ -60,6 +60,7 @@ export const tasksConverter = {
       data.auc,
       data.losses,
       data.predictions,
+      data.embeddings,
       data.errorMessage,
     )
   },

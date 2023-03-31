@@ -238,6 +238,9 @@
   async function createTask() {
     task.state = ExperimentState.PROGRESS
     task.useCustomSplit = customizedSplitDefined
+    if(task.taskType === TaskType.EDGE_PREDICTION){
+        task.yColumn = ""
+    }
     createExperimentDataTable()
     // await delay(2000) // To simulate task being run. TODO: Remove this later on.
     previousTasks.forEach((firestoreTask) => {
@@ -533,7 +536,7 @@
                 (task.trainPercentage === 0 &&
                   task.taskType === TaskType.NODE_CLASSIFICATION &&
                   checkCustomizedSplit() === true) ||
-                task.yColumn === undefined ||
+                (task.taskType === TaskType.NODE_CLASSIFICATION && task.yColumn === undefined) ||
                 task.xColumns.length === 0 ||
                 task.trainPercentage === 1}
               on:click={() => {

@@ -26,7 +26,6 @@
 
   export let nodeData: Array<{ name: string, index: number, result: string }> = []
 
-
   export let task: Task = undefined
   // Run an onMount function to initialize the plot
   onMount(() => {
@@ -46,7 +45,7 @@
     If the plot is created to show the results of link prediction, 
     */
     if (task.taskType === TaskType.NODE_CLASSIFICATION) {
-       /*
+      /*
         In this case, the structure of task.predictions is supposed to be:
         {
             "{node_index}": "{predicted_class}"
@@ -73,7 +72,7 @@
       nodeData = networkToPlot.nodes.map((node) => ({
         name: node.name,
         index: node.index,
-        result: node.result.,
+        result: node.result
       }))
       dispatch('nodeData', nodeData)
 
@@ -81,8 +80,8 @@
       setColorKey(
         VisSpec,
         "result",
-        ["#808080", "#FF0000", "#097969"],
-        TaskType.NODE_CLASSIFICATION
+        ["#808080", "#FF0000", "#097969"]
+        //TaskType.NODE_CLASSIFICATION
       )
     } else if (task.taskType === TaskType.EDGE_PREDICTION) {
       /*
@@ -102,10 +101,16 @@
         */
       for (const [key, value] of Object.entries(task.predictions)) {
         const [source, target] = key.split("-")
-        const link = networkToPlot.links.find((link: Link) =>
-          link.equals(new Link(source, target))
+        const link = networkToPlot.links.find(
+          (link: Link) =>
+            Number(link.target) === Number(target) &&
+            Number(link.source) === Number(source)
         )
+
         if (link !== undefined) {
+          // Mark this link as found in predictions
+          link.inPredictions = true
+
           if (value) {
             // @ts-ignore
             link.result = PredictionResult.CORRECT
@@ -114,24 +119,36 @@
             link.result = PredictionResult.WRONG
           }
         } else {
-          networkToPlot.links.push({
-            source: source,
-            target: target,
-            result: PredictionResult.WRONG,
-          })
+          if (value) {
+            networkToPlot.links.push({
+              source: source,
+              target: target,
+              result: PredictionResult.WRONG,
+            })
+          }
         }
       }
+
+      // Iterate through the links and set the result to IN_TRAIN for links not in predictions
+      networkToPlot.links.forEach((link: Link) => {
+        if (!link.inPredictions || link.result === undefined) {
+          // @ts-ignore
+          link.result = PredictionResult.IN_TRAIN
+        }
+      })
+
+      console.log("xxx")
     }
     updateVisSpec(networkToPlot, VisSpec)
     setColorKey(
       VisSpec,
       "result",
-      ["#808080", "#FF0000", "#097969"],
-      TaskType.EDGE_PREDICTION
+      ["#808080", "#FF0000", "#097969"]
+      //TaskType.EDGE_PREDICTION
     )
   }
 
-  vegaEmbed("#viz", VisSpec, { actions: false })
+  vegaEmbed("#predictionPlot", VisSpec, { actions: false })
     .then((result) => {
       dispatch("predictionPlotLoaded", result.view)
       result.view.addEventListener("mouseover", function (event, item) {
@@ -181,7 +198,7 @@
     .catch((error) => console.log(error))
 </script>
 
-<div id="viz" />
+<div id="predictionPlot" />
 {#if hoverData !== undefined}
   <Hover {hoverData} />
 {/if}

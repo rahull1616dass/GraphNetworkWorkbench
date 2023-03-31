@@ -26,6 +26,7 @@ export class Task {
     public auc: number = undefined,
     public losses: number[] = undefined,
     public predictions: Record<string, string> = undefined,
+    public embeddings: Record<string, number[]> = undefined,
     public errorMessage: string = undefined
   ) {}
 
