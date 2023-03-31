@@ -25,6 +25,7 @@
   export let currentNetwork: Network = undefined
 
   export let nodeData: Array<{ name: string, index: number, result: string }> = []
+  export let edgeData: Array<{ source: string, target: number, result: string }> = []
 
   export let task: Task = undefined
   // Run an onMount function to initialize the plot
@@ -99,24 +100,36 @@
         If it is, then we need to check if the prediction was correct or not. If it is not, then we need to
         add it to the network and label it as wrong.
         */
+       console.log(task.predictions)
+       
+      for (let i = 0; i < networkToPlot.links.length; i++) {
+        networkToPlot.links[i].result = PredictionResult.IN_TRAIN_SET
+      }
       for (const [key, value] of Object.entries(task.predictions)) {
         const [source, target] = key.split("-")
-        const link = networkToPlot.links.find(
-          (link: Link) =>
-            Number(link.target) === Number(target) &&
-            Number(link.source) === Number(source)
-        )
+        
+        let matchingLink;
+        for (let i = 0; i < networkToPlot.links.length; i++) {
+          const link = networkToPlot.links[i];
+          const sourceValueAsNumber = parseInt(source, 10);
+          const targetValueAsNumber = parseInt(target, 10);
 
-        if (link !== undefined) {
+          if (link.source === sourceValueAsNumber && link.target === targetValueAsNumber) {
+            matchingLink = link;
+            break;
+          }
+        }
+
+        if (matchingLink !== undefined) {
           // Mark this link as found in predictions
-          link.inPredictions = true
+          matchingLink.inPredictions = true
 
           if (value) {
             // @ts-ignore
-            link.result = PredictionResult.CORRECT
+            matchingLink.result = PredictionResult.CORRECT
           } else {
             // @ts-ignore
-            link.result = PredictionResult.WRONG
+            matchingLink.result = PredictionResult.WRONG
           }
         } else {
           if (value) {
@@ -130,22 +143,22 @@
       }
 
       // Iterate through the links and set the result to IN_TRAIN for links not in predictions
-      networkToPlot.links.forEach((link: Link) => {
-        if (!link.inPredictions || link.result === undefined) {
-          // @ts-ignore
-          link.result = PredictionResult.IN_TRAIN
-        }
-      })
-
+     
+      edgeData = networkToPlot.links.map((link) => ({
+        source: link.source,
+        target: link.target,
+        result: link.result,
+      }));
+      dispatch("edgeData", edgeData);
       console.log("xxx")
     }
-    updateVisSpec(networkToPlot, VisSpec)
-    setColorKey(
-      VisSpec,
-      "result",
-      ["#808080", "#FF0000", "#097969"]
-      //TaskType.EDGE_PREDICTION
-    )
+    // updateVisSpec(networkToPlot, VisSpec)
+    // setColorKey(
+    //   VisSpec,
+    //   "result",
+    //   ["#808080", "#FF0000", "#097969"]
+    //   //TaskType.EDGE_PREDICTION
+    // )
   }
 
   vegaEmbed("#predictionPlot", VisSpec, { actions: false })
