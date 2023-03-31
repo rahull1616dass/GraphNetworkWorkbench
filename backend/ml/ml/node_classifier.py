@@ -57,29 +57,30 @@ class NodeClassifier:
         self.model.eval()
         out = self.model(data.x, data.edge_index)
         y_true = data.y[data.test_mask].cpu().numpy()
-        y_predicted = torch.argmax(out[data.test_mask], dim=1).unsqueeze(1).cpu().numpy()
-        return y_true, y_predicted
+        y_pred_prob = out.cpu().numpy()
+        y_predicted_class = torch.argmax(out[data.test_mask], dim=1).unsqueeze(1).cpu().numpy()
+        return y_true, y_predicted_class, y_pred_prob
 
     def test(self, data: Data) -> float:
-        y_true, y_predicted = self.__get_data_to_compare(data)
+        y_true, y_predicted, _ = self.__get_data_to_compare(data)
         return round(accuracy_score(y_true, y_predicted), 4)
 
     def get_all_metrics(self, data: Data) -> Tuple:
-        y_true, y_predicted = self.__get_data_to_compare(data)
+        y_true, y_predicted_class, y_pred_prob = self.__get_data_to_compare(data)
 
-        accuracy = round(accuracy_score(y_true, y_predicted), 4)
+        accuracy = round(accuracy_score(y_true, y_predicted_class), 4)
         mlflow.log_metric("accuracy", accuracy)
 
-        precision = round(precision_score(y_true, y_predicted, average="macro"), 4)
+        precision = round(precision_score(y_true, y_predicted_class, average="macro"), 4)
         mlflow.log_metric("precision", precision)
 
-        recall = round(recall_score(y_true, y_predicted, average="macro"), 4)
+        recall = round(recall_score(y_true, y_predicted_class, average="macro"), 4)
         mlflow.log_metric("recall", recall)
 
-        f1 = round(f1_score(y_true, y_predicted, average="macro"), 4)
+        f1 = round(f1_score(y_true, y_predicted_class, average="macro"), 4)
         mlflow.log_metric("f1", f1)
 
-        roc_auc = round(roc_auc_score(y_true, y_predicted, multi_class="ovr", average="macro"), 4)
+        roc_auc = round(roc_auc_score(y_true, y_pred_prob, multi_class="ovr", average="macro"), 4)
         mlflow.log_metric("ROC AUC", roc_auc)
 
         return accuracy, precision, recall, f1, roc_auc
