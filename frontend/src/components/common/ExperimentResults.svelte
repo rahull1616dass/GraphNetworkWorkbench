@@ -223,7 +223,7 @@ async function addNodeData(pdf: jsPDF) {
           nodeDataResult = e.detail
         }}
         on:edgeData={(e) => {
-          edgeDataResult = e.detail
+          console.log(e.detail)
         }}
 
       />
