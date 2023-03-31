@@ -152,13 +152,13 @@
       dispatch("edgeData", edgeData);
       console.log("xxx")
     }
-    updateVisSpec(networkToPlot, VisSpec)
-    setColorKey(
-      VisSpec,
-      "result",
-      ["#808080", "#FF0000", "#097969"]
-      //TaskType.EDGE_PREDICTION
-    )
+    // updateVisSpec(networkToPlot, VisSpec)
+    // setColorKey(
+    //   VisSpec,
+    //   "result",
+    //   ["#808080", "#FF0000", "#097969"]
+    //   //TaskType.EDGE_PREDICTION
+    // )
   }
 
   vegaEmbed("#predictionPlot", VisSpec, { actions: false })

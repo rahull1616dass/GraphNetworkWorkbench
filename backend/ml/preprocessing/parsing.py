@@ -32,6 +32,8 @@ def get_basic_data(data_files: Dict[str, str], params: MLParams, label_encoder: 
 
     graph = nx.Graph()
 
+    graph.add_nodes_from(nodes["index"].to_numpy())
+
     graph.add_edges_from(list(edges[["source", "target"]].itertuples(index=False)))
 
     for every_column in params.x_columns:

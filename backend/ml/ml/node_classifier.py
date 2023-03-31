@@ -79,7 +79,7 @@ class NodeClassifier:
         f1 = round(f1_score(y_true, y_predicted, average="macro"), 4)
         mlflow.log_metric("f1", f1)
 
-        roc_auc = round(roc_auc_score(y_true, y_predicted), 4)
+        roc_auc = round(roc_auc_score(y_true, y_predicted, multi_class="ovr", average="macro"), 4)
         mlflow.log_metric("ROC AUC", roc_auc)
 
         return accuracy, precision, recall, f1, roc_auc
@@ -102,6 +102,8 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
     mlflow.set_experiment("Node Classification")
 
     with mlflow.start_run():
+        mlflow.log_params(params.dict())
+
         device = set_up_device(params.seed)
 
         if params.train_percentage is None:

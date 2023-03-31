@@ -118,7 +118,7 @@ function formatNodeData(node) {
 
 function formatEdgeData(edge) {
   let result:string = edge.result == 1?"In Training":edge.result == 2?"Correct":edge.result ==3?"Wrong":"Not Defined"
-  return `source: ${edge.source}, target: ${edge.target}, result: ${edge.result}`;
+  return `source: ${edge.source}, target: ${edge.target}, result: ${result}`;
 }
 
 async function addNodeData(pdf: jsPDF) {
@@ -127,20 +127,22 @@ async function addNodeData(pdf: jsPDF) {
     const xOffsetNodeData = 50;
     let yOffsetNodeData = yOffsetStart;
 
-    pdf.addPage("a4", "p");
-    pdf.text("Node Results", pdf.internal.pageSize.getWidth() / 2, yOffsetNodeData, { align: "center" });
-    yOffsetNodeData += yOffsetIncrement;
+    if(nodeDataResult !== undefined){
+          pdf.addPage("a4", "p");
+          pdf.text("Node Results", pdf.internal.pageSize.getWidth() / 2, yOffsetNodeData, { align: "center" });
+          yOffsetNodeData += yOffsetIncrement;
 
-    nodeDataResult.forEach((node) => {
-      pdf.text(formatNodeData(node), xOffsetNodeData, yOffsetNodeData);
-      yOffsetNodeData += yOffsetIncrement;
+          nodeDataResult.forEach((node) => {
+            pdf.text(formatNodeData(node), xOffsetNodeData, yOffsetNodeData);
+            yOffsetNodeData += yOffsetIncrement;
 
-      // Check if yOffsetNodeData exceeds the page height, and if so, add a new page and reset yOffsetNodeData
-      if (yOffsetNodeData >= pdf.internal.pageSize.getHeight() - yOffsetStart) {
-        pdf.addPage("a4", "p");
-        yOffsetNodeData = yOffsetStart;
-      }
-    });
+            // Check if yOffsetNodeData exceeds the page height, and if so, add a new page and reset yOffsetNodeData
+            if (yOffsetNodeData >= pdf.internal.pageSize.getHeight() - yOffsetStart) {
+              pdf.addPage("a4", "p");
+              yOffsetNodeData = yOffsetStart;
+            }
+          });
+    }
   }
 
   async function addEdgeData(pdf: jsPDF) {
@@ -148,21 +150,22 @@ async function addNodeData(pdf: jsPDF) {
     const yOffsetIncrement = 20;
     const xOffsetEdgeData = 50;
     let yOffsetEdgeData = yOffsetStart;
-
+    if(edgeDataResult!== undefined){
     pdf.addPage("a4", "p");
     pdf.text("Edge Results", pdf.internal.pageSize.getWidth() / 2, yOffsetEdgeData, { align: "center" });
     yOffsetEdgeData += yOffsetIncrement;
+   
+      edgeDataResult.forEach((edge) => {
+        pdf.text(formatEdgeData(edge), xOffsetEdgeData, yOffsetEdgeData);
+        yOffsetEdgeData += yOffsetIncrement;
 
-    edgeDataResult.forEach((edge) => {
-      pdf.text(formatEdgeData(edge), xOffsetEdgeData, yOffsetEdgeData);
-      yOffsetEdgeData += yOffsetIncrement;
-
-      // Check if yOffsetEdgeData exceeds the page height, and if so, add a new page and reset yOffsetEdgeData
-      if (yOffsetEdgeData >= pdf.internal.pageSize.getHeight() - yOffsetStart) {
-        pdf.addPage("a4", "p");
-        yOffsetEdgeData = yOffsetStart;
-      }
-    });
+        // Check if yOffsetEdgeData exceeds the page height, and if so, add a new page and reset yOffsetEdgeData
+        if (yOffsetEdgeData >= pdf.internal.pageSize.getHeight() - yOffsetStart) {
+          pdf.addPage("a4", "p");
+          yOffsetEdgeData = yOffsetStart;
+        }
+      });
+    }
   }
 </script>
 
@@ -223,7 +226,7 @@ async function addNodeData(pdf: jsPDF) {
           nodeDataResult = e.detail
         }}
         on:edgeData={(e) => {
-          console.log(e.detail)
+          edgeDataResult = e.detail
         }}
 
       />
