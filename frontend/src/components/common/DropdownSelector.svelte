@@ -11,9 +11,9 @@
   export let type: DropdownSelectorType = undefined;
 
   let modelTypes: MLModelType[] = [
-    MLModelType.GCN,
-    MLModelType.DeepWalk,
-    MLModelType.GIN,
+    MLModelType.TAGCONV,
+    MLModelType.SGCONV,
+    MLModelType.GATCONV,
     MLModelType.GCNCONV,
     MLModelType.SAGECONV
   ];
