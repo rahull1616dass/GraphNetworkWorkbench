@@ -58,5 +58,14 @@ class EdgePredictionNet(torch.nn.Module):
         return (z[edge_label_index[0]] * z[edge_label_index[1]]).sum(dim=-1)
 
     def decode_all(self, z):
-        prob_adj = z @ z.t()
-        return (prob_adj > 0.5).nonzero(as_tuple=False).t()
+        prob_adj = (z @ z.t()).sigmoid()
+
+        n = prob_adj.shape[0]
+        flat_matrix = prob_adj.flatten()
+        _, top_indices = flat_matrix.topk(20)
+
+        row_indices = top_indices // n
+        col_indices = top_indices % n
+
+        top_row_col_indices = torch.stack((row_indices, col_indices), dim=1)
+        return top_row_col_indices
