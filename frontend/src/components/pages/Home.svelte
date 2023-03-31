@@ -9,6 +9,7 @@
   import HomeVisSpec from "../../data/HomeVisSpec";
   import { default as vegaEmbed } from "vega-embed";
   import { fly } from "svelte/transition";
+  import InfoText from "../common/InfoText.svelte";
 
   let isLoggedIn: boolean = false;
   $: isLoggedIn =
@@ -51,7 +52,10 @@
     <li class="registerButton"><CustomButton type={"secondary"} inverse={true} on:click={() => ($selectedMenuItem = MenuItem.REGISTER)}
       >Sign-up</CustomButton></li>
       -->
-      <h1>Welcome to the WUE Graph Learning Workbench</h1>
+      <InfoText>
+        Welcome to the WUE Graph Learning Workbench
+      </InfoText>
+      <!-- <h1>Welcome to the WUE Graph Learning Workbench</h1> -->
       <div class="viz" id="viz" />
 
       <!-- <button on:click={() => ($selectedMenuItem = MenuItem.REGISTER)}

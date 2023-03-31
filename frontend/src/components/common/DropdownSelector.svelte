@@ -21,7 +21,10 @@
     TaskType.NODE_CLASSIFICATION,
     TaskType.EDGE_PREDICTION,
   ];
-
+// let taskTypes = {
+//     [TaskType.NODE_CLASSIFICATION]: "Node Classification",
+//     [TaskType.EDGE_PREDICTION]: "Edge Prediction",
+// };
   // remove the is_train column from the nodeColumns array
   $: nodeColumns = Object.keys(
     $networksList[$selectedNetworkIndex].nodes[0]
@@ -84,6 +87,11 @@
           {task}
         </option>
       {/each}
+      <!-- {#each Object.entries(taskTypes) as [task, value]}
+        <option class="optionDropdown" value={task}>
+          {value}
+        </option>
+      {/each} -->
     </select>
   </div>
 {:else if type === DropdownSelectorType.Y_COLUMN}
