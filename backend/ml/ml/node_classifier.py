@@ -79,7 +79,7 @@ class NodeClassifier:
         f1 = round(f1_score(y_true, y_predicted, average="macro"), 4)
         mlflow.log_metric("f1", f1)
 
-        roc_auc = round(roc_auc_score(y_true, y_predicted), 4)
+        roc_auc = round(roc_auc_score(y_true, y_predicted, multi_class="ovr", average="macro"), 4)
         mlflow.log_metric("ROC AUC", roc_auc)
 
         return accuracy, precision, recall, f1, roc_auc
