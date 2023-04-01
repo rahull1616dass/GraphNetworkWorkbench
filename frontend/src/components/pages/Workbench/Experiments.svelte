@@ -204,6 +204,7 @@
     task.state = ExperimentState.CREATE
     task.taskType = undefined
     task.mlModelType = undefined
+    task.xColumns = []
   }
 
   function addHiddenLayer() {
