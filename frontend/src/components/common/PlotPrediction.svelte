@@ -223,7 +223,7 @@
 {#if hoverData !== undefined}
   <Hover {hoverData} />
 {/if}
-{#if edgeData !== undefined}
+{#if edgeData.length > 0}
   <div id="edge_data">
     <table>
       <tr>
