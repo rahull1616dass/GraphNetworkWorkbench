@@ -21,10 +21,7 @@
     TaskType.NODE_CLASSIFICATION,
     TaskType.EDGE_PREDICTION,
   ];
-// let taskTypes = {
-//     [TaskType.NODE_CLASSIFICATION]: "Node Classification",
-//     [TaskType.EDGE_PREDICTION]: "Edge Prediction",
-// };
+
   // remove the is_train column from the nodeColumns array
   $: nodeColumns = Object.keys(
     $networksList[$selectedNetworkIndex].nodes[0]
