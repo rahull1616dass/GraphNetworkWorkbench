@@ -34,7 +34,7 @@ class NodeClassifier:
 
         out = self.model(data.x, data.edge_index)
 
-        loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+        loss = F.cross_entropy(out[data.train_mask], data.y[data.train_mask])
 
         loss.backward()
         self.optimizer.step()
