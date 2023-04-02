@@ -196,9 +196,9 @@
                 undefined
               ),
               // @ts-ignore
-              event.clientX - HOVER_OFFSET.x,
+              event.pageX - HOVER_OFFSET.x,
               // @ts-ignore
-              event.clientY - HOVER_OFFSET.y
+              event.pageY - HOVER_OFFSET.y
             )
           }
         }
