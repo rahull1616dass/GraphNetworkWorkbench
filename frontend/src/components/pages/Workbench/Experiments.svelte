@@ -97,6 +97,15 @@
   const totalContent = 5
   let previousTasks: Task[] = []
 
+
+  $: {
+    if (task.state === ExperimentState.RESULT) {
+      resetPage();
+    } else if (task.state === ExperimentState.ERROR) {
+      resetPage();
+    }
+  }
+
   onMount(() => {
     getPreviousTasks()
   })
@@ -147,6 +156,10 @@
     currentIndex = (currentIndex + 1) % totalContent
   }
 
+  function resetPage(){
+    currentIndex = 0
+  }
+
   function checkCustomizedSplit(): boolean {
     return (
       currentNetwork !== undefined &&
@@ -191,6 +204,7 @@
     task.state = ExperimentState.CREATE
     task.taskType = undefined
     task.mlModelType = undefined
+    task.xColumns = []
   }
 
   function addHiddenLayer() {
@@ -583,7 +597,17 @@
     <hr />
     <ExperimentResults {task} {currentNetwork} />
   {:else if task.state === ExperimentState.ERROR}
-    <p>Error: {task.errorMessage}</p>
+    <InfoText>Error: {task.errorMessage}</InfoText>
+    <div class="newExperiment">
+      <CustomButton
+        type={"secondary"}
+        inverse={false}
+        on:click={() => {
+          startNewExperiment()
+        }}
+        >Start New Experiment
+      </CustomButton>
+    </div>
   {/if}
 </div>
 

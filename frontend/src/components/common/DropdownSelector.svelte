@@ -11,9 +11,9 @@
   export let type: DropdownSelectorType = undefined;
 
   let modelTypes: MLModelType[] = [
-    MLModelType.GCN,
-    MLModelType.DeepWalk,
-    MLModelType.GIN,
+    MLModelType.TAGCONV,
+    MLModelType.SGCONV,
+    MLModelType.GATCONV,
     MLModelType.GCNCONV,
     MLModelType.SAGECONV
   ];
@@ -84,6 +84,11 @@
           {task}
         </option>
       {/each}
+      <!-- {#each Object.entries(taskTypes) as [task, value]}
+        <option class="optionDropdown" value={task}>
+          {value}
+        </option>
+      {/each} -->
     </select>
   </div>
 {:else if type === DropdownSelectorType.Y_COLUMN}

@@ -24,8 +24,13 @@
   }
   export let currentNetwork: Network = undefined
 
-  export let nodeData: Array<{ name: string, index: number, result: string }> = []
-  export let edgeData: Array<{ source: string, target: number, result: string }> = []
+  export let nodeData: Array<{ name: string; index: number; result: string }> =
+    []
+  export let edgeData: Array<{
+    source: string
+    target: number
+    result: string
+  }> = []
 
   export let task: Task = undefined
   // Run an onMount function to initialize the plot
@@ -73,9 +78,9 @@
       nodeData = networkToPlot.nodes.map((node) => ({
         name: node.name,
         index: node.index,
-        result: node.result
+        result: node.result,
       }))
-      dispatch('nodeData', nodeData)
+      dispatch("nodeData", nodeData)
 
       updateVisSpec(networkToPlot, VisSpec)
       setColorKey(
@@ -100,23 +105,26 @@
         If it is, then we need to check if the prediction was correct or not. If it is not, then we need to
         add it to the network and label it as wrong.
         */
-       console.log(task.predictions)
-       
+      console.log(task.predictions)
+
       for (let i = 0; i < networkToPlot.links.length; i++) {
         networkToPlot.links[i].result = PredictionResult.IN_TRAIN_SET
       }
       for (const [key, value] of Object.entries(task.predictions)) {
         const [source, target] = key.split("-")
-        
-        let matchingLink;
-        for (let i = 0; i < networkToPlot.links.length; i++) {
-          const link = networkToPlot.links[i];
-          const sourceValueAsNumber = parseInt(source, 10);
-          const targetValueAsNumber = parseInt(target, 10);
 
-          if (link.source === sourceValueAsNumber && link.target === targetValueAsNumber) {
-            matchingLink = link;
-            break;
+        let matchingLink
+        for (let i = 0; i < networkToPlot.links.length; i++) {
+          const link = networkToPlot.links[i]
+          const sourceValueAsNumber = parseInt(source, 10)
+          const targetValueAsNumber = parseInt(target, 10)
+
+          if (
+            link.source === sourceValueAsNumber &&
+            link.target === targetValueAsNumber
+          ) {
+            matchingLink = link
+            break
           }
         }
 
@@ -143,13 +151,13 @@
       }
 
       // Iterate through the links and set the result to IN_TRAIN for links not in predictions
-     
+
       edgeData = networkToPlot.links.map((link) => ({
         source: link.source,
         target: link.target,
         result: link.result,
-      }));
-      dispatch("edgeData", edgeData);
+      }))
+      dispatch("edgeData", edgeData)
       console.log("xxx")
     }
     // updateVisSpec(networkToPlot, VisSpec)
@@ -214,6 +222,24 @@
 <div id="predictionPlot" />
 {#if hoverData !== undefined}
   <Hover {hoverData} />
+{/if}
+{#if edgeData.length > 0}
+  <div id="edge_data">
+    <table>
+      <tr>
+        <th>Source</th>
+        <th>Target</th>
+        <th>Result</th>
+      </tr>
+      {#each edgeData as edge}
+        <tr>
+          <td>{edge.source}</td>
+          <td>{edge.target}</td>
+          <td>{edge.result}</td>
+        </tr>
+      {/each}
+    </table>
+  </div>
 {/if}
 
 <style lang="scss">

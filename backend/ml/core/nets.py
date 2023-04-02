@@ -41,7 +41,7 @@ class NodeClassificationNet(torch.nn.Module):
         self.non_act_layers = Sequential('x, edge_index', non_act_layers)
 
     def forward(self, x, edge_index):
-        return torch.softmax(self.layers(x, edge_index), dim=1)
+        return self.layers(x, edge_index)
 
 
 class EdgePredictionNet(torch.nn.Module):

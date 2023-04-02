@@ -34,7 +34,7 @@ class NodeClassifier:
 
         out = self.model(data.x, data.edge_index)
 
-        loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+        loss = F.cross_entropy(out[data.train_mask], data.y[data.train_mask])
 
         loss.backward()
         self.optimizer.step()
@@ -56,40 +56,43 @@ class NodeClassifier:
     def __get_data_to_compare(self, data: Data):
         self.model.eval()
         out = self.model(data.x, data.edge_index)
-        y_true = data.y[data.test_mask].cpu().numpy()
-        y_pred_prob = out.cpu().numpy()
-        y_predicted_class = torch.argmax(out[data.test_mask], dim=1).unsqueeze(1).cpu().numpy()
-        return y_true, y_predicted_class, y_pred_prob
+        return data.y[data.test_mask].cpu(), torch.softmax(out[data.test_mask], dim=1).cpu()
 
     def test(self, data: Data) -> float:
-        y_true, y_predicted, _ = self.__get_data_to_compare(data)
-        return round(accuracy_score(y_true, y_predicted), 4)
+        y_true, out = self.__get_data_to_compare(data)
+        y_true_classes = y_true.numpy()
+        y_pred_classes = torch.argmax(out, dim=1).unsqueeze(1).numpy()
+        return round(accuracy_score(y_true_classes, y_pred_classes), 4)
 
     def get_all_metrics(self, data: Data) -> Tuple:
-        y_true, y_predicted_class, y_pred_prob = self.__get_data_to_compare(data)
+        y_true, out = self.__get_data_to_compare(data)
+        y_true_classes = y_true.numpy()
+        y_true_one_hot = torch.nn.functional.one_hot(y_true, num_classes=out.shape[1]).detach().numpy()
+        y_pred_classes = torch.argmax(out, dim=1).numpy()
+        y_pred_probs = out.detach().numpy()
 
-        accuracy = round(accuracy_score(y_true, y_predicted_class), 4)
+        accuracy = round(accuracy_score(y_true_classes, y_pred_classes), 4)
         mlflow.log_metric("accuracy", accuracy)
 
-        precision = round(precision_score(y_true, y_predicted_class, average="macro"), 4)
+        precision = round(precision_score(y_true_classes, y_pred_classes, average="micro"), 4)
         mlflow.log_metric("precision", precision)
 
-        recall = round(recall_score(y_true, y_predicted_class, average="macro"), 4)
+        recall = round(recall_score(y_true_classes, y_pred_classes, average="micro"), 4)
         mlflow.log_metric("recall", recall)
 
-        f1 = round(f1_score(y_true, y_predicted_class, average="macro"), 4)
+        f1 = round(f1_score(y_true_classes, y_pred_classes, average="micro"), 4)
         mlflow.log_metric("f1", f1)
 
-        roc_auc = round(roc_auc_score(y_true, y_pred_prob, multi_class="ovr", average="macro"), 4)
+        roc_auc = round(roc_auc_score(y_true_one_hot, y_pred_probs, multi_class="ovr", average="micro"), 4)
         mlflow.log_metric("ROC AUC", roc_auc)
 
         return accuracy, precision, recall, f1, roc_auc
 
-    def predict(self, data: Data) -> List:
+    def predict(self, data: Data):
         self.model.eval()
         out = self.model(data.x, data.edge_index)
         predicted_classes = torch.argmax(out[data.test_mask], dim=1)
-        return predicted_classes.detach().cpu().numpy().tolist()
+        return predicted_classes.detach().cpu().numpy()
 
     def get_2d_node_embeddings(self, data: Data):
         self.model.eval()
@@ -125,7 +128,7 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
 
         accuracy, precision, recall, f1, roc_auc = node_classifier.get_all_metrics(data_to_use)
 
-        predictions: List = encoder.inverse_transform(node_classifier.predict(data_to_use))
+        predictions: List = encoder.inverse_transform(node_classifier.predict(data_to_use).tolist())
         test_node_indices = torch.unique(data_to_use.edge_index)[data_to_use.test_mask].cpu().numpy().tolist()
         node_idx_pred_class_pairs = {node_idx: str(pred_class)
                                      for node_idx, pred_class in zip(test_node_indices, predictions)}

@@ -30,6 +30,9 @@ def get_basic_data(data_files: Dict[str, str], params: MLParams, label_encoder: 
     nodes = pd.read_csv(data_files["nodes"])
     edges = pd.read_csv(data_files["edges"])
 
+    # in case if index of nodes are not same as just numeric sequence
+    nodes = nodes.set_index("index", drop=False)
+
     graph = nx.Graph()
 
     graph.add_nodes_from(nodes["index"].to_numpy())
