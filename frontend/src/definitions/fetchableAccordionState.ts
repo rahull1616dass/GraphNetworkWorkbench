@@ -4,6 +4,7 @@ export const enum FetchableAccordionState {
     UPLOADING,
     FETCH_ERROR,
     UPLOAD_ERROR,
+    MAX_NODE_LIMIT_ERROR,
     FETCHED,
     UPLOADED,
     NETWORK_EXISTS,

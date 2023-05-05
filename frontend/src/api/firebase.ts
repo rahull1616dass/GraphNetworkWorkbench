@@ -31,6 +31,7 @@ import {
 import firebaseConfig from "../../firebase_config"
 import type { LoginUser } from "../definitions/user"
 import {
+  maxNodeLimit as maxNodeLimitStore,
   authUserStore,
   loginUserStore,
   networksList,
@@ -50,6 +51,7 @@ export const db = initializeFirestore(app, {
 })
 
 const enum Database {
+  APP = "App",
   USERS = "Users",
   NETWORKS = "Networks",
   IMAGES = "Images",
@@ -58,6 +60,19 @@ const enum Database {
 
 export function getCurrentTimestamp(): Timestamp {
   return Timestamp.now()
+}
+
+export async function getAppConfig(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    getDoc(doc(db, Database.APP, Database.APP))
+      .then((doc) => {
+        if (doc.exists()) {
+          maxNodeLimitStore.set(doc.data().maxNodeLimit)
+          resolve()
+        } 
+      })
+      .catch((error) => reject(error))
+  })
 }
 
 // ---- Authentication ----
@@ -79,12 +94,13 @@ async function setUserDocument(user: LoginUser): Promise<void> {
   })
 }
 
-export async function getDefaultSeed(): Promise<number> {
+export async function setDefaultSeed(): Promise<void> {
   return new Promise((resolve, reject) => {
     getDoc(doc(db, Database.USERS, get(authUserStore).uid))
       .then((doc) => {
         if (doc.exists()) {
-          resolve(doc.data().defaultSeed)
+          defaultSeedStore.set(doc.data().defaultSeed)
+          resolve()
         } else {
           reject(`No such document for user ${get(authUserStore).uid}!`)
         }

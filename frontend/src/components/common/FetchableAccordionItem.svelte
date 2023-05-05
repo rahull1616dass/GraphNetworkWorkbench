@@ -9,7 +9,7 @@
   import { ProgressBarData } from "../../definitions/progressBarData"
   import { UploadResult } from "../../definitions/uploadResult"
   import { FetchableAccordionState } from "../../definitions/fetchableAccordionState"
-  import { networksList, paletteColors } from "../../stores"
+  import { maxNodeLimit, networksList, paletteColors } from "../../stores"
   import JSZip from "jszip"
   import {
     parseNetwork,
@@ -114,6 +114,10 @@
         As such the following parsing is also necessary.
         */
         let network: Network = await filesToCleanedNetwork(nodeFile, edgeFile)
+        if (network.nodes.length > $maxNodeLimit) {
+          state = FetchableAccordionState.MAX_NODE_LIMIT_ERROR
+          return
+        }
         const files = network.toFiles()
         uploadNetworkToStorage(
           network.metadata,
@@ -180,8 +184,11 @@
     </div>
   {:else if state === FetchableAccordionState.FETCH_ERROR}
     Error fetching the network from the source.
+  {:else if state === FetchableAccordionState.MAX_NODE_LIMIT_ERROR}
+    Error uploading network to your list of networks. The network has more than {$maxNodeLimit} nodes, 
+    which is the maximum allowed nodes in a given graph within our system.
   {:else if state === FetchableAccordionState.UPLOAD_ERROR}
-    Error uploading network to your list of networks
+    Error uploading network to your list of networks.
   {:else if state === FetchableAccordionState.NETWORK_EXISTS}
     <p>
       This network <i>probably</i> exists in your list of networks, given that

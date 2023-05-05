@@ -67,3 +67,4 @@ loginUserStore.subscribe((newLoginUser) => {
   }
 })
 export const defaultSeed: Writable<number> = writable(42)
+export const maxNodeLimit: Writable<number> = writable(1000)
