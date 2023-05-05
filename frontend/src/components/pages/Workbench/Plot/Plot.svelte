@@ -82,21 +82,7 @@
             return
           }
           // @ts-ignore
-          if (item.path !== undefined) {
-            detailedItem = new Link(
-              item.datum.source.datum.name,
-              item.datum.target.datum.name,
-              item.datum.value
-            )
-          } else {
-            detailedItem = new Node(
-              item.datum.name,
-              undefined,
-              item.datum.group,
-              item.datum.index,
-              undefined
-            )
-          }
+          detailedItem = item.datum
           hoverData = undefined
           nodeDetailModalData.isOpen = true
         })
@@ -242,9 +228,7 @@
   function updateItem(event: CustomEvent) {
     let updatedItem: Node | Link = event.detail.updatedItem
     console.log("updating item", updatedItem)
-    if (updatedItem instanceof Node) {
-      currentNetwork.nodes[updatedItem.index] = updatedItem as Node
-    } else if (updatedItem instanceof Link) {
+    if (updatedItem.source != null) {
       currentNetwork.links.forEach((link, index) => {
         if (
           new Link(
@@ -259,6 +243,8 @@
           currentNetwork.links[index].value = updatedItem.value
         }
       })
+    } else {
+      currentNetwork.nodes[updatedItem.index] = updatedItem
     }
     loadNetwork(true)
   }

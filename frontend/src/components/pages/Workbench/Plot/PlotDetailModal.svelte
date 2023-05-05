@@ -15,11 +15,12 @@
 {#if detailedItem != undefined}
   <CustomModal on:close={() => (open = false)}>
     <h4 slot="header">
-      {detailedItem instanceof Node ? "Node Details" : "Edge Details"}
+      {detailedItem.source == null ? "Node Details" : "Edge Details"}
     </h4>
     <div slot="body">
       <Form>
         {#each Object.keys(detailedItem) as key}
+          {#if detailedItem[key] != null}
             <TextInput
               labelText={key}
               value={detailedItem[key]}
@@ -33,6 +34,7 @@
               type="text"
               id={key}
             />
+          {/if}
         {/each}
       </Form>
     </div>
@@ -46,7 +48,7 @@
           open = false
         }}
       >
-        {detailedItem instanceof Node ? "Update Node" : "Update Edge"}
+        {detailedItem.source == null ? "Update Node" : "Update Edge"}
       </CustomButton>
     </div>
   </CustomModal>
