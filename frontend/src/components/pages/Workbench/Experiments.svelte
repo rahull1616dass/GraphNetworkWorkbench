@@ -687,7 +687,7 @@
         >Start New Experiment
       </CustomButton>
     </div>
-    
+    <hr />
     <ExperimentResults {task} {currentNetwork} />
   {:else if task.state === ExperimentState.ERROR}
     <InfoText>Error: {task.errorMessage}</InfoText>
