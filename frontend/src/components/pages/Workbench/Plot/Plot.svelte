@@ -130,10 +130,9 @@
                 undefined,
                 new Node(
                   item.datum.name,
-                  undefined,
                   item.datum.group,
                   item.datum.index,
-                  undefined
+                  item.datum.is_train
                 ),
                 // @ts-ignore
                 event.pageX,

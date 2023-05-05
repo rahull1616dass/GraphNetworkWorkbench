@@ -13,7 +13,7 @@
         {hoverData.node.name}
       {/if}<br />
       Group: {hoverData.node.group}
-      {#if hoverData.node.is_train !== undefined}
+      {#if hoverData.node.is_train != null}
         <br />
         In the {hoverData.node.is_train ? "Train" : "Test"} set
       {/if}
