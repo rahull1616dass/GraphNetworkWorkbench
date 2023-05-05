@@ -13,6 +13,7 @@
 
   export let task: Task = undefined
   export let currentNetwork: Network = undefined
+  
 
   let nodeDataResult
   let edgeDataResult
