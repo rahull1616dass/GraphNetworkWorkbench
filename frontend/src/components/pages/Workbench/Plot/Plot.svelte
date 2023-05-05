@@ -96,14 +96,10 @@
             // @ts-ignore
             if (item != undefined && item.path != undefined) {
               // @ts-ignore
-              console.log(item.path)
+              console.log(item.datum)
               hoverData = new HoverData(
                 HoverType.LINK,
-                new Link(
-                  item.datum.source.datum.name,
-                  item.datum.target.datum.name,
-                  item.datum.value
-                ),
+                item.datum,
                 undefined,
                 // @ts-ignore
                 event.pageX,
@@ -114,12 +110,7 @@
               hoverData = new HoverData(
                 HoverType.NODE,
                 undefined,
-                new Node(
-                  item.datum.name,
-                  item.datum.group,
-                  item.datum.index,
-                  item.datum.is_train
-                ),
+                item.datum,
                 // @ts-ignore
                 event.pageX,
                 // @ts-ignore
