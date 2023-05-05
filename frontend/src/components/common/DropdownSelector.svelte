@@ -9,6 +9,10 @@
 
   export let placeholder: string = "Select one of the following";
   export let type: DropdownSelectorType = undefined;
+  export let networkIndex: number = undefined;
+  export let task: TaskType = undefined;
+  export let model: MLModelType = undefined;
+  export let y_column: string = undefined;
 
   let modelTypes: MLModelType[] = [
     MLModelType.TAGCONV,
@@ -27,10 +31,7 @@
     $networksList[$selectedNetworkIndex].nodes[0]
   ).filter((nodeColumns) => nodeColumns !== "is_train");
 
-  let networkIndex: number = undefined;
-  let task: TaskType;
-  let model: MLModelType;
-  let y_column: string = undefined;
+  
 
   function handleModelChange(event) {
     model = event.target.value;

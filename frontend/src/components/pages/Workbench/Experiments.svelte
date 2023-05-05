@@ -31,6 +31,7 @@
   import RightArrow from "../../common/RightArrow.svelte"
   import InfoText from "../../common/InfoText.svelte"
   import { onMount } from "svelte"
+  import DropdownMultiSelector from "../../common/DropdownMultiSelector.svelte";
 
   let infoBoxContent =
     "<p>Select a network, model, and task. Choose which columns to predict and use as features. Customize the hyperparameters, such as epochs, training percentage, and learning rate.</p><p>You can also customize the network layers by adding or changing the number of neurons in each layer. Once everything is specified, create the task. Note that you must select all the necessary fields before creating the task.</p>"
@@ -92,6 +93,14 @@
   $: task.hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
   $: currentNetwork = $networksList[$selectedNetworkIndex]
   $: customizedSplitDefined = checkCustomizedSplit()
+
+  // Create a reactive variable to store checked state of each column
+  let checkedStates = {};
+  $: {
+    selectableColumns.forEach((column) => {
+      checkedStates[column] = task.xColumns.includes(column);
+    });
+  }
 
   let currentIndex = 0
   const totalContent = 5
@@ -320,12 +329,14 @@
             placeholder={"Select a Model"}
             type={DropdownSelectorType.MLMODEL}
             on:modelChange={handleModelChange}
+            bind:model={task.mlModelType}
           />
 
           <DropdownSelector
             placeholder={"Select a Task"}
             type={DropdownSelectorType.TASK}
             on:taskChange={handleTaskChange}
+            bind:task={task.taskType}
           />
         </div>
       {:else if currentIndex === 1}
@@ -340,6 +351,7 @@
               placeholder={"Select a column to predict"}
               type={DropdownSelectorType.Y_COLUMN}
               on:columnChange={handleColumnChange}
+              bind:y_column={task.yColumn}
             />
           {/if}
 
@@ -353,6 +365,7 @@
                   type="checkbox"
                   value={column}
                   on:change={updateSelectedNodeColumns}
+                  bind:checked={checkedStates[column]}
                 />
                 {column}
               </label>
@@ -539,7 +552,64 @@
             If the button is inactive, you have to fill in all the required fields
             in the previous steps
           </InfoText>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Selected Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>{"Network"}</td>
+                  <td>{currentNetwork.metadata.name}</td>
+                </tr>
+
+                <tr>
+                  <td>{"Model"}</td>
+                  <td>{task.mlModelType}</td>
+                </tr>
+
+                <tr>
+                  <td>{"Task"}</td>
+                  <td>{task.taskType}</td>
+                </tr>
+
+                <tr>
+                  <td>{"Columns to Train"}</td>
+                  <td>{task.xColumns}</td>
+                </tr>
+
+                <tr>
+                  <td>{"Epochs"}</td>
+                  <td>{task.epochs}</td>
+                </tr>
+
+                <tr>
+                  <td>{"Learning Rate"}</td>
+                  <td>{task.learningRate}</td>
+                </tr>
+
+                <tr>
+                  <td>{"Training Percentage"}</td>
+                  <td>{task.trainPercentage}</td>
+                </tr>
+
+                <tr>
+                  <td>{"Seed"}</td>
+                  <td>{task.seed}</td>
+                </tr>
+
+                <tr>
+                  <td>{"Hidden Layers"}</td>
+                  <td>{task.hiddenLayerSizes}</td>
+                </tr>
+              
+            </tbody>
+          </table>
           <div class="createTask">
+            
             <CustomButton
               type={"secondary"}
               inverse={false}
@@ -612,6 +682,26 @@
 </div>
 
 <style lang="scss">
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 8px;
+  }
+
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
   .container {
     display: flex;
     align-items: center;
