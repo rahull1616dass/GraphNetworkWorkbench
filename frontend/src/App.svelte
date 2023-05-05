@@ -128,15 +128,16 @@
     </div>
     </ul>
   {/if}
-    <div class="footer-container">
-      <Footer />
-    </div>
+  <div class="footer-container">
+    <Footer />
+  </div>
   
 </div>
 
 <style lang="scss">
   .footer-container {
     width: 100%;
+    margin-top: auto;
   }
   .main {
     display: flex;

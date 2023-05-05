@@ -10,6 +10,7 @@
   import CustomButton from "./CustomButton.svelte"
   import html2canvas from "html2canvas"
   import jsPDF from "jspdf"
+  import { fade } from "svelte/transition";
 
   export let task: Task = undefined
   export let currentNetwork: Network = undefined
@@ -23,6 +24,12 @@
     plotNodeEmbeddding: undefined,
     plotPrediction: undefined,
   }
+
+  let showDetails = false;
+
+function toggleDetails() {
+  showDetails = !showDetails;
+}
 
   async function downloadPDF() {
   const cardsPerPage: number = 1;
@@ -170,79 +177,21 @@ async function addNodeData(pdf: jsPDF) {
   }
 </script>
 
-<div class="container">
-  <CardView title="Metrics">
-    <h4 slot="header">Details</h4>
-    <div slot="body">
-      <p>Accuracy:{task.accuracy}</p>
-      <p>F1 score:{task.f1}</p>
-      <p>Precision:{task.precision}</p>
-      <p>Recall:{task.recall}</p>
-      <p>AUC:{task.auc}</p>
+<div class="circle-container">
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <div class="circle" on:click={() => (showDetails = !showDetails)}>
+    <div class="accuracy">
+      {task.accuracy}%
     </div>
-
-    <div slot="footer" />
-  </CardView>
-
-  <CardView id="plotLoss" title="Loss Function">
-    <h4 slot="header">Loss Function</h4>
-    <div slot="body">
-      <PlotLoss
-        losses={task.losses}
-        on:plotLoaded={(e) => {
-          experimentPlots["plotLoss"] = e.detail
-        }}
-      />
-    </div>
-    <div slot="footer" />
-  </CardView>
-
-  <CardView id="plotNodeEmbedding" title="Node Embeddings">
-    <h4 slot="header">Node Embedding</h4>
-    <div slot="body">
-      <Embedding {task} 
-        on:plotLoaded={(e) => {
-          experimentPlots["plotNodeEmbedding"] = e.detail
-        }}
-      />
-    </div>
-
-    <div slot="footer" />
-  </CardView>
-
-  <CardView id="plotPrediction" title="Prediction Results">
-    <h4 slot="header">Network Results</h4>
-    <div slot="body">
-      <p>
-        Green nodes/edges for correct predictions, red nodes/edges for false
-        predictions
-      </p>
-      <PlotPrediction
-        {task}
-        {currentNetwork}
-        on:predictionPlotLoaded={(e) => {
-          experimentPlots["plotPrediction"] = e.detail
-        }}
-        on:nodeData={(e) => {
-          nodeDataResult = e.detail
-        }}
-        on:edgeData={(e) => {
-          edgeDataResult = e.detail
-        }}
-
-      />
-    </div>
-
-    <div slot="footer" />
-  </CardView>
-
-  <CardView>
-    <h4 slot="header">Expert Opinion</h4>
-    <div slot="body">
-      <p>{task.expertOpinion}</p>
-    </div>
-    <div slot="footer" />
-  </CardView>
+    {#if showDetails}
+      <div class="details">
+        <p>F1 score:{task.f1}</p>
+        <p>Precision:{task.precision}</p>
+        <p>Recall:{task.recall}</p>
+        <p>AUC:{task.auc}</p>
+      </div>
+    {/if}
+  </div>
 </div>
 
 <div class="download_results">
@@ -255,13 +204,65 @@ async function addNodeData(pdf: jsPDF) {
 </div>
 
 <style>
-  .container {
-    display: grid;
-    grid-template-rows: repeat(3, 1fr);
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2%;
-    margin: 2%;
-  }
+  .circle-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.circle {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(75, 192, 192, 0.5);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.accuracy {
+  font-size: 1.5rem;
+  transition: font-size 0.3s ease, margin-top 0.3s ease;
+}
+
+.circle:hover .accuracy {
+  font-size: 2rem;
+  margin-top: -10px;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.circle:hover .details {
+  opacity: 1;
+}
+
+
+
+.details p {
+  margin-bottom: 0;
+}
+
+
   p {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
