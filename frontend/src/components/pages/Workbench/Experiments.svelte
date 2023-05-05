@@ -553,52 +553,55 @@
           <table>
             <thead>
               <tr>
-                <th>Parameter</th>
+                <th>Required Fields</th>
                 <th>Selected Value</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr class:highlight={!currentNetwork.metadata.name}>
                 <td>{"Network"}</td>
                 <td>{currentNetwork.metadata.name}</td>
               </tr>
 
-              <tr>
+              <tr class:highlight={task.mlModelType === undefined}>
                 <td>{"Model"}</td>
                 <td>{task.mlModelType}</td>
               </tr>
 
-              <tr>
+              <tr class:highlight={task.taskType === undefined}>
                 <td>{"Task"}</td>
                 <td>{task.taskType}</td>
               </tr>
 
-              <tr>
+              <tr class:highlight={task.xColumns.length === 0}>
                 <td>{"Columns to Train"}</td>
-                <td>{task.xColumns}</td>
+                <td>{task.xColumns} </td>
               </tr>
 
-              <tr>
+              <tr class:highlight={!task.epochs}>
                 <td>{"Epochs"}</td>
                 <td>{task.epochs}</td>
               </tr>
 
-              <tr>
+              <tr class:highlight={task.learningRate === 0.0}>
                 <td>{"Learning Rate"}</td>
                 <td>{task.learningRate}</td>
               </tr>
 
-              <tr>
+              <tr
+                class:highlight={task.trainPercentage === 1 ||
+                  task.trainPercentage === 0}
+              >
                 <td>{"Training Percentage"}</td>
                 <td>{task.trainPercentage}</td>
               </tr>
 
-              <tr>
+              <tr class:highlight={!task.seed}>
                 <td>{"Seed"}</td>
                 <td>{task.seed}</td>
               </tr>
 
-              <tr>
+              <tr class:highlight={!task.hiddenLayerSizes}>
                 <td>{"Hidden Layers"}</td>
                 <td>{task.hiddenLayerSizes}</td>
               </tr>
@@ -678,6 +681,10 @@
 </div>
 
 <style lang="scss">
+  .highlight {
+    background-color: #ffcccc !important; /* Change the color to your desired highlight color */
+  }
+
   .fixed-left-arrow {
     position: fixed;
     left: 10px;

@@ -19,7 +19,7 @@
     MLModelType.SGCONV,
     MLModelType.GATCONV,
     MLModelType.GCNCONV,
-    MLModelType.SAGECONV
+    MLModelType.SAGECONV,
   ];
   let taskTypes: TaskType[] = [
     TaskType.NODE_CLASSIFICATION,
@@ -30,8 +30,6 @@
   $: nodeColumns = Object.keys(
     $networksList[$selectedNetworkIndex].nodes[0]
   ).filter((nodeColumns) => nodeColumns !== "is_train");
-
-  
 
   function handleModelChange(event) {
     model = event.target.value;
@@ -58,7 +56,7 @@
     >
       <!-- <option disabled selected>{placeholder}</option> -->
       {#each $networksList as network, networkIndex}
-        <option  class="optionDropdown" value={networkIndex}>
+        <option class="optionDropdown" value={networkIndex}>
           {network.metadata.name} --- Nodes: {network.nodes.length} , Edges: {network
             .links.length}
         </option>
@@ -68,7 +66,9 @@
 {:else if type === DropdownSelectorType.MLMODEL}
   <div>
     <select class="select" bind:value={model} on:change={handleModelChange}>
-      <option class="placeholder" disabled selected>{placeholder}</option>
+      <option class="placeholder" value={undefined} disabled selected
+        >{placeholder}</option
+      >
       {#each modelTypes as model}
         <option class="optionDropdown" value={model}>
           {model}
@@ -79,7 +79,9 @@
 {:else if type === DropdownSelectorType.TASK}
   <div>
     <select class="select" bind:value={task} on:change={handleTaskChange}>
-      <option class="placeholder" disabled selected>{placeholder}</option>
+      <option class="placeholder" value={undefined} disabled selected
+        >{placeholder}</option
+      >
       {#each taskTypes as task, _}
         <option class="optionDropdown" value={task}>
           {task}
@@ -95,7 +97,7 @@
 {:else if type === DropdownSelectorType.Y_COLUMN}
   <div>
     <select class="select" bind:value={y_column} on:change={handleColumnChange}>
-      <option class="placeholder">{placeholder}</option>
+      <option class="placeholder" value={undefined}>{placeholder}</option>
       {#each nodeColumns as column}
         <option class="optionDropdown" value={column}>
           {column}
