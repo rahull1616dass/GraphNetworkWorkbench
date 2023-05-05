@@ -13,15 +13,15 @@
         {hoverData.node.name}
       {/if}<br />
       Group: {hoverData.node.group}
-      {#if hoverData.node.is_train !== undefined}
+      {#if hoverData.node.is_train != null}
         <br />
         In the {hoverData.node.is_train ? "Train" : "Test"} set
       {/if}
     </div>
   {:else if hoverData.type === HoverType.LINK}
     <div class="link" style="--x: {hoverData.x}px; --y: {hoverData.y}px;">
-      {hoverData.link.source} -> {hoverData.link.target}<br />
-      Value: {hoverData.link.value}
+      {hoverData.link.source.datum.name.toString()} -> {hoverData.link.target.datum.name}<br />
+      Value: {hoverData.value}
     </div>
   {/if}
 </main>

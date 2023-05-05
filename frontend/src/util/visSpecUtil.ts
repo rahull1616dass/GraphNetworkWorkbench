@@ -52,7 +52,7 @@ export function updateVisSpec(
     visSpec.data[1].values = network.links
   }
   // @ts-ignore
-  if(network.nodes[0].is_train !== undefined){
+  if(network.nodes[0].is_train != null){
     visSpec = setColorKey(visSpec, COLUMN_IS_TRAIN, ["#ff0000", "#00ff00"])
   }
   return visSpec
