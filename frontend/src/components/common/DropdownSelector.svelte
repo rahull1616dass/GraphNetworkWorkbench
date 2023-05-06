@@ -27,7 +27,7 @@
     $networksList[$selectedNetworkIndex].nodes[0]
   ).filter((nodeColumns) => nodeColumns !== "is_train")
 
-  let networkIndex: number = undefined
+  let networkIndex: number = $selectedNetworkIndex
   let task: TaskType
   let model: MLModelType
   let y_column: string = undefined
