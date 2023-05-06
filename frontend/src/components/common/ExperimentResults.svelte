@@ -266,6 +266,7 @@
     <line x1="300" y1="300" x2="450" y2="400" stroke="black" stroke-width="2" />
 
     <!-- Main Node -->
+    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <circle
       cx="300"
       cy="300"
@@ -285,6 +286,7 @@
     >
 
     <!-- F1 Score Node -->
+    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <circle
       cx="200"
       cy="100"
@@ -305,6 +307,7 @@
     >
 
     <!-- Precision Node -->
+    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <circle
       cx="400"
       cy="100"
@@ -325,6 +328,7 @@
     >
 
     <!-- Recall Node -->
+    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <circle
       cx="150"
       cy="400"
@@ -345,6 +349,7 @@
     >
 
     <!-- AUC Node -->
+    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
     <circle
       cx="450"
       cy="400"
@@ -422,7 +427,7 @@
 
 <hr />
 
-<!-- <h4>Network Results</h4>
+<h4>Network Results</h4>
 <div>
   <p>
     Green nodes/edges for correct predictions, red nodes/edges for false
@@ -432,19 +437,18 @@
     {task}
     {currentNetwork}
     on:predictionPlotLoaded={(e) => {
-      experimentPlots["plotPrediction"] = e.detail
+      experimentPlots["plotPrediction"] = e.detail;
     }}
     on:nodeData={(e) => {
-      nodeDataResult = e.detail
+      nodeDataResult = e.detail;
     }}
     on:edgeData={(e) => {
-      edgeDataResult = e.detail
+      edgeDataResult = e.detail;
     }}
-
   />
 </div>
 
-<div /> -->
+<div />
 
 <style>
   .plots-container {
@@ -460,14 +464,6 @@
 
   .node-text {
     transition: font-size 0.3s ease-in-out;
-  }
-
-  .line {
-    transition: stroke-width 0.3s ease-in-out;
-  }
-
-  .line:hover {
-    stroke-width: 4;
   }
 
   svg {
@@ -538,67 +534,6 @@
   .download_results {
     flex: 1;
     margin: 0 1px;
-  }
-
-  .circle-container {
-    /*position: fixed;*/
-    /*transform: translate(-50%, -50%);*/
-    z-index: 1000;
-    width: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 10%;
-    margin-top: 3%;
-  }
-
-  .circle {
-    width: 300px;
-    height: 300px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 5%;
-    background-color: #03c988;
-    box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
-    /*position: fixed;*/
-    /*top: 50%;*/
-    /*left: 50%;*/
-    /*transform: translate(-50%, -50%);*/
-    text-align: center;
-    font-size: 2rem;
-    cursor: pointer;
-    z-index: 1000;
-    overflow: hidden;
-  }
-
-  .accuracy {
-    font-size: 2rem;
-    transition: font-size 0.3s ease, margin-top 0.3s ease;
-    color: whitesmoke;
-  }
-
-  .circle:hover .accuracy {
-    font-size: 3rem;
-    margin-top: -10px;
-  }
-
-  .details {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.8rem;
-    color: whitesmoke;
-  }
-
-  .circle:hover .details {
-    opacity: 1;
-  }
-
-  .details p {
-    margin-bottom: 0;
   }
 
   p {
