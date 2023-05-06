@@ -60,7 +60,7 @@
     ['index'], // xColumns,
     'group', // yColumn,
     'Based on the provided data, it seems like the model is already performing very well with a validation accuracy score of 1.0, and good values for loss, precision, recall, f1 score, and ROC AUC score. Therefore, it might not be necessary to optimize the model further, unless there are specific requirements or constraints that need to be met.However, if the user still wants to optimize the model, there are a few things that they could try. Firstly, they could experiment with different activation functions (other than Relu and Softmax) to see if they can improve performance. Secondly, they could try adjusting the number of layers and their sizes, and observe the effect on the models metrics. Thirdly, they could try adjusting the learning rate to see if they can achieve faster convergence. Finally, they could try adding more features to the model to see if it improves performance',
-    1,
+    0.1,
     1,
     1,
     1,
@@ -677,18 +677,8 @@
       />
     </div>
   {:else if task.state === ExperimentState.RESULT}
-    <div class="newExperiment">
-      <CustomButton
-        type={"secondary"}
-        inverse={false}
-        on:click={() => {
-          startNewExperiment();
-        }}
-        >Start New Experiment
-      </CustomButton>
-    </div>
-    <hr />
-    <ExperimentResults {task} {currentNetwork} />
+    <ExperimentResults {task} {currentNetwork} {startNewExperiment} />
+
   {:else if task.state === ExperimentState.ERROR}
     <InfoText>Error: {task.errorMessage}</InfoText>
     <div class="newExperiment">
