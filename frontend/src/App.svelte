@@ -93,45 +93,44 @@
     <ul id="menuLogin" class="menuLogin">
       <Tabs />
       <div class="content">
-      {#if $selectedMenuItem === MenuItem.HOME}
-        <Home />
-      {:else if $selectedMenuItem === MenuItem.NETWORKS}
-        <Networks />
-      {:else if $selectedMenuItem === MenuItem.PLOT}
-        <Plot />
-      {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
-        <Experiments />
-      {:else if $selectedMenuItem === MenuItem.REPORTS}
-        <Reports />
-      {:else if $selectedMenuItem === MenuItem.PROFILE}
-        <Profile />
-      {:else if $selectedMenuItem === MenuItem.FROM_WEB}
-        <FromWeb />
-      {:else if $selectedMenuItem === MenuItem.FROM_PC}
-        <UploadNetwork />
-      {:else if $selectedMenuItem === MenuItem.TEST}
-        <Test />
-      {/if}
-    </div>
+        {#if $selectedMenuItem === MenuItem.HOME}
+          <Home />
+        {:else if $selectedMenuItem === MenuItem.NETWORKS}
+          <Networks />
+        {:else if $selectedMenuItem === MenuItem.PLOT}
+          <Plot />
+        {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
+          <Experiments />
+        {:else if $selectedMenuItem === MenuItem.REPORTS}
+          <Reports />
+        {:else if $selectedMenuItem === MenuItem.PROFILE}
+          <Profile />
+        {:else if $selectedMenuItem === MenuItem.FROM_WEB}
+          <FromWeb />
+        {:else if $selectedMenuItem === MenuItem.FROM_PC}
+          <UploadNetwork />
+        {:else if $selectedMenuItem === MenuItem.TEST}
+          <Test />
+        {/if}
+      </div>
     </ul>
   {:else if isLoggedIn === false}
     <ul>
       <Tabs />
       <div class="content">
-      {#if $selectedMenuItem === MenuItem.HOME}
-        <Home />
-      {:else if $selectedMenuItem === MenuItem.LOGIN}
-        <Login />
-      {:else if $selectedMenuItem === MenuItem.REGISTER}
-        <Register />
-      {/if}
-    </div>
+        {#if $selectedMenuItem === MenuItem.HOME}
+          <Home />
+        {:else if $selectedMenuItem === MenuItem.LOGIN}
+          <Login />
+        {:else if $selectedMenuItem === MenuItem.REGISTER}
+          <Register />
+        {/if}
+      </div>
     </ul>
   {/if}
   <div class="footer-container">
     <Footer />
   </div>
-  
 </div>
 
 <style lang="scss">
