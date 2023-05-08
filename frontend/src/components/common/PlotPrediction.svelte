@@ -144,8 +144,8 @@
         } else {
           if (value) {
             networkToPlot.links.push({
-              source: source,
-              target: target,
+              source: parseInt(source, 10),
+              target: parseInt(target, 10),
               result: PredictionResult.WRONG,
             })
           }
@@ -161,14 +161,15 @@
       }))
       dispatch("edgeData", edgeData)
       console.log("xxx")
+      updateVisSpec(networkToPlot, VisSpec)
+      setColorKey(
+        VisSpec,
+        "result",
+        ["#808080", "#FF0000", "#097969"]
+      //TaskType.EDGE_PREDICTION
+    )
     }
-    // updateVisSpec(networkToPlot, VisSpec)
-    // setColorKey(
-    //   VisSpec,
-    //   "result",
-    //   ["#808080", "#FF0000", "#097969"]
-    //   //TaskType.EDGE_PREDICTION
-    // )
+    
   }
 
   vegaEmbed("#predictionPlot", VisSpec, { actions: false })
