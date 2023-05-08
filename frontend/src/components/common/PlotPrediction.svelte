@@ -63,16 +63,18 @@
         if (task.predictions[node.index] === undefined) {
           // @ts-ignore
           node.result = PredictionResult.IN_TRAIN_SET
-        } else if (
+        } 
+        else if (node[task.yColumn] !== null) {
           // @ts-ignore
-          task.predictions[node.index] === node[task.yColumn].toString()
-        ) {
+          if(task.predictions[node.index] === node[task.yColumn].toString()){
           // @ts-ignore
-          node.result = PredictionResult.CORRECT
-        } else {
+            node.result = PredictionResult.CORRECT
+          }
+          else {
           // @ts-ignore
           node.result = PredictionResult.WRONG
-        }
+          }
+        } 
       })
 
       nodeData = networkToPlot.nodes.map((node) => ({
