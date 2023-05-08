@@ -5,23 +5,23 @@
 </script>
 
 <main>
-  {#if hoverData.type === HoverType.NODE}
-    <div class="node" style="--x: {hoverData.x}px; --y: {hoverData.y}px;">
-      {#if hoverData.node.name === undefined}
-        {hoverData.node.index}
+  {#if hoverData?.type === HoverType.NODE}
+    <div class="node" style="--x: {hoverData?.x}px; --y: {hoverData?.y}px;">
+      {#if hoverData?.node?.name === undefined}
+        {hoverData?.node?.index}
       {:else}
-        {hoverData.node.name}
+        {hoverData?.node?.name}
       {/if}<br />
-      Group: {hoverData.node.group}
-      {#if hoverData.node.is_train != null}
+      Group: {hoverData?.node?.group}
+      {#if hoverData?.node?.is_train != null}
         <br />
-        In the {hoverData.node.is_train ? "Train" : "Test"} set
+        In the {hoverData?.node?.is_train ? "Train" : "Test"} set
       {/if}
     </div>
-  {:else if hoverData.type === HoverType.LINK}
-    <div class="link" style="--x: {hoverData.x}px; --y: {hoverData.y}px;">
-      {hoverData.link.source.datum.name.toString()} -> {hoverData.link.target.datum.name}<br />
-      Value: {hoverData.value}
+  {:else if hoverData?.type === HoverType.LINK}
+    <div class="link" style="--x: {hoverData?.x}px; --y: {hoverData?.y}px;">
+      {hoverData?.link?.source?.datum?.name?.toString()} -> {hoverData?.link?.target?.datum?.name}<br />
+      Value: {hoverData?.value}
     </div>
   {/if}
 </main>

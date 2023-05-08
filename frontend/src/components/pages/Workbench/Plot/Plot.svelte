@@ -250,7 +250,7 @@
     loadNetwork(true);
   }
 
-  let index: number = undefined;
+  let index: number = $selectedNetworkIndex
   let placeholder: string = "Please select a network from the list";
 
   function selected(index: number) {

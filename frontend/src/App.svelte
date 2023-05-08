@@ -27,7 +27,8 @@
   import {
     loginUser,
     getNetworks as getNetworksFromFirestore,
-    getDefaultSeed,
+    setDefaultSeed,
+    getAppConfig
   } from "./api/firebase";
   import { ProgressBarData } from "./definitions/progressBarData";
   import { ProgressBar, Button } from "carbon-components-svelte";
@@ -71,15 +72,15 @@
       if ($fetchedNetworkOnce) return;
       $fetchedNetworkOnce = true;
       getNetworksFromFirestore().finally(() => {
+        $networksList = $networksList.sort((a, b) => {
+          if (a.name < b.name) return -1
+          else if (a.name > b.name) return 1
+          else return 0
+        });
         progressBarData.isPresent = false;
-      });
-      getDefaultSeed()
-        .then((seed) => {
-          if (seed !== undefined) $defaultSeed = seed;
-        })
-        .catch((error) =>
-          console.log(`Error in getting default seed: ${error}`)
-        );
+      })
+      setDefaultSeed()
+      getAppConfig()
     }
   }
 </script>

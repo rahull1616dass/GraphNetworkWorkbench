@@ -1,18 +1,14 @@
 <script lang="ts">
-  import { networksList, selectedNetworkIndex } from "../../stores";
-  import { DropdownSelectorType } from "../../definitions/dropdownSelectorType";
-  import { MLModelType } from "../../definitions/mlModelType";
-  import { TaskType } from "../../definitions/taskType";
-  import { createEventDispatcher } from "svelte";
+  import { networksList, selectedNetworkIndex } from "../../stores"
+  import { DropdownSelectorType } from "../../definitions/dropdownSelectorType"
+  import { MLModelType } from "../../definitions/mlModelType"
+  import { TaskType } from "../../definitions/taskType"
+  import { createEventDispatcher } from "svelte"
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher()
 
-  export let placeholder: string = "Select one of the following";
-  export let type: DropdownSelectorType = undefined;
-  export let networkIndex: number = undefined;
-  export let task: TaskType = undefined;
-  export let model: MLModelType = undefined;
-  export let y_column: string = undefined;
+  export let placeholder: string = "Select one of the following"
+  export let type: DropdownSelectorType = undefined
 
   let modelTypes: MLModelType[] = [
     MLModelType.TAGCONV,
@@ -20,30 +16,35 @@
     MLModelType.GATCONV,
     MLModelType.GCNCONV,
     MLModelType.SAGECONV,
-  ];
-  let taskTypes: TaskType[] = [
-    TaskType.NODE_CLASSIFICATION,
-    TaskType.EDGE_PREDICTION,
-  ];
+  ]
 
+  let taskTypeDictionary: Record<string, TaskType> = {
+    "Node Classification": TaskType.NODE_CLASSIFICATION,
+    "Edge Prediction": TaskType.EDGE_PREDICTION,
+  }
   // remove the is_train column from the nodeColumns array
   $: nodeColumns = Object.keys(
     $networksList[$selectedNetworkIndex].nodes[0]
-  ).filter((nodeColumns) => nodeColumns !== "is_train");
+  ).filter((nodeColumns) => nodeColumns !== "is_train")
+
+  let networkIndex: number = $selectedNetworkIndex
+  let task: TaskType
+  let model: MLModelType
+  let y_column: string = undefined
 
   function handleModelChange(event) {
-    model = event.target.value;
-    dispatch("modelChange", model);
+    model = event.target.value
+    dispatch("modelChange", model)
   }
 
   function handleTaskChange(event) {
-    task = event.target.value;
-    dispatch("taskChange", task);
+    //task = taskTypeDictionary[event.target.value]
+    dispatch("taskChange", task)
   }
 
   function handleColumnChange(event) {
-    y_column = event.target.value;
-    dispatch("columnChange", y_column);
+    y_column = event.target.value
+    dispatch("columnChange", y_column)
   }
 </script>
 
@@ -79,12 +80,10 @@
 {:else if type === DropdownSelectorType.TASK}
   <div>
     <select class="select" bind:value={task} on:change={handleTaskChange}>
-      <option class="placeholder" value={undefined} disabled selected
-        >{placeholder}</option
-      >
-      {#each taskTypes as task, _}
-        <option class="optionDropdown" value={task}>
-          {task}
+      <option class="placeholder" disabled selected>{placeholder}</option>
+      {#each Object.entries(taskTypeDictionary) as [readableString, taskId]}
+        <option class="optionDropdown" value={taskId}>
+          {readableString}
         </option>
       {/each}
       <!-- {#each Object.entries(taskTypes) as [task, value]}
