@@ -19,8 +19,8 @@
   let hoverData: HoverData = undefined
   // Dynamically adjust the hover offset based on screen size
   const HOVER_OFFSET = {
-    x: 300,
-    y: 850,
+    x: 0,
+    y: 0,
   }
   export let currentNetwork: Network = undefined
 
@@ -194,7 +194,7 @@
               // @ts-ignore
               event.pageX + HOVER_OFFSET.x - containerRect.left,
               // @ts-ignore
-              event.pageY + HOVER_OFFSET.y - containerRect.top
+              event.pageY + HOVER_OFFSET.y - (containerRect.top*0.5)
             )
           } else {
             hoverData = new HoverData(
@@ -210,7 +210,7 @@
               // @ts-ignore
               event.pageX + HOVER_OFFSET.x - containerRect.left,
               // @ts-ignore
-              event.pageY + HOVER_OFFSET.y - containerRect.top
+              event.pageY + HOVER_OFFSET.y - (containerRect.top*0.5)
             )
           }
         }
