@@ -59,22 +59,43 @@ export function updateVisSpec(
 }
 
 export function setColorKey(
-    visSpec: VisualizationSpec,
-    colorKey: string,
-    colorPalette: string[] = undefined
-  ): VisualizationSpec {
-    /*
-    Set what key to use for coloring the nodes.
-    */
-  
-    // @ts-ignore
-    visSpec.scales[0].domain.field = colorKey
-    if (colorPalette !== undefined) {
-      // @ts-ignore
-      visSpec.scales[0].range = colorPalette
+  visSpec: VisualizationSpec,
+  target: "nodes" | "edges",
+  colorKey: string,
+  colorPalette: string[] = undefined
+): VisualizationSpec {
+  if (target === "nodes") {
+    const nodeScale = visSpec.scales.find((scale) => scale.name === "colorNodes");
+    if (nodeScale) {
+      nodeScale.domain.field = colorKey;
+      if (colorPalette !== undefined) {
+        nodeScale.range = colorPalette;
+      }
     }
-    // @ts-ignore
-    visSpec.marks[0].encode.enter.fill.field = colorKey
-    return visSpec
+    const nodeMark = visSpec.marks.find((mark) => mark.name === "nodes");
+    if (nodeMark) {
+      nodeMark.encode.enter.fill.field = colorKey;
+    }
+  } else if (target === "edges") {
+    const edgeScale = visSpec.scales.find((scale) => scale.name === "edgeColor");
+    if (edgeScale) {
+      edgeScale.domain.field = colorKey;
+      if (colorPalette !== undefined) {
+        edgeScale.range = colorPalette;
+      }
+    }
+    const edgeMark = visSpec.marks.find((mark) => mark.name === "edges");
+    if (edgeMark) {
+      edgeMark.encode.update.stroke.field = colorKey;
+    }
   }
+
+  return visSpec;
+}
+
+
+
+
+  
+  
   

@@ -87,6 +87,7 @@
       updateVisSpec(networkToPlot, VisSpec)
       setColorKey(
         VisSpec,
+        "nodes",
         "result",
         ["#808080", "#FF0000", "#097969"]
         //TaskType.NODE_CLASSIFICATION
@@ -164,6 +165,7 @@
       updateVisSpec(networkToPlot, VisSpec)
       setColorKey(
         VisSpec,
+        "edges",
         "result",
         ["#808080", "#FF0000", "#097969"]
       //TaskType.EDGE_PREDICTION
