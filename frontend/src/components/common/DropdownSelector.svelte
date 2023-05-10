@@ -5,10 +5,19 @@
   import { TaskType } from "../../definitions/taskType"
   import { createEventDispatcher } from "svelte"
 
-  const dispatch = createEventDispatcher()
+  const dispatch = createEventDispatcher<{
+  modelChange: MLModelType;
+  taskChange: TaskType;
+  columnChange: string;
+  'update:model': MLModelType;
+  'update:task': TaskType;
+  'update:y_column': string;
+}>();
+
 
   export let placeholder: string = "Select one of the following"
   export let type: DropdownSelectorType = undefined
+  export let selectedModel: MLModelType | undefined = undefined;
 
   let modelTypes: MLModelType[] = [
     MLModelType.TAGCONV,
@@ -32,20 +41,26 @@
   let model: MLModelType
   let y_column: string = undefined
 
-  function handleModelChange(event) {
-    model = event.target.value
-    dispatch("modelChange", model)
-  }
+  function handleModelChange(event: Event) {
+  const target = event.target as HTMLSelectElement;
+  selectedModel = target.value as MLModelType;
+  dispatch("modelChange", selectedModel);
+  dispatch("update:model", selectedModel);
+}
 
-  function handleTaskChange(event) {
-    //task = taskTypeDictionary[event.target.value]
-    dispatch("taskChange", task)
-  }
+function handleTaskChange(event: Event) {
+  const target = event.target as HTMLSelectElement;
+  task = target.value as TaskType;
+  dispatch("taskChange", task);
+  dispatch("update:task", task);
+}
 
-  function handleColumnChange(event) {
-    y_column = event.target.value
-    dispatch("columnChange", y_column)
-  }
+function handleColumnChange(event: Event) {
+  const target = event.target as HTMLSelectElement;
+  y_column = target.value;
+  dispatch("columnChange", y_column);
+  dispatch("update:y_column", y_column);
+}
 </script>
 
 {#if type === DropdownSelectorType.NETWORK}

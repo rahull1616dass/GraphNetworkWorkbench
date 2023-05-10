@@ -33,6 +33,7 @@
   import { onMount } from "svelte"
   import DropdownMultiSelector from "../../common/DropdownMultiSelector.svelte"
   import { MLModelType } from "../../../definitions/mlModelType"
+  import CustomDataTable from "../../common/CustomDataTable.svelte"
   let infoBoxContent =
     "<p>Select a network, model, and task. Choose which columns to predict and use as features. Customize the hyperparameters, such as epochs, training percentage, and learning rate.</p><p>You can also customize the network layers by adding or changing the number of neurons in each layer. Once everything is specified, create the task. Note that you must select all the necessary fields before creating the task.</p>"
 
@@ -372,18 +373,21 @@
           />
 
           <DropdownSelector
-            placeholder={"Select a Model"}
-            type={DropdownSelectorType.MLMODEL}
-            on:modelChange={handleModelChange}
-            bind:model={task.mlModelType}
-          />
+  placeholder={"Select a Model"}
+  type={DropdownSelectorType.MLMODEL}
+  on:modelChange={handleModelChange}
+  bind:model={task.mlModelType}
+/>
 
-          <DropdownSelector
-            placeholder={"Select a Task"}
-            type={DropdownSelectorType.TASK}
-            on:taskChange={handleTaskChange}
-            bind:task={task.taskType}
-          />
+<DropdownSelector
+  placeholder={"Select a Task"}
+  type={DropdownSelectorType.TASK}
+  on:taskChange={handleTaskChange}
+  bind:task={task.taskType}
+/>
+
+
+
         </div>
       {:else if currentIndex === 1}
         <div class="content">
@@ -393,12 +397,12 @@
           </InfoText>
 
           {#if task.taskType === TaskType.NODE_CLASSIFICATION}
-            <DropdownSelector
-              placeholder={"Select a column to predict"}
-              type={DropdownSelectorType.Y_COLUMN}
-              on:columnChange={handleColumnChange}
-              bind:y_column={task.yColumn}
-            />
+          <DropdownSelector
+          placeholder={"Select a column to predict"}
+          type={DropdownSelectorType.Y_COLUMN}
+          on:columnChange={handleColumnChange}
+          bind:y_column={task.yColumn}
+        />
           {/if}
 
           <hr />
@@ -595,63 +599,10 @@
             If the button is inactive, you have to fill in all the required fields
             in the previous steps
           </InfoText>
-          <table>
-            <thead>
-              <tr>
-                <th>Required Fields</th>
-                <th>Selected Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class:highlight={!currentNetwork.metadata.name}>
-                <td>{"Network"}</td>
-                <td>{currentNetwork.metadata.name}</td>
-              </tr>
 
-              <tr class:highlight={task.mlModelType === undefined}>
-                <td>{"Model"}</td>
-                <td>{task.mlModelType}</td>
-              </tr>
+          <CustomDataTable {currentNetwork} {task} />
 
-              <tr class:highlight={task.taskType === undefined}>
-                <td>{"Task"}</td>
-                <td>{task.taskType}</td>
-              </tr>
-
-              <tr class:highlight={task.xColumns.length === 0}>
-                <td>{"Columns to Train"}</td>
-                <td>{task.xColumns} </td>
-              </tr>
-
-              <tr class:highlight={!task.epochs}>
-                <td>{"Epochs"}</td>
-                <td>{task.epochs}</td>
-              </tr>
-
-              <tr class:highlight={task.learningRate === 0.0}>
-                <td>{"Learning Rate"}</td>
-                <td>{task.learningRate}</td>
-              </tr>
-
-              <tr
-                class:highlight={task.trainPercentage === 1 ||
-                  task.trainPercentage === 0}
-              >
-                <td>{"Training Percentage"}</td>
-                <td>{task.trainPercentage}</td>
-              </tr>
-
-              <tr class:highlight={!task.seed}>
-                <td>{"Seed"}</td>
-                <td>{task.seed}</td>
-              </tr>
-
-              <tr class:highlight={!task.hiddenLayerSizes}>
-                <td>{"Hidden Layers"}</td>
-                <td>{task.hiddenLayerSizes}</td>
-              </tr>
-            </tbody>
-          </table>
+        
           <div class="createTask">
             <CustomButton
               type={"secondary"}
@@ -715,9 +666,7 @@
 </div>
 
 <style lang="scss">
-  .highlight {
-    background-color: #ffcccc !important; /* Change the color to your desired highlight color */
-  }
+  
 
   .fixed-left-arrow {
     position: fixed;
@@ -735,25 +684,6 @@
     z-index: 1000;
   }
 
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-
-  th,
-  td {
-    text-align: left;
-    padding: 8px;
-  }
-
-  th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-  }
-
-  tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
   .container {
     display: flex;
     align-items: center;
