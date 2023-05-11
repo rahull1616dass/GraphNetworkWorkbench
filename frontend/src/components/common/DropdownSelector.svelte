@@ -66,7 +66,9 @@
 {:else if type === DropdownSelectorType.MLMODEL}
   <div>
     <select class="select" bind:value={model} on:change={handleModelChange}>
-      <option class="placeholder" disabled selected>{placeholder}</option>
+      <option class="placeholder" value={undefined} disabled selected
+        >{placeholder}</option
+      >
       {#each modelTypes as model}
         <option class="optionDropdown" value={model}>
           {model}
@@ -77,7 +79,9 @@
 {:else if type === DropdownSelectorType.TASK}
   <div>
     <select class="select" bind:value={task} on:change={handleTaskChange}>
-      <option class="placeholder" disabled selected>{placeholder}</option>
+      <option class="placeholder" value={undefined} disabled selected
+        >{placeholder}</option
+      >
       {#each taskTypes as task, _}
         <option class="optionDropdown" value={task}>
           {task}
@@ -93,7 +97,9 @@
 {:else if type === DropdownSelectorType.Y_COLUMN}
   <div>
     <select class="select" bind:value={y_column} on:change={handleColumnChange}>
-      <option class="placeholder">{placeholder}</option>
+      <option class="placeholder" value={undefined} disabled selected
+        >{placeholder}</option
+      >
       {#each nodeColumns as column}
         <option class="optionDropdown" value={column}>
           {column}
