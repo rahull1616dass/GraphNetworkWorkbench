@@ -1,49 +1,49 @@
 <script lang="ts">
-  import { ExperimentState } from "../../../definitions/experimentState"
-  import { DataTable, ProgressBar } from "carbon-components-svelte"
-  import { ProgressBarData } from "../../../definitions/progressBarData"
-  import { Task } from "../../../definitions/task"
-  import { TaskType } from "../../../definitions/taskType"
-  import CustomButton from "../../common/CustomButton.svelte"
-  import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte"
-  import DropdownSelector from "../../common/DropdownSelector.svelte"
+  import { ExperimentState } from "../../../definitions/experimentState";
+  import { DataTable, ProgressBar } from "carbon-components-svelte";
+  import { ProgressBarData } from "../../../definitions/progressBarData";
+  import { Task } from "../../../definitions/task";
+  import { TaskType } from "../../../definitions/taskType";
+  import CustomButton from "../../common/CustomButton.svelte";
+  import PlotDatasetSplitter from "../../common/PlotDatasetSplitter.svelte";
+  import DropdownSelector from "../../common/DropdownSelector.svelte";
   import {
     setExperimentTask,
     getExperimentTasks,
     getCurrentTimestamp,
     listenForExperimentResult,
-  } from "../../../api/firebase"
-  import { DropdownSelectorType } from "../../../definitions/dropdownSelectorType"
-  import type { Network } from "../../../definitions/network"
+  } from "../../../api/firebase";
+  import { DropdownSelectorType } from "../../../definitions/dropdownSelectorType";
+  import type { Network } from "../../../definitions/network";
   import {
     networksList,
     selectedNetworkIndex,
     defaultSeed,
-  } from "../../../stores"
-  import { fly } from "svelte/transition"
-  import { ModalData } from "../../../definitions/modalData"
-  import ExperimentResults from "../../common/ExperimentResults.svelte"
-  import { delay } from "../../../util/generalUtil"
-  import Countup from "svelte-countup"
-  import { COLUMN_IS_TRAIN } from "../../../definitions/constants"
-  import InfoBox from "../../common/InfoBox.svelte"
-  import LeftArrow from "../../common/LeftArrow.svelte"
-  import RightArrow from "../../common/RightArrow.svelte"
-  import InfoText from "../../common/InfoText.svelte"
-  import { onMount } from "svelte"
-  import DropdownMultiSelector from "../../common/DropdownMultiSelector.svelte"
-  import { MLModelType } from "../../../definitions/mlModelType"
-  import CustomDataTable from "../../common/CustomDataTable.svelte"
+  } from "../../../stores";
+  import { fly } from "svelte/transition";
+  import { ModalData } from "../../../definitions/modalData";
+  import ExperimentResults from "../../common/ExperimentResults.svelte";
+  import { delay } from "../../../util/generalUtil";
+  import Countup from "svelte-countup";
+  import { COLUMN_IS_TRAIN } from "../../../definitions/constants";
+  import InfoBox from "../../common/InfoBox.svelte";
+  import LeftArrow from "../../common/LeftArrow.svelte";
+  import RightArrow from "../../common/RightArrow.svelte";
+  import InfoText from "../../common/InfoText.svelte";
+  import { onMount } from "svelte";
+  import DropdownMultiSelector from "../../common/DropdownMultiSelector.svelte";
+  import { MLModelType } from "../../../definitions/mlModelType";
+  import CustomDataTable from "../../common/CustomDataTable.svelte";
   let infoBoxContent =
-    "<p>Select a network, model, and task. Choose which columns to predict and use as features. Customize the hyperparameters, such as epochs, training percentage, and learning rate.</p><p>You can also customize the network layers by adding or changing the number of neurons in each layer. Once everything is specified, create the task. Note that you must select all the necessary fields before creating the task.</p>"
+    "<p>Select a network, model, and task. Choose which columns to predict and use as features. Customize the hyperparameters, such as epochs, training percentage, and learning rate.</p><p>You can also customize the network layers by adding or changing the number of neurons in each layer. Once everything is specified, create the task. Note that you must select all the necessary fields before creating the task.</p>";
 
-  $: isInfoModalOpen = false
+  $: isInfoModalOpen = false;
 
   let hiddenLayers = [
     { permanent: true, checked: false, size: 10 },
     { permanent: true, checked: false, size: 10 },
-  ]
-  let customizedSplitDefined: boolean = false
+  ];
+  let customizedSplitDefined: boolean = false;
 
   // These values should be set by UI Elements later on
   let task = new Task(
@@ -60,11 +60,11 @@
     ExperimentState.CREATE, // experimentState,
     [], // xColumns,
     undefined // yColumn,
-  )
+  );
 
   // For debug purposes, mock data can be used to generate the ExperimentResult page without
   // connecting to the backend
-  const USE_MOCK_DATA: boolean = true
+  const USE_MOCK_DATA: boolean = true;
   if (USE_MOCK_DATA) {
     task = new Task(
       "cJuui4MU0OYn5YyeLu6Z", // taskID
@@ -104,17 +104,17 @@
         "4": [-7.2122, 0.358],
         "5": [-6.1562, 0.6418],
       }
-    )
+    );
   }
 
-  let isCustomizeModalOpen: boolean = false
-  let currentNetwork: Network = undefined
+  let isCustomizeModalOpen: boolean = false;
+  let currentNetwork: Network = undefined;
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
     undefined,
     "Error Uploading Network",
     `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
     false
-  )
+  );
 
   /*
   progressBarData.isPresent = true by default since the page is being controlled by ExperimentState enum anyway
@@ -122,7 +122,7 @@
   let progressBarData: ProgressBarData = new ProgressBarData(
     true,
     "Creating experiment..."
-  )
+  );
 
   let progressDataTable = {
     rows: [],
@@ -130,90 +130,90 @@
       { key: "parameter", value: "Parameter" },
       { key: "value", value: "Value" },
     ],
-  }
+  };
 
   // remove the is_train column from the selectableColumns array
   $: selectableColumns = Object.keys(currentNetwork.nodes[0]).filter(
     (nodeColumns) => nodeColumns !== COLUMN_IS_TRAIN
-  )
-  $: task.hiddenLayerSizes = hiddenLayers.map((layer) => layer.size)
-  $: currentNetwork = $networksList[$selectedNetworkIndex]
-  $: customizedSplitDefined = checkCustomizedSplit()
+  );
+  $: task.hiddenLayerSizes = hiddenLayers.map((layer) => layer.size);
+  $: currentNetwork = $networksList[$selectedNetworkIndex];
+  $: customizedSplitDefined = checkCustomizedSplit();
 
   // Create a reactive variable to store checked state of each column
-  let checkedStates = {}
+  let checkedStates = {};
   $: {
     selectableColumns.forEach((column) => {
-      checkedStates[column] = task.xColumns.includes(column)
-    })
+      checkedStates[column] = task.xColumns.includes(column);
+    });
   }
 
-  let currentIndex = 0
-  const totalContent = 5
-  let previousTasks: Task[] = []
+  let currentIndex = 0;
+  const totalContent = 5;
+  let previousTasks: Task[] = [];
 
   $: {
     if (task.state === ExperimentState.RESULT) {
-      resetPage()
+      resetPage();
     } else if (task.state === ExperimentState.ERROR) {
-      resetPage()
+      resetPage();
     }
   }
 
   onMount(() => {
-    getPreviousTasks()
-  })
+    getPreviousTasks();
+  });
 
   async function getPreviousTasks() {
     await getExperimentTasks(currentNetwork.metadata.id)
       .then((tasks) => {
-        previousTasks = tasks
+        previousTasks = tasks;
         for (let previousTask of previousTasks) {
           // @ts-ignore
           if (
             ExperimentState[previousTask.state] === ExperimentState.PROGRESS
           ) {
-            listenExpResult(previousTask.id)
-            task = previousTask
-            task.state = ExperimentState.PROGRESS
-            createExperimentDataTable()
-            break
+            listenExpResult(previousTask.id);
+            task = previousTask;
+            task.state = ExperimentState.PROGRESS;
+            createExperimentDataTable();
+            break;
           }
         }
       })
       .catch((error) => {
-        task.state = ExperimentState.ERROR
+        task.state = ExperimentState.ERROR;
         console.log(
           `Error retrieving tasks for network ${currentNetwork}: ${error}`
-        )
-      })
+        );
+      });
   }
 
   function listenExpResult(taskDocId: string) {
     listenForExperimentResult(currentNetwork.metadata.id, taskDocId)
       .then((resultTask: Task) => {
-        task = resultTask
-        progressBarData.isPresent = false
-        console.log("Result", resultTask)
+        task = resultTask;
+        progressBarData.isPresent = false;
+        console.log("Result", resultTask);
         // @ts-ignore
-        task.state = ExperimentState[resultTask.state]
+        task.state = ExperimentState[resultTask.state];
       })
       .catch((error) => {
-        task.state = ExperimentState.ERROR
-        console.log(`Error listening for experiment result: ${error}`)
-      })
+        task.state = ExperimentState.ERROR;
+        console.log(`Error listening for experiment result: ${error}`);
+      });
   }
 
   function goLeft() {
-    currentIndex = (currentIndex - 1 + totalContent) % totalContent
+    currentIndex = (currentIndex - 1 + totalContent) % totalContent;
   }
 
   function goRight() {
-    currentIndex = (currentIndex + 1) % totalContent
+    currentIndex = (currentIndex + 1) % totalContent;
   }
 
   function resetPage() {
-    currentIndex = 0
+    currentIndex = 0;
   }
 
   function checkCustomizedSplit(): boolean {
@@ -223,44 +223,44 @@
         (node) =>
           node[COLUMN_IS_TRAIN] !== undefined && node[COLUMN_IS_TRAIN] !== null
       )
-    )
+    );
   }
 
   function resetCustomizedSplit() {
-    currentNetwork.nodes.forEach((node) => delete node[COLUMN_IS_TRAIN])
-    customizedSplitDefined = false
+    currentNetwork.nodes.forEach((node) => delete node[COLUMN_IS_TRAIN]);
+    customizedSplitDefined = false;
   }
 
   function handleModelChange(event) {
-    task.mlModelType = event.detail
+    task.mlModelType = event.detail;
   }
 
   function handleTaskChange(event) {
-    task.taskType = event.detail
+    task.taskType = event.detail;
   }
 
   function handleColumnChange(event) {
-    task.yColumn = event.detail
+    task.yColumn = event.detail;
   }
 
   function updateSelectedNodeColumns(event) {
-    const column = event.target.value
+    const column = event.target.value;
     if (event.target.checked) {
-      task.xColumns = [...task.xColumns, column]
+      task.xColumns = [...task.xColumns, column];
     } else {
-      task.xColumns = task.xColumns.filter((f) => f !== column)
+      task.xColumns = task.xColumns.filter((f) => f !== column);
     }
   }
 
   function randomize() {
-    task.seed = Math.floor(Math.random() * 1000)
+    task.seed = Math.floor(Math.random() * 1000);
   }
 
   function startNewExperiment() {
-    task.state = ExperimentState.CREATE
-    task.taskType = undefined
-    task.mlModelType = undefined
-    task.xColumns = []
+    task.state = ExperimentState.CREATE;
+    task.taskType = undefined;
+    task.mlModelType = undefined;
+    task.xColumns = [];
   }
 
   function addHiddenLayer() {
@@ -268,76 +268,76 @@
       permanent: false,
       checked: false,
       size: 10,
-    })
+    });
   }
 
   function clearHiddenLayer() {
-    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.permanent)
+    hiddenLayers = hiddenLayers.filter((t) => !t.checked || t.permanent);
   }
 
   function saveSplitClicked(event: CustomEvent) {
-    currentNetwork = event.detail.network
-    isCustomizeModalOpen = false
-    customizedSplitDefined = true
-    console.log("Current Network", currentNetwork)
+    currentNetwork = event.detail.network;
+    isCustomizeModalOpen = false;
+    customizedSplitDefined = true;
+    console.log("Current Network", currentNetwork);
   }
 
   function closePlotPopup(event: CustomEvent) {
-    console.log("Close")
-    isCustomizeModalOpen = false
+    console.log("Close");
+    isCustomizeModalOpen = false;
   }
 
   function createExperimentDataTable() {
     let parameters = Object.keys(task).filter(
       (key) => task[key] !== undefined && task[key] !== null
-    )
+    );
     progressDataTable.rows = parameters.map((parameter) => {
       // If task[parameter] is an array, convert it to a string
-      let taskValue = task[parameter]
+      let taskValue = task[parameter];
       if (Array.isArray(task[parameter])) {
-        taskValue = task[parameter].join(", ")
+        taskValue = task[parameter].join(", ");
       }
-      return { parameter: parameter, value: taskValue }
-    })
+      return { parameter: parameter, value: taskValue };
+    });
     // For each row in rows, create an id field with id as the index of the row
     progressDataTable.rows.forEach((row, index) => {
-      row.id = index
-    })
+      row.id = index;
+    });
   }
 
   async function createTask() {
-    task.state = ExperimentState.PROGRESS
-    task.useCustomSplit = customizedSplitDefined
+    task.state = ExperimentState.PROGRESS;
+    task.useCustomSplit = customizedSplitDefined;
     if (task.taskType === TaskType.EDGE_PREDICTION) {
-      task.yColumn = ""
+      task.yColumn = "";
     }
-    createExperimentDataTable()
+    createExperimentDataTable();
     // await delay(2000) // To simulate task being run. TODO: Remove this later on.
     previousTasks.forEach((firestoreTask) => {
       if (firestoreTask.equals(task)) {
-        console.log("Task already exists")
-        return
+        console.log("Task already exists");
+        return;
       }
-    })
-    task.createdAt = getCurrentTimestamp()
+    });
+    task.createdAt = getCurrentTimestamp();
     setExperimentTask(currentNetwork, task)
       .then((taskDocId) => {
-        console.log(`Task created with id: ${taskDocId}`)
-        progressBarData.text = "Experiment created. Running..."
-        listenExpResult(taskDocId)
+        console.log(`Task created with id: ${taskDocId}`);
+        progressBarData.text = "Experiment created. Running...";
+        listenExpResult(taskDocId);
       })
       .catch((error) => {
-        task.state = ExperimentState.ERROR
-        console.log(`Error creating task ${task}`, error)
-      })
+        task.state = ExperimentState.ERROR;
+        console.log(`Error creating task ${task}`, error);
+      });
   }
 
   $: {
     if (isCustomizeModalOpen) {
-      window.scrollTo(0, 0)
-      document.body.style.overflow = "hidden"
+      window.scrollTo(0, 0);
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = ""
+      document.body.style.overflow = "";
     }
   }
 </script>
@@ -373,21 +373,18 @@
           />
 
           <DropdownSelector
-  placeholder={"Select a Model"}
-  type={DropdownSelectorType.MLMODEL}
-  on:modelChange={handleModelChange}
-  bind:model={task.mlModelType}
-/>
+            placeholder={"Select a Model"}
+            type={DropdownSelectorType.MLMODEL}
+            on:modelChange={handleModelChange}
+            bind:model={task.mlModelType}
+          />
 
-<DropdownSelector
-  placeholder={"Select a Task"}
-  type={DropdownSelectorType.TASK}
-  on:taskChange={handleTaskChange}
-  bind:task={task.taskType}
-/>
-
-
-
+          <DropdownSelector
+            placeholder={"Select a Task"}
+            type={DropdownSelectorType.TASK}
+            on:taskChange={handleTaskChange}
+            bind:task={task.taskType}
+          />
         </div>
       {:else if currentIndex === 1}
         <div class="content">
@@ -397,12 +394,12 @@
           </InfoText>
 
           {#if task.taskType === TaskType.NODE_CLASSIFICATION}
-          <DropdownSelector
-          placeholder={"Select a column to predict"}
-          type={DropdownSelectorType.Y_COLUMN}
-          on:columnChange={handleColumnChange}
-          bind:y_column={task.yColumn}
-        />
+            <DropdownSelector
+              placeholder={"Select a column to predict"}
+              type={DropdownSelectorType.Y_COLUMN}
+              on:columnChange={handleColumnChange}
+              bind:y_column={task.yColumn}
+            />
           {/if}
 
           <hr />
@@ -602,7 +599,6 @@
 
           <CustomDataTable {currentNetwork} {task} />
 
-        
           <div class="createTask">
             <CustomButton
               type={"secondary"}
@@ -619,7 +615,7 @@
                 task.xColumns.length === 0 ||
                 task.trainPercentage === 1}
               on:click={() => {
-                createTask()
+                createTask();
               }}>Create Task</CustomButton
             >
           </div>
@@ -657,7 +653,7 @@
         type={"secondary"}
         inverse={false}
         on:click={() => {
-          startNewExperiment()
+          startNewExperiment();
         }}
         >Start New Experiment
       </CustomButton>
@@ -666,8 +662,6 @@
 </div>
 
 <style lang="scss">
-  
-
   .fixed-left-arrow {
     position: fixed;
     left: 10px;

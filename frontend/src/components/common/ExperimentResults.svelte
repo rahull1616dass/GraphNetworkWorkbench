@@ -574,6 +574,7 @@
     margin-right: 10%;
     box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);
     color: var(--lightblack);
+    animation: fadeIn 1s ease-in-out;
   }
   .explanation p {
     margin-top: 0;
@@ -586,6 +587,7 @@
     width: 100%;
     max-width: 20%; /* Adjust this value according to your desired buttons' spacing */
     margin: 0 auto;
+    margin-top: 1%;
   }
 
   .newExperiment {

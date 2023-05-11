@@ -1,23 +1,18 @@
 <script lang="ts">
-  import { networksList, selectedNetworkIndex } from "../../stores"
-  import { DropdownSelectorType } from "../../definitions/dropdownSelectorType"
-  import { MLModelType } from "../../definitions/mlModelType"
-  import { TaskType } from "../../definitions/taskType"
-  import { createEventDispatcher } from "svelte"
+  import { networksList, selectedNetworkIndex } from "../../stores";
+  import { DropdownSelectorType } from "../../definitions/dropdownSelectorType";
+  import { MLModelType } from "../../definitions/mlModelType";
+  import { TaskType } from "../../definitions/taskType";
+  import { createEventDispatcher } from "svelte";
 
-  const dispatch = createEventDispatcher<{
-  modelChange: MLModelType;
-  taskChange: TaskType;
-  columnChange: string;
-  'update:model': MLModelType;
-  'update:task': TaskType;
-  'update:y_column': string;
-}>();
+  const dispatch = createEventDispatcher();
 
-
-  export let placeholder: string = "Select one of the following"
-  export let type: DropdownSelectorType = undefined
-  export let selectedModel: MLModelType | undefined = undefined;
+  export let placeholder: string = "Select one of the following";
+  export let type: DropdownSelectorType = undefined;
+  export let networkIndex: number = undefined;
+  export let task: TaskType = undefined;
+  export let model: MLModelType = undefined;
+  export let y_column: string = undefined;
 
   let modelTypes: MLModelType[] = [
     MLModelType.TAGCONV,
@@ -25,42 +20,31 @@
     MLModelType.GATCONV,
     MLModelType.GCNCONV,
     MLModelType.SAGECONV,
-  ]
+  ];
+  let taskTypes: TaskType[] = [
+    TaskType.NODE_CLASSIFICATION,
+    TaskType.EDGE_PREDICTION,
+  ];
 
-  let taskTypeDictionary: Record<string, TaskType> = {
-    "Node Classification": TaskType.NODE_CLASSIFICATION,
-    "Edge Prediction": TaskType.EDGE_PREDICTION,
-  }
   // remove the is_train column from the nodeColumns array
   $: nodeColumns = Object.keys(
     $networksList[$selectedNetworkIndex].nodes[0]
-  ).filter((nodeColumns) => nodeColumns !== "is_train")
+  ).filter((nodeColumns) => nodeColumns !== "is_train");
 
-  let networkIndex: number = $selectedNetworkIndex
-  let task: TaskType
-  let model: MLModelType
-  let y_column: string = undefined
+  function handleModelChange(event) {
+    model = event.target.value;
+    dispatch("modelChange", model);
+  }
 
-  function handleModelChange(event: Event) {
-  const target = event.target as HTMLSelectElement;
-  selectedModel = target.value as MLModelType;
-  dispatch("modelChange", selectedModel);
-  dispatch("update:model", selectedModel);
-}
+  function handleTaskChange(event) {
+    task = event.target.value;
+    dispatch("taskChange", task);
+  }
 
-function handleTaskChange(event: Event) {
-  const target = event.target as HTMLSelectElement;
-  task = target.value as TaskType;
-  dispatch("taskChange", task);
-  dispatch("update:task", task);
-}
-
-function handleColumnChange(event: Event) {
-  const target = event.target as HTMLSelectElement;
-  y_column = target.value;
-  dispatch("columnChange", y_column);
-  dispatch("update:y_column", y_column);
-}
+  function handleColumnChange(event) {
+    y_column = event.target.value;
+    dispatch("columnChange", y_column);
+  }
 </script>
 
 {#if type === DropdownSelectorType.NETWORK}
@@ -82,9 +66,7 @@ function handleColumnChange(event: Event) {
 {:else if type === DropdownSelectorType.MLMODEL}
   <div>
     <select class="select" bind:value={model} on:change={handleModelChange}>
-      <option class="placeholder" value={undefined} disabled selected
-        >{placeholder}</option
-      >
+      <option class="placeholder" disabled selected>{placeholder}</option>
       {#each modelTypes as model}
         <option class="optionDropdown" value={model}>
           {model}
@@ -96,9 +78,9 @@ function handleColumnChange(event: Event) {
   <div>
     <select class="select" bind:value={task} on:change={handleTaskChange}>
       <option class="placeholder" disabled selected>{placeholder}</option>
-      {#each Object.entries(taskTypeDictionary) as [readableString, taskId]}
-        <option class="optionDropdown" value={taskId}>
-          {readableString}
+      {#each taskTypes as task, _}
+        <option class="optionDropdown" value={task}>
+          {task}
         </option>
       {/each}
       <!-- {#each Object.entries(taskTypes) as [task, value]}
@@ -111,7 +93,7 @@ function handleColumnChange(event: Event) {
 {:else if type === DropdownSelectorType.Y_COLUMN}
   <div>
     <select class="select" bind:value={y_column} on:change={handleColumnChange}>
-      <option class="placeholder" value={undefined}>{placeholder}</option>
+      <option class="placeholder">{placeholder}</option>
       {#each nodeColumns as column}
         <option class="optionDropdown" value={column}>
           {column}
