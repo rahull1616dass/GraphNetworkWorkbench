@@ -64,7 +64,7 @@
 
   // For debug purposes, mock data can be used to generate the ExperimentResult page without
   // connecting to the backend
-  const USE_MOCK_DATA: boolean = true;
+  const USE_MOCK_DATA: boolean = false;
   if (USE_MOCK_DATA) {
     task = new Task(
       "cJuui4MU0OYn5YyeLu6Z", // taskID
@@ -627,7 +627,14 @@
       {/if}
     </div>
   {:else if task.state === ExperimentState.PROGRESS}
-    <div class="progress_bar">
+  <div class="progress_page">
+  
+  <InfoText>
+    There is one experiment running for """ {currentNetwork.metadata.name} """ network and if you wish to create another experiment with the same network, you need to wait for experiment to finish. If you want to create another experiment with a different network, go to networks page and select another network to start experimenting
+  </InfoText>
+</div>
+  <div class="progress_bar_container">
+    <div class="progress_bar_text">
       <ProgressBar helperText={progressBarData.text} />
       It has been running for
       <Countup
@@ -639,11 +646,11 @@
         format={true}
       />
       seconds
-      <DataTable
-        headers={progressDataTable.headers}
-        rows={progressDataTable.rows}
-      />
     </div>
+    <div class="data_table">
+      <CustomDataTable {currentNetwork} {task} />
+    </div>
+  </div>
   {:else if task.state === ExperimentState.RESULT}
     <ExperimentResults {task} {currentNetwork} {startNewExperiment} />
   {:else if task.state === ExperimentState.ERROR}
@@ -662,6 +669,33 @@
 </div>
 
 <style lang="scss">
+  .progress_page {
+    display: flex;
+    justify-content: center;
+    position: flex;
+    width: 80%;
+    margin: 0 auto;
+  }
+
+.progress_bar_container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f0f0f0; /* Light gray background for contrast */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1); /* Slight shadow for a lifted effect */
+}
+
+.progress_bar_text {
+  margin-bottom: 20px; /* 20px gap between the progress bar and the data table */
+}
+
+
+
   .fixed-left-arrow {
     position: fixed;
     left: 10px;
