@@ -11,6 +11,15 @@
   import ExperimentResults from "../../common/ExperimentResults.svelte"
   import InfoBox from "../../common/InfoBox.svelte";
   import { ExperimentState } from "../../../definitions/experimentState"
+  import Test from "../../common/Test.svelte"
+  import DetailView from "../../common/DetailView.svelte"
+  import ComparisonView from "../../common/ComparisonView.svelte"
+
+
+  let selectedRows: Record<string, boolean> = {};
+  let currentView = 'table'; 
+  let selectedRowId;
+  let selectedRowIds = [];
 
   let tasks: Task[] = []
   let errorData: ModalData = undefined
@@ -19,6 +28,28 @@
   $: isInfoModalOpen = false
 
   // onMount(() => updateTasks());
+
+  function selectRow(rowId, event) {
+    if(event.target.checked) {
+      selectedRowIds = [...selectedRowIds, rowId];
+    } else {
+      selectedRowIds = selectedRowIds.filter(id => id !== rowId);
+    }
+    selectedRows = { ...selectedRows, [rowId]: event.target.checked };
+  }
+
+  function showRow(rowId) {
+    selectedRowId = rowId;
+    currentView = 'detail'; 
+  }
+
+  function compareRows() {
+    currentView = 'compare';
+  }
+
+  function backToTable() {
+    currentView = 'table';
+  }
 
   $: {
     console.log($selectedNetworkIndex + " is this")
@@ -52,7 +83,34 @@
 <div
   in:fly={{ y: -50, duration: 250, delay: 300 }}
   out:fly={{ y: -50, duration: 250 }}
+
 >
+
+
+{#if currentView === 'table'}
+  <!-- Table View -->
+  <table>
+    <!-- ...your table code... -->
+  </table>
+
+  <button on:click={compareRows}>Compare</button>
+
+  <p>Selected Rows:</p>
+  <ul>
+    {#each selectedRowIds as rowId}
+      <li>{tasks.find(task => task.index === Number(rowId)).name}</li>
+    {/each}
+  </ul>
+{:else if currentView === 'detail'}
+  <!-- Detail View -->
+  <DetailView {selectedRowId} on:back={backToTable} />
+{:else if currentView === 'compare'}
+  <!-- Comparison View -->
+  <ComparisonView {selectedRowIds} on:back={backToTable} />
+{/if}
+
+
+<!-- 
   <DropdownSelector
     placeholder={"Select a Network"}
     type={DropdownSelectorType.NETWORK}
@@ -92,7 +150,7 @@
         </svelte:fragment>
       </DataTable>
     {/if}
-  </div>
+  </div>  -->
 
   
 </div>
