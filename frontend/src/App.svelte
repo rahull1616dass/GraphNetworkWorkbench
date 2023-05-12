@@ -151,6 +151,7 @@
   }
   .menuLogin {
     height: 100%;
+    background: rgba(255, 255, 255, 1);
   }
   .main_progress_bar {
     position: relative;
