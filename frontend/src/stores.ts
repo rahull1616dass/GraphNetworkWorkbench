@@ -40,10 +40,10 @@ export const paletteColors: Readable<string[]> = readable([
   These are the attributes that are not editable by the user in Plot.svelte.
 */
 export const unchangeableAttributes: Readable<string[]> = readable([
-  "id",
   "name",
   "source",
   "target",
+  "index"
 ])
 
 /*
@@ -67,3 +67,4 @@ loginUserStore.subscribe((newLoginUser) => {
   }
 })
 export const defaultSeed: Writable<number> = writable(42)
+export const maxNodeLimit: Writable<number> = writable(1000)

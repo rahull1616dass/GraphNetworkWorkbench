@@ -31,7 +31,8 @@
   import RightArrow from "../../common/RightArrow.svelte"
   import InfoText from "../../common/InfoText.svelte"
   import { onMount } from "svelte"
-
+  import DropdownMultiSelector from "../../common/DropdownMultiSelector.svelte"
+  import { MLModelType } from "../../../definitions/mlModelType"
   let infoBoxContent =
     "<p>Select a network, model, and task. Choose which columns to predict and use as features. Customize the hyperparameters, such as epochs, training percentage, and learning rate.</p><p>You can also customize the network layers by adding or changing the number of neurons in each layer. Once everything is specified, create the task. Note that you must select all the necessary fields before creating the task.</p>"
 
@@ -59,6 +60,51 @@
     [], // xColumns,
     undefined // yColumn,
   )
+
+  // For debug purposes, mock data can be used to generate the ExperimentResult page without
+  // connecting to the backend
+  const USE_MOCK_DATA: boolean = true
+  if (USE_MOCK_DATA) {
+    task = new Task(
+      "cJuui4MU0OYn5YyeLu6Z", // taskID
+      MLModelType.GCNCONV, // mlModelType,
+      TaskType.NODE_CLASSIFICATION, // taskType,
+      100, // epochs,
+      0.8, // trainPercentage,
+      false, //useCustomSplit
+      0.01, // learningRate
+      [10, 7, 17], // hiddenLayerSizes
+      99, // seed
+      undefined, // createdAt,
+      ExperimentState.RESULT, // experimentState,
+      ["index"], // xColumns,
+      "group", // yColumn,
+      "Based on the provided data, it seems like the model is already performing very well with a validation accuracy score of 1.0, and good values for loss, precision, recall, f1 score, and ROC AUC score. Therefore, it might not be necessary to optimize the model further, unless there are specific requirements or constraints that need to be met.However, if the user still wants to optimize the model, there are a few things that they could try. Firstly, they could experiment with different activation functions (other than Relu and Softmax) to see if they can improve performance. Secondly, they could try adjusting the number of layers and their sizes, and observe the effect on the models metrics. Thirdly, they could try adjusting the learning rate to see if they can achieve faster convergence. Finally, they could try adding more features to the model to see if it improves performance",
+      0.1,
+      1,
+      1,
+      1,
+      1,
+      [2.3574, 1.0597, 0.67, 0.91, 1.0585, 0.9929, 0.8292, 0.7172, 0.6718],
+      {
+        "5": "0",
+        "6": "0",
+        "16": "0",
+        "18": "1",
+        "27": "1",
+        "32": "1",
+        "33": "1",
+      },
+      {
+        "0": [3.4665, 1.8362],
+        "1": [0.1957, 0.818],
+        "2": [4.0159, 0.627],
+        "3": [-3.8721, 0.5197],
+        "4": [-7.2122, 0.358],
+        "5": [-6.1562, 0.6418],
+      }
+    )
+  }
 
   let isCustomizeModalOpen: boolean = false
   let currentNetwork: Network = undefined
@@ -93,16 +139,23 @@
   $: currentNetwork = $networksList[$selectedNetworkIndex]
   $: customizedSplitDefined = checkCustomizedSplit()
 
+  // Create a reactive variable to store checked state of each column
+  let checkedStates = {}
+  $: {
+    selectableColumns.forEach((column) => {
+      checkedStates[column] = task.xColumns.includes(column)
+    })
+  }
+
   let currentIndex = 0
   const totalContent = 5
   let previousTasks: Task[] = []
 
-
   $: {
     if (task.state === ExperimentState.RESULT) {
-      resetPage();
+      resetPage()
     } else if (task.state === ExperimentState.ERROR) {
-      resetPage();
+      resetPage()
     }
   }
 
@@ -113,10 +166,12 @@
   async function getPreviousTasks() {
     await getExperimentTasks(currentNetwork.metadata.id)
       .then((tasks) => {
-        previousTasks = tasks  
-        for(let previousTask of previousTasks){
+        previousTasks = tasks
+        for (let previousTask of previousTasks) {
           // @ts-ignore
-          if(ExperimentState[previousTask.state] === ExperimentState.PROGRESS){
+          if (
+            ExperimentState[previousTask.state] === ExperimentState.PROGRESS
+          ) {
             listenExpResult(previousTask.id)
             task = previousTask
             task.state = ExperimentState.PROGRESS
@@ -133,19 +188,19 @@
       })
   }
 
-  function listenExpResult(taskDocId: string){
+  function listenExpResult(taskDocId: string) {
     listenForExperimentResult(currentNetwork.metadata.id, taskDocId)
-          .then((resultTask: Task) => {
-            task = resultTask
-            progressBarData.isPresent = false
-            console.log("Result", resultTask)
-            // @ts-ignore
-            task.state = ExperimentState[resultTask.state]
-          })
-          .catch((error) => {
-            task.state = ExperimentState.ERROR
-            console.log(`Error listening for experiment result: ${error}`)
-          })
+      .then((resultTask: Task) => {
+        task = resultTask
+        progressBarData.isPresent = false
+        console.log("Result", resultTask)
+        // @ts-ignore
+        task.state = ExperimentState[resultTask.state]
+      })
+      .catch((error) => {
+        task.state = ExperimentState.ERROR
+        console.log(`Error listening for experiment result: ${error}`)
+      })
   }
 
   function goLeft() {
@@ -156,7 +211,7 @@
     currentIndex = (currentIndex + 1) % totalContent
   }
 
-  function resetPage(){
+  function resetPage() {
     currentIndex = 0
   }
 
@@ -252,8 +307,8 @@
   async function createTask() {
     task.state = ExperimentState.PROGRESS
     task.useCustomSplit = customizedSplitDefined
-    if(task.taskType === TaskType.EDGE_PREDICTION){
-        task.yColumn = ""
+    if (task.taskType === TaskType.EDGE_PREDICTION) {
+      task.yColumn = ""
     }
     createExperimentDataTable()
     // await delay(2000) // To simulate task being run. TODO: Remove this later on.
@@ -320,12 +375,14 @@
             placeholder={"Select a Model"}
             type={DropdownSelectorType.MLMODEL}
             on:modelChange={handleModelChange}
+            bind:model={task.mlModelType}
           />
 
           <DropdownSelector
             placeholder={"Select a Task"}
             type={DropdownSelectorType.TASK}
             on:taskChange={handleTaskChange}
+            bind:task={task.taskType}
           />
         </div>
       {:else if currentIndex === 1}
@@ -340,6 +397,7 @@
               placeholder={"Select a column to predict"}
               type={DropdownSelectorType.Y_COLUMN}
               on:columnChange={handleColumnChange}
+              bind:y_column={task.yColumn}
             />
           {/if}
 
@@ -353,6 +411,7 @@
                   type="checkbox"
                   value={column}
                   on:change={updateSelectedNodeColumns}
+                  bind:checked={checkedStates[column]}
                 />
                 {column}
               </label>
@@ -367,9 +426,7 @@
           </InfoText>
 
           <div>
-            <li>
-              Epochs
-            </li>
+            <li>Epochs</li>
             <li class="range">
               <input
                 type="range"
@@ -434,17 +491,16 @@
                   >
                 {/if}
                 {#if isCustomizeModalOpen}
-                <PlotDatasetSplitter
-                  on:saveSplitClicked={saveSplitClicked}
-                  on:closePopup={closePlotPopup}
-                  seed={task.seed}
-                  {currentNetwork}
-                  groupColumn={task.yColumn}
-                  trainPercentage={task.trainPercentage}
-                />
+                  <PlotDatasetSplitter
+                    on:saveSplitClicked={saveSplitClicked}
+                    on:closePopup={closePlotPopup}
+                    seed={task.seed}
+                    {currentNetwork}
+                    groupColumn={task.yColumn}
+                    trainPercentage={task.trainPercentage}
+                  />
+                {/if}
               {/if}
-              {/if}
-              
             </li>
             {#if task.taskType !== TaskType.NODE_CLASSIFICATION || (task.taskType === TaskType.NODE_CLASSIFICATION && customizedSplitDefined === false)}
               <li class="range">
@@ -539,6 +595,63 @@
             If the button is inactive, you have to fill in all the required fields
             in the previous steps
           </InfoText>
+          <table>
+            <thead>
+              <tr>
+                <th>Required Fields</th>
+                <th>Selected Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class:highlight={!currentNetwork.metadata.name}>
+                <td>{"Network"}</td>
+                <td>{currentNetwork.metadata.name}</td>
+              </tr>
+
+              <tr class:highlight={task.mlModelType === undefined}>
+                <td>{"Model"}</td>
+                <td>{task.mlModelType}</td>
+              </tr>
+
+              <tr class:highlight={task.taskType === undefined}>
+                <td>{"Task"}</td>
+                <td>{task.taskType}</td>
+              </tr>
+
+              <tr class:highlight={task.xColumns.length === 0}>
+                <td>{"Columns to Train"}</td>
+                <td>{task.xColumns} </td>
+              </tr>
+
+              <tr class:highlight={!task.epochs}>
+                <td>{"Epochs"}</td>
+                <td>{task.epochs}</td>
+              </tr>
+
+              <tr class:highlight={task.learningRate === 0.0}>
+                <td>{"Learning Rate"}</td>
+                <td>{task.learningRate}</td>
+              </tr>
+
+              <tr
+                class:highlight={task.trainPercentage === 1 ||
+                  task.trainPercentage === 0}
+              >
+                <td>{"Training Percentage"}</td>
+                <td>{task.trainPercentage}</td>
+              </tr>
+
+              <tr class:highlight={!task.seed}>
+                <td>{"Seed"}</td>
+                <td>{task.seed}</td>
+              </tr>
+
+              <tr class:highlight={!task.hiddenLayerSizes}>
+                <td>{"Hidden Layers"}</td>
+                <td>{task.hiddenLayerSizes}</td>
+              </tr>
+            </tbody>
+          </table>
           <div class="createTask">
             <CustomButton
               type={"secondary"}
@@ -550,7 +663,8 @@
                 (task.trainPercentage === 0 &&
                   task.taskType === TaskType.NODE_CLASSIFICATION &&
                   checkCustomizedSplit() === true) ||
-                (task.taskType === TaskType.NODE_CLASSIFICATION && task.yColumn === undefined) ||
+                (task.taskType === TaskType.NODE_CLASSIFICATION &&
+                  task.yColumn === undefined) ||
                 task.xColumns.length === 0 ||
                 task.trainPercentage === 1}
               on:click={() => {
@@ -584,18 +698,7 @@
       />
     </div>
   {:else if task.state === ExperimentState.RESULT}
-    <div class="newExperiment">
-      <CustomButton
-        type={"secondary"}
-        inverse={false}
-        on:click={() => {
-          startNewExperiment()
-        }}
-        >Start New Experiment
-      </CustomButton>
-    </div>
-    <hr />
-    <ExperimentResults {task} {currentNetwork} />
+    <ExperimentResults {task} {currentNetwork} {startNewExperiment} />
   {:else if task.state === ExperimentState.ERROR}
     <InfoText>Error: {task.errorMessage}</InfoText>
     <div class="newExperiment">
@@ -612,6 +715,45 @@
 </div>
 
 <style lang="scss">
+  .highlight {
+    background-color: #ffcccc !important; /* Change the color to your desired highlight color */
+  }
+
+  .fixed-left-arrow {
+    position: fixed;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+  }
+
+  .fixed-right-arrow {
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 8px;
+  }
+
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
   .container {
     display: flex;
     align-items: center;

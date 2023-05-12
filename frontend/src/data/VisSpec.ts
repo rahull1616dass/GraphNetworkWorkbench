@@ -32,7 +32,7 @@ export default {
 
 
 
-        { "name": "static", "value": false, "bind": { "input": "checkbox" } },
+        { "name": "static", "value": true, "bind": { "input": "checkbox" } },
         {
             "description": "State variable for active node fix status.",
             "name": "fix",
@@ -142,7 +142,7 @@ export default {
             "from": { "data": "link-data" },
             "interactive": true,
             "encode": {
-                "update": { "stroke": { "value": "#880808" }, "strokeWidth": { "field": "value" } }
+                "update": { "stroke": { "value": "#880808" }, "strokeWidth": { "value": 3 } } // "strokeWidth": { "field": "value" }
             },
             "transform": [
                 {

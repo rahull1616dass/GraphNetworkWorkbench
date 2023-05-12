@@ -19,8 +19,8 @@
   let hoverData: HoverData = undefined
   // Dynamically adjust the hover offset based on screen size
   const HOVER_OFFSET = {
-    x: 100,
-    y: 200,
+    x: 300,
+    y: 850,
   }
   export let currentNetwork: Network = undefined
 
@@ -174,6 +174,8 @@
       dispatch("predictionPlotLoaded", result.view)
       result.view.addEventListener("mouseover", function (event, item) {
         console.log("MOUSEOVER", item)
+        const container = document.getElementById("predictionPlot");
+        const containerRect = container.getBoundingClientRect();
         if (item != undefined && item.datum != undefined) {
           // @ts-ignore
           if (item != undefined && item.path != undefined) {
@@ -188,9 +190,9 @@
               ),
               undefined,
               // @ts-ignore
-              event.clientX - HOVER_OFFSET.x,
+              event.pageX + HOVER_OFFSET.x - containerRect.left,
               // @ts-ignore
-              event.clientY - HOVER_OFFSET.y
+              event.pageY + HOVER_OFFSET.y - containerRect.top
             )
           } else {
             hoverData = new HoverData(
@@ -204,16 +206,16 @@
                 undefined
               ),
               // @ts-ignore
-              event.clientX - HOVER_OFFSET.x,
+              event.pageX + HOVER_OFFSET.x - containerRect.left,
               // @ts-ignore
-              event.clientY - HOVER_OFFSET.y
+              event.pageY + HOVER_OFFSET.y - containerRect.top
             )
           }
         }
       })
       result.view.addEventListener("mouseout", function (_, item) {
         console.log("MOUSEOUT", item)
-        hoverData = undefined
+        // hoverData = undefined
       })
     })
     .catch((error) => console.log(error))

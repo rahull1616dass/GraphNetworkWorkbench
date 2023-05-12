@@ -27,7 +27,8 @@
   import {
     loginUser,
     getNetworks as getNetworksFromFirestore,
-    getDefaultSeed,
+    setDefaultSeed,
+    getAppConfig
   } from "./api/firebase";
   import { ProgressBarData } from "./definitions/progressBarData";
   import { ProgressBar, Button } from "carbon-components-svelte";
@@ -71,15 +72,15 @@
       if ($fetchedNetworkOnce) return;
       $fetchedNetworkOnce = true;
       getNetworksFromFirestore().finally(() => {
+        $networksList = $networksList.sort((a, b) => {
+          if (a.name < b.name) return -1
+          else if (a.name > b.name) return 1
+          else return 0
+        });
         progressBarData.isPresent = false;
-      });
-      getDefaultSeed()
-        .then((seed) => {
-          if (seed !== undefined) $defaultSeed = seed;
-        })
-        .catch((error) =>
-          console.log(`Error in getting default seed: ${error}`)
-        );
+      })
+      setDefaultSeed()
+      getAppConfig()
     }
   }
 </script>
@@ -93,50 +94,50 @@
     <ul id="menuLogin" class="menuLogin">
       <Tabs />
       <div class="content">
-      {#if $selectedMenuItem === MenuItem.HOME}
-        <Home />
-      {:else if $selectedMenuItem === MenuItem.NETWORKS}
-        <Networks />
-      {:else if $selectedMenuItem === MenuItem.PLOT}
-        <Plot />
-      {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
-        <Experiments />
-      {:else if $selectedMenuItem === MenuItem.REPORTS}
-        <Reports />
-      {:else if $selectedMenuItem === MenuItem.PROFILE}
-        <Profile />
-      {:else if $selectedMenuItem === MenuItem.FROM_WEB}
-        <FromWeb />
-      {:else if $selectedMenuItem === MenuItem.FROM_PC}
-        <UploadNetwork />
-      {:else if $selectedMenuItem === MenuItem.TEST}
-        <Test />
-      {/if}
-    </div>
+        {#if $selectedMenuItem === MenuItem.HOME}
+          <Home />
+        {:else if $selectedMenuItem === MenuItem.NETWORKS}
+          <Networks />
+        {:else if $selectedMenuItem === MenuItem.PLOT}
+          <Plot />
+        {:else if $selectedMenuItem === MenuItem.EXPERIMENTS}
+          <Experiments />
+        {:else if $selectedMenuItem === MenuItem.REPORTS}
+          <Reports />
+        {:else if $selectedMenuItem === MenuItem.PROFILE}
+          <Profile />
+        {:else if $selectedMenuItem === MenuItem.FROM_WEB}
+          <FromWeb />
+        {:else if $selectedMenuItem === MenuItem.FROM_PC}
+          <UploadNetwork />
+        {:else if $selectedMenuItem === MenuItem.TEST}
+          <Test />
+        {/if}
+      </div>
     </ul>
   {:else if isLoggedIn === false}
     <ul>
       <Tabs />
       <div class="content">
-      {#if $selectedMenuItem === MenuItem.HOME}
-        <Home />
-      {:else if $selectedMenuItem === MenuItem.LOGIN}
-        <Login />
-      {:else if $selectedMenuItem === MenuItem.REGISTER}
-        <Register />
-      {/if}
-    </div>
+        {#if $selectedMenuItem === MenuItem.HOME}
+          <Home />
+        {:else if $selectedMenuItem === MenuItem.LOGIN}
+          <Login />
+        {:else if $selectedMenuItem === MenuItem.REGISTER}
+          <Register />
+        {/if}
+      </div>
     </ul>
   {/if}
-    <div class="footer-container">
-      <Footer />
-    </div>
-  
+  <div class="footer-container">
+    <Footer />
+  </div>
 </div>
 
 <style lang="scss">
   .footer-container {
     width: 100%;
+    margin-top: auto;
   }
   .main {
     display: flex;

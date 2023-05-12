@@ -7,6 +7,7 @@
   import { ModalData } from "../../../../definitions/modalData"
   import { MenuItem } from "../../../../definitions/menuItem"
   import {
+    maxNodeLimit,
     selectedMenuItem,
     networksList,
     paletteColors,
@@ -87,6 +88,13 @@
       console.log(`Parsed network: ${parseResult as ParseResult}`)
       switch (uploadedFileType) {
         case UploadedFileType.NODE_FILE:
+          if(parseResult.data.length > $maxNodeLimit) {
+            onInvalidFile(
+              `The number of nodes in the network exceeds the maximum limit of ${$maxNodeLimit}. Please reduce the number of nodes in the network.`,
+              UploadedFileType.NODE_FILE
+            )
+            return
+          }
           if (!parseResult.meta.fields.includes("name")) {
             onInvalidFile(
               `'name' field is required for nodes. Please create this column 
