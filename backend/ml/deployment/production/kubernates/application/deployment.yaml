@@ -43,7 +43,7 @@ spec:
         volumeMounts:
           - mountPath: /workspace
             name: project-code
-      priorityClassName: "research-high"
+      priorityClassName: "research-med"
       imagePullSecrets:
       - name: lsx-registry
       restartPolicy: "Always"
