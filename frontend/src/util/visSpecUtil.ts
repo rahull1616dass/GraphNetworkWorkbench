@@ -1,6 +1,7 @@
 import cloneDeep from "lodash.clonedeep"
 import VisSpec from "../data/VisSpec"
-import type { VisualizationSpec } from "vega-embed"
+import type { VisualizationSpec} from "vega-embed"
+import embed from "vega-embed"
 import { COLUMN_IS_TRAIN } from "../definitions/constants"
 import type { Network } from "../definitions/network"
 import { TaskType } from "../definitions/taskType"
@@ -57,7 +58,11 @@ export function updateVisSpec(
   }
   return visSpec
 }
-
+export async function updateLinkDistance(visSpec: VisualizationSpec, newDistance) {
+  let linkDistance = newDistance;
+  visSpec.signals.find(signal => signal.name === 'linkDistance').value = linkDistance;
+  await embed("#viz", visSpec);
+}
 export function setColorKey(
   visSpec: VisualizationSpec,
   target: "nodes" | "edges",

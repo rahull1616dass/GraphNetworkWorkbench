@@ -4,7 +4,7 @@
   import MiserablesData from "../../../../data/MiserablesVisSpec";
   import VisSpec from "../../../../data/VisSpec";
   import { default as vegaEmbed } from "vega-embed";
-  import { updateVisSpec } from "../../../../util/visSpecUtil";
+  import { updateVisSpec , updateLinkDistance} from "../../../../util/visSpecUtil";
   import {
     networksList,
     selectedNetworkIndex,
@@ -56,18 +56,18 @@
   function loadNetworkValues(network: Network) {
     updateVisSpec(network, VisSpec);
     createVegaEmbed(VisSpec);
+    
   }
-
+;
   function createVegaEmbed(embeddedNetwork: any) {
+
     vegaEmbed("#viz", embeddedNetwork, { actions: false })
       .then((result) => {
         viz = result.view;
+        
         result.view.addSignalListener("linkDistance", (value, val) => {
           console.log(parentWidth);
-          if (
-            parentWidth <
-            (currentNetwork.nodes.length + val) * dynamicVegaCanvasConstant
-          ) {
+          if (parentWidth < (currentNetwork.nodes.length + val) * dynamicVegaCanvasConstant) {
             parentStyle = parentStyleFlexStart;
           } else {
             parentStyle = parentStyleCentered;
@@ -129,6 +129,13 @@
           console.log("MOUSEOUT", item);
           hoverData = undefined;
         });
+        console.log(currentNetwork.links.length)
+        
+        // 
+        result.view.signal('linkDistance', currentNetwork.nodes.length/2);
+        // updateLinkDistance(VisSpec,currentNetwork.nodes.length)
+        // viz.width((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
+        // viz.height((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
       })
       .catch((error) => console.log(error));
   }
@@ -364,7 +371,7 @@
   </div>
 
   {#if isPlottable}
-    <div id="viz" />
+    <div id="viz" style="background-color: white;"/>
   {:else}
     {$networksList[$selectedNetworkIndex].metadata.name} is too large to be plotted,
     for performance reasons. Currently, it has {currentNetwork.nodes.length} nodes
