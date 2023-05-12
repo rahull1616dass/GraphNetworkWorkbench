@@ -63,7 +63,7 @@
 
   // For debug purposes, mock data can be used to generate the ExperimentResult page without
   // connecting to the backend
-  const USE_MOCK_DATA: boolean = false
+  const USE_MOCK_DATA: boolean = true
   if (USE_MOCK_DATA) {
     task = new Task(
       "cJuui4MU0OYn5YyeLu6Z", // taskID

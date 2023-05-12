@@ -11,6 +11,7 @@
   import html2canvas from "html2canvas";
   import jsPDF from "jspdf";
   import { fade } from "svelte/transition";
+  import CustomModal from "./CustomModal.svelte";
 
   export let task: Task = undefined;
   export let currentNetwork: Network = undefined;
@@ -33,7 +34,36 @@
     showDetails = !showDetails;
   }
 
-  // ... other imports and code ...
+  let modalState = { isOpen: false, circleName: "", description: "" };
+
+  function openModal(circleName) {
+    modalState.isOpen = true;
+    modalState.circleName = circleName;
+    if (circleName === "Accuracy") {
+      modalState.description = "Accuracy is a metric used to evaluate the performance of classification models. It measures the proportion of correct predictions made by the model out of the total number of predictions. In simple terms, it represents how well a model correctly classifies the given data.";
+    }
+    else if (circleName === "Precision") {
+      modalState.description = "Precision is a metric used to evaluate the performance of classification models. It is the proportion of true positives that are correctly identified. It is a better metric than accuracy when the dataset is imbalanced.";
+    }
+    else if (circleName === "F1 Score") {
+      modalState.description = "F1 Score is a metric used to evaluate the performance of classification models. It is the harmonic mean of precision and recall. It is a better metric than accuracy when the dataset is imbalanced.";
+    }
+    else if (circleName === "AUC Score") {
+      modalState.description = "AUC Score is a metric used to evaluate the performance of classification models. It is the area under the ROC curve. It is a better metric than accuracy when the dataset is imbalanced.";
+    }
+    else if (circleName == "Recall") {
+      modalState.description = "Recall is a metric used to evaluate the performance of classification models. It is the proportion of true positives that are correctly identified. It is a better metric than accuracy when the dataset is imbalanced.";
+    }
+    else {
+      modalState.description = "Not defined";
+    }
+
+  }
+
+  function closeModal() {
+    modalState.isOpen = false;
+    modalState.circleName = "";
+  }
 
   let backgroundColor;
   $: {
@@ -267,6 +297,7 @@
 
     <!-- Main Node -->
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <circle
       cx="300"
       cy="300"
@@ -274,6 +305,7 @@
       fill="#03C988"
       on:mouseover={() => changeFontSize("accuracy", true)}
       on:mouseout={() => changeFontSize("accuracy", false)}
+      on:click={() => openModal("Accuracy")}
     />
     <text
       class="node-text"
@@ -287,6 +319,7 @@
 
     <!-- F1 Score Node -->
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <circle
       cx="200"
       cy="100"
@@ -294,6 +327,7 @@
       fill="#4CAF50"
       on:mouseover={() => changeFontSize("f1Score", true)}
       on:mouseout={() => changeFontSize("f1Score", false)}
+      on:click={() => openModal("F1 Score")}
     />
     <text
       class="node-text"
@@ -308,6 +342,7 @@
 
     <!-- Precision Node -->
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <circle
       cx="400"
       cy="100"
@@ -315,6 +350,7 @@
       fill="#2196F3"
       on:mouseover={() => changeFontSize("precision", true)}
       on:mouseout={() => changeFontSize("precision", false)}
+      on:click={() => openModal("Precision")}
     />
     <text
       class="node-text"
@@ -329,6 +365,7 @@
 
     <!-- Recall Node -->
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <circle
       cx="150"
       cy="400"
@@ -336,6 +373,7 @@
       fill="#FF9800"
       on:mouseover={() => changeFontSize("recall", true)}
       on:mouseout={() => changeFontSize("recall", false)}
+      on:click={() => openModal("Recall")}
     />
     <text
       class="node-text"
@@ -350,6 +388,7 @@
 
     <!-- AUC Node -->
     <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <circle
       cx="450"
       cy="400"
@@ -357,6 +396,7 @@
       fill="#9C27B0"
       on:mouseover={() => changeFontSize("auc", true)}
       on:mouseout={() => changeFontSize("auc", false)}
+      on:click={() => openModal("AUC Score")}
     />
     <text
       class="node-text"
@@ -369,6 +409,28 @@
       fill="white">AUC: {task.auc}</text
     >
   </svg>
+
+  {#if modalState.isOpen}
+    <CustomModal  on:close="{closeModal}">
+      <h4 slot="header">
+        {modalState.circleName}
+      </h4>
+      <div slot="body">
+        {modalState.description}
+      </div>
+
+      <div slot="footer">
+
+        <CustomButton type={"secondary"} inverse={false}
+        on:click={() => {
+          closeModal();
+        }}
+      >
+        Got it!
+      </CustomButton>
+      </div>
+    </CustomModal>
+  {/if}
 
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
