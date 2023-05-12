@@ -85,13 +85,11 @@
   out:fly={{ y: -50, duration: 250 }}
 
 >
+<Test/>
 
 
-{#if currentView === 'table'}
-  <!-- Table View -->
-  <table>
-    <!-- ...your table code... -->
-  </table>
+<!-- {#if currentView === 'table'}
+ 
 
   <button on:click={compareRows}>Compare</button>
 
@@ -102,12 +100,12 @@
     {/each}
   </ul>
 {:else if currentView === 'detail'}
-  <!-- Detail View -->
+  
   <DetailView {selectedRowId} on:back={backToTable} />
 {:else if currentView === 'compare'}
-  <!-- Comparison View -->
+  
   <ComparisonView {selectedRowIds} on:back={backToTable} />
-{/if}
+{/if} -->
 
 
 <!-- 
