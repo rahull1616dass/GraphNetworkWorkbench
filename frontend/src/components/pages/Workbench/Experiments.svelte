@@ -66,8 +66,12 @@
 
   // For debug purposes, mock data can be used to generate the ExperimentResult page without
   // connecting to the backend
-  const USE_MOCK_DATA: boolean = false
-  if (USE_MOCK_DATA) {
+  const USE_MOCK_NODE_DATA: boolean = false
+  const USE_MOCK_LINK_DATA: boolean = false
+  if(USE_MOCK_NODE_DATA && USE_MOCK_LINK_DATA){
+    throw new Error("Cannot use both mock node and link data")
+  }
+  if (USE_MOCK_NODE_DATA) {
     task = new Task(
       "cJuui4MU0OYn5YyeLu6Z", // taskID
       MLModelType.GCNCONV, // mlModelType,
@@ -108,8 +112,6 @@
       }
     )
   }
-
-  const USE_MOCK_LINK_DATA: boolean = false
   if (USE_MOCK_LINK_DATA) {
     task = new Task(
       "4huJyQ1Ucxlnk11UbmpZ", // taskID
