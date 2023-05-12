@@ -1,5 +1,5 @@
 export enum PredictionResult{
-    IN_TRAIN_SET = 1,
-    CORRECT = 2,
-    WRONG = 3
+    IN_TRAIN_SET = 0,
+    CORRECT = 1,
+    WRONG = 2
 }

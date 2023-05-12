@@ -140,6 +140,7 @@
             matchingLink.result = PredictionResult.WRONG
           }
         } else {
+          // This link was not in the original network, so we need to add it but mark it as wrong
           if (value) {
             networkToPlot.links.push({
               source: source,

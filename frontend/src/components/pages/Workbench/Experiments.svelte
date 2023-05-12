@@ -44,8 +44,9 @@
   ]
   let customizedSplitDefined: boolean = false
 
+  
   // These values should be set by UI Elements later on
-  let task = new Task(
+  const DEFAULT_TASK: Task = new Task(
     undefined, // taskID
     undefined, // mlModelType,
     undefined, // taskType,
@@ -61,9 +62,11 @@
     undefined // yColumn,
   )
 
+  let task = DEFAULT_TASK
+
   // For debug purposes, mock data can be used to generate the ExperimentResult page without
   // connecting to the backend
-  const USE_MOCK_DATA: boolean = true
+  const USE_MOCK_DATA: boolean = false
   if (USE_MOCK_DATA) {
     task = new Task(
       "cJuui4MU0OYn5YyeLu6Z", // taskID
@@ -256,10 +259,7 @@
   }
 
   function startNewExperiment() {
-    task.state = ExperimentState.CREATE
-    task.taskType = undefined
-    task.mlModelType = undefined
-    task.xColumns = []
+    task = DEFAULT_TASK
   }
 
   function addHiddenLayer() {
@@ -698,7 +698,7 @@
       />
     </div>
   {:else if task.state === ExperimentState.RESULT}
-    <ExperimentResults {task} {currentNetwork} {startNewExperiment} />
+    <ExperimentResults {task} {currentNetwork} on:newExperiment={() => startNewExperiment()} />
   {:else if task.state === ExperimentState.ERROR}
     <InfoText>Error: {task.errorMessage}</InfoText>
     <div class="newExperiment">
