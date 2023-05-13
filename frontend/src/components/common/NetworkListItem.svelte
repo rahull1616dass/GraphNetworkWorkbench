@@ -18,33 +18,32 @@
   class="root"
   class:selected
 >
-  <div class="network_color" style="--bg-color: {network.metadata.color}" />
+  <div class="left-container"> <!-- Added this div -->
+    <div class="network_color" style="--bg-color: {network.metadata.color}" />
 
-  <div class="container">
-    <ol class="content">
-      <li class="network_name">
-        {network.metadata.name}
-      </li>
+    <div class="container">
+      <ol class="content">
+        <li class="network_name">
+          {network.metadata.name}
+        </li>
 
-      <li class="network_details">
-        <img src={networkIcon} class="network_icon" alt="Network Icon" />
-        {network.nodes.length} nodes, {network.links.length} edges
-      </li>
-
-      
-    </ol>
-
-    <div class="delete">
-      <ImageButton
-        on:click={() => {
-          dispatch("deleteItem", { selectedIndex: index });
-        }}
-        defaultImageSource={deleteIcon}
-        styleClass="deleteButtonClass"
-      />
+        <li class="network_details">
+          <img src={networkIcon} class="network_icon" alt="Network Icon" />
+          {network.nodes.length} nodes, {network.links.length} edges
+        </li>
+      </ol>
     </div>
+  </div> <!-- Closing the div -->
+
+  <div class="delete">
+    <ImageButton
+      on:click={() => {
+        dispatch("deleteItem", { selectedIndex: index });
+      }}
+      defaultImageSource={deleteIcon}
+      styleClass="deleteButtonClass"
+    />
   </div>
-  
 </div>
 
 
@@ -67,7 +66,6 @@
   .root {
     display: flex;
     width: 80%;
-    background-color: #f5f5f5;
     border-radius: 5px;
     padding: 10px;
     cursor: pointer;
@@ -76,7 +74,9 @@
     &.selected {
       background-color: var(--wueblue);
       color: white;
-    }
+    }    
+    justify-content: space-between;
+    align-items: center;
   }
 
   .network_color {
@@ -94,6 +94,10 @@
   .network_icon {
     width: 1.5rem;
     height: 1.5rem;
+  }
+  .left-container{
+    display: flex;
+    align-items: center;
   }
   div {
     //padding-right: 10px;
