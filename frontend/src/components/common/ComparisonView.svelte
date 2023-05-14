@@ -1,19 +1,17 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
-    import DetailView from './DetailView.svelte'; 
+  import { createEventDispatcher } from "svelte";
+  import DetailView from "./DetailView.svelte";
+  import CustomButton from "./CustomButton.svelte";
 
-    export let selectedRowIds;
+  export let selectedRowIds;
 
-    const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher();
 </script>
-  
-<p>Comparison view for rows:</p>
-  
+
 {#each selectedRowIds as rowId}
-  <DetailView selectedRowId={rowId} /> 
+  <!-- <DetailView selectedRowId={rowId} />  -->
 {/each}
-  
-<button on:click={() => dispatch('back')}>Back to table</button>
 
-
-  
+<CustomButton type="secondary" inverse={true} on:click={() => dispatch("back")}
+  >Back to Reports Page</CustomButton
+>

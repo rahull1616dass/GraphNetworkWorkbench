@@ -44,6 +44,9 @@
     updateTasks()
   }
 
+  $: selectedTask = tasks.find(task => task.id === selectedRowId);
+
+
 
   async function updateTasks() {
     await getExperimentTasks($networksList[$selectedNetworkIndex].metadata.id)
@@ -99,7 +102,17 @@
 >
 
 {#if currentView === 'table'}
+
+<DropdownSelector
+    placeholder={"Select a Network"}
+    type={DropdownSelectorType.NETWORK}
+  />
+
+
   <!-- Table View -->
+  <dıv class='report_container'>
+
+
   <table>
     <thead>
       <tr>
@@ -109,6 +122,7 @@
         <th>ML Model</th>
         <th>Epochs</th>
         <th>Train Percentage</th>
+        <th>Accuracy</th>
         <th>Created At</th>
       </tr>
     </thead>
@@ -121,24 +135,21 @@
     <td>{task.mlModelType}</td>
     <td>{task.epochs}</td>
     <td>{task.trainPercentage}</td>
+    <td>{task.accuracy}</td>
     <td>{task.createdAt.toDate().toLocaleString()}</td>
   </tr>
 {/each}
     </tbody>
   </table>
+</dıv>
 
   <button on:click={compareRows}>Compare</button>
 
-  <p>Selected Rows:</p>
-<ul>
-  {#each selectedRowIds as taskId}
-  <li>{'Experiment ' + taskId}</li>
-{/each}
-</ul>
-
 {:else if currentView === 'detail'}
+
   <!-- Detail View -->
-  <DetailView {selectedRowId} on:back={backToTable} />
+  <DetailView task={selectedTask} {selectedNetworkIndex} on:back={backToTable} />
+
 {:else if currentView === 'compare'}
   <!-- Comparison View -->
   <ComparisonView {selectedRowIds} on:back={backToTable} />
@@ -156,6 +167,41 @@
 </div>
 
 <style lang="scss">
+
+.report_container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f0f0f0; /* Light gray background for contrast */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1); /* Slight shadow for a lifted effect */
+  max-height: 70%;
+  overflow: auto;
+}
+
+    table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 8px;
+  }
+
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+
+  tr:nth-child(even) {
+    background-color: whitesmoke;
+  }
   .reports {
     margin-left: 10%;
     margin-right: 10%;
