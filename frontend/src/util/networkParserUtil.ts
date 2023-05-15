@@ -3,6 +3,7 @@ import Papa from "papaparse"
 import type ParseResult from "papaparse"
 import { UploadedFileType } from "../definitions/uploadedFileType"
 import type JSZip from "jszip"
+import { COLUMN_INDEX, COLUMN_POS } from "../definitions/constants"
 
 export async function parseNetwork(file: File): Promise<ParseResult> {
   let fileExtension: string = file.name.split(".").pop()
@@ -62,11 +63,17 @@ async function parseCSV(file: File, uploadedFileType: UploadedFileType): Promise
       },
       complete: (results, file) => {
         // Only add index field for node files
-        if (uploadedFileType === UploadedFileType.NODE_FILE && !results.meta.fields.includes("index")) {
+        if (!results.meta.fields.includes(COLUMN_INDEX)) {
           results.data.forEach((row, index) => {
-            row["index"] = index
+            row[COLUMN_INDEX] = index
           })
-          results.meta.fields.push("index")
+          results.meta.fields.push(COLUMN_INDEX)
+        }
+        if (results.meta.fields.includes(COLUMN_POS)) {
+          results.data.forEach((row) => {
+            delete row[COLUMN_POS]
+          }
+          )
         }
         console.log(results)
         resolve(results)
@@ -100,7 +107,7 @@ export function JSZipObjectToFile(zipObject: JSZip.JSZipObject): Promise<File> {
 export function blobToFile(theBlob: Blob, fileName: string, type: string = undefined): File {
   return new File([theBlob as any], fileName, {
     lastModified: new Date().getTime(),
-    type: type === undefined ? theBlob.type: type,
+    type: type === undefined ? theBlob.type : type,
   })
 }
 

@@ -12,12 +12,12 @@ export class Network{
         return {
             nodes: toCSVFile(
                 UploadedFileType.NODE_FILE,
-                Object.keys(new Node()),
+                Object.keys(this.nodes[0]),
                 this.nodes
               ),
             links: toCSVFile(
                 UploadedFileType.EDGE_FILE,
-                Object.keys(new Link()),
+                Object.keys(this.links[0]),
                 this.links
               )
         }

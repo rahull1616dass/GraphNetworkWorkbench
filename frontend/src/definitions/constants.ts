@@ -5,3 +5,5 @@ export const enum Endpoints {
 }
 
 export const COLUMN_IS_TRAIN = "is_train"
+export const COLUMN_INDEX = "index"
+export const COLUMN_POS = "pos"
