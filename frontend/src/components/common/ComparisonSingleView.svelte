@@ -1,7 +1,5 @@
 <script>
   import { createEventDispatcher } from "svelte";
-  import ExperimentResults from "./ExperimentResults.svelte";
-  import CustomButton from "./CustomButton.svelte";
   import CustomDataTable from "./CustomDataTable.svelte";
   import PlotLoss from "./PlotLoss.svelte";
   import Embedding from "./Embedding.svelte";
