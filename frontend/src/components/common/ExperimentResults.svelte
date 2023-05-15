@@ -310,11 +310,20 @@
     <text
       class="node-text"
       x="300"
-      y="300"
+      y="290"
       text-anchor="middle"
       dy=".3em"
       font-size="{fontSize.accuracy}px"
-      fill="white">Accuracy: {task.accuracy}</text
+      fill="white">Accuracy</text
+    >
+    <text
+      class="node-text"
+      x="300"
+      y="315"
+      text-anchor="middle"
+      dy=".3em"
+      font-size="{fontSize.accuracy}px"
+      fill="white">{task.accuracy}</text
     >
 
     <!-- F1 Score Node -->
@@ -333,11 +342,21 @@
       class="node-text"
       id="f1Score"
       x="200"
-      y="100"
+      y="90"
       text-anchor="middle"
       dy=".3em"
       font-size="{fontSize.f1Score}px"
-      fill="white">F1 Score: {task.f1}</text
+      fill="white">F1 Score</text
+    >
+    <text
+      class="node-text"
+      id="f1Score"
+      x="200"
+      y="115"
+      text-anchor="middle"
+      dy=".3em"
+      font-size="{fontSize.f1Score}px"
+      fill="white">{task.f1}</text
     >
 
     <!-- Precision Node -->
@@ -346,7 +365,7 @@
     <circle
       cx="400"
       cy="100"
-      r="50"
+      r="55"
       fill="#2196F3"
       on:mouseover={() => changeFontSize("precision", true)}
       on:mouseout={() => changeFontSize("precision", false)}
@@ -356,11 +375,20 @@
       class="node-text"
       id="precision"
       x="400"
-      y="100"
+      y="90"
       text-anchor="middle"
       dy=".3em"
       font-size="{fontSize.precision}px"
-      fill="white">Precision: {task.precision}</text
+      fill="white">Precision</text>
+      <text
+      class="node-text"
+      id="precision"
+      x="400"
+      y="115"
+      text-anchor="middle"
+      dy=".3em"
+      font-size="{fontSize.precision}px"
+      fill="white">{task.precision}</text
     >
 
     <!-- Recall Node -->
@@ -369,7 +397,7 @@
     <circle
       cx="150"
       cy="400"
-      r="35"
+      r="45"
       fill="#FF9800"
       on:mouseover={() => changeFontSize("recall", true)}
       on:mouseout={() => changeFontSize("recall", false)}
@@ -379,11 +407,21 @@
       class="node-text"
       id="recall"
       x="150"
-      y="400"
+      y="390"
       text-anchor="middle"
       dy=".3em"
       font-size="{fontSize.recall}px"
-      fill="white">Recall: {task.recall}</text
+      fill="white">Recall</text
+    >
+    <text
+      class="node-text"
+      id="recall"
+      x="150"
+      y="415"
+      text-anchor="middle"
+      dy=".3em"
+      font-size="{fontSize.recall}px"
+      fill="white">{task.recall}</text
     >
 
     <!-- AUC Node -->
@@ -402,11 +440,21 @@
       class="node-text"
       id="auc"
       x="450"
-      y="400"
+      y="390"
       text-anchor="middle"
       dy=".3em"
       font-size="{fontSize.auc}px"
-      fill="white">AUC: {task.auc}</text
+      fill="white">AUC</text
+    >
+    <text
+      class="node-text"
+      id="auc"
+      x="450"
+      y="415"
+      text-anchor="middle"
+      dy=".3em"
+      font-size="{fontSize.auc}px"
+      fill="white">{task.auc}</text
     >
   </svg>
 
@@ -442,18 +490,7 @@
     {#if showExplanation}
       <div class="explanation">
         <p>
-          Based on the provided data, it seems like the model is already
-          performing very well with a validation accuracy score of 1.0, and good
-          values for loss, precision, recall, f1 score, and ROC AUC score.
-          Therefore, it might not be necessary to optimize the model further,
-          unless there are specific requirements or constraints that need to be
-          met. However, if the user still wants to optimize the model, there are
-          a few things that they could try. Experiment with different activation
-          functions (other than Relu and Softmax) to see if they can improve
-          performance. Adjust the number of layers and their sizes, and observe
-          the effect on the models metrics. Adjust the learning rate to see if
-          they can achieve faster convergence. Add more features to the model to
-          see if it improves performance.
+          {task.expertOpinion}
         </p>
       </div>
     {/if}
