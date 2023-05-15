@@ -1,108 +1,111 @@
 <script lang="ts">
-  loadNetwork;
-  import { onMount } from "svelte";
-  import MiserablesData from "../../../../data/MiserablesVisSpec";
-  import VisSpec from "../../../../data/VisSpec";
-  import { default as vegaEmbed } from "vega-embed";
-  import { updateVisSpec , updateLinkDistance} from "../../../../util/visSpecUtil";
+  loadNetwork
+  import { onMount } from "svelte"
+  import MiserablesData from "../../../../data/MiserablesVisSpec"
+  import VisSpec from "../../../../data/VisSpec"
+  import { default as vegaEmbed } from "vega-embed"
+  import {
+    updateVisSpec,
+    updateLinkDistance,
+  } from "../../../../util/visSpecUtil"
   import {
     networksList,
     selectedNetworkIndex,
     maxNumberOfNodesForPlot,
-  } from "../../../../stores";
-  import { ModalData } from "../../../../definitions/modalData";
-  import { HoverData } from "../../../../definitions/hoverData";
-  import PlotDetailModal from "./PlotDetailModal.svelte";
-  import { Link, Node } from "../../../../definitions/network";
-  import Hover from "./Hover.svelte";
-  import statsIcon from "../../../../assets/stats.svg";
-  import { HoverType } from "../../../../definitions/hoverType";
-  import { Toggle, Modal } from "carbon-components-svelte";
-  import CustomButton from "../../../common/CustomButton.svelte";
-  import { toCSVFile } from "../../../../util/networkParserUtil";
-  import { uploadNetworkToStorage } from "../../../../api/firebase";
-  import type { Network } from "../../../../definitions/network";
-  import { UploadedFileType } from "../../../../definitions/uploadedFileType";
-  import { ProgressBar } from "carbon-components-svelte";
-  import { ProgressBarData } from "../../../../definitions/progressBarData";
-  import { fade, slide, scale, fly } from "svelte/transition";
+  } from "../../../../stores"
+  import { ModalData } from "../../../../definitions/modalData"
+  import { HoverData } from "../../../../definitions/hoverData"
+  import PlotDetailModal from "./PlotDetailModal.svelte"
+  import { Link, Node } from "../../../../definitions/network"
+  import Hover from "./Hover.svelte"
+  import statsIcon from "../../../../assets/stats.svg"
+  import { HoverType } from "../../../../definitions/hoverType"
+  import { Toggle, Modal } from "carbon-components-svelte"
+  import CustomButton from "../../../common/CustomButton.svelte"
+  import { toCSVFile } from "../../../../util/networkParserUtil"
+  import { uploadNetworkToStorage } from "../../../../api/firebase"
+  import type { Network } from "../../../../definitions/network"
+  import { UploadedFileType } from "../../../../definitions/uploadedFileType"
+  import { ProgressBar } from "carbon-components-svelte"
+  import { ProgressBarData } from "../../../../definitions/progressBarData"
+  import { fade, slide, scale, fly } from "svelte/transition"
 
   //import JSON from "json-strictify"
-  import cloneDeep from "lodash.clonedeep";
-  import InfoBox from "../../../common/InfoBox.svelte";
+  import cloneDeep from "lodash.clonedeep"
+  import InfoBox from "../../../common/InfoBox.svelte"
 
   let infoBoxContent =
-    "<p>View and customize the nodes and edges of the selected network. Enter edit mode to modify the node group and other properties, then save the changes and run experiments.</p>";
-  $: isInfoModalOpen = false;
+    "<p>View and customize the nodes and edges of the selected network. Enter edit mode to modify the node group and other properties, then save the changes and run experiments.</p>"
+  $: isInfoModalOpen = false
 
   function loadNetwork(isItemUpdated: boolean) {
     if (isItemUpdated) {
-      loadNetworkValues(currentNetwork);
+      loadNetworkValues(currentNetwork, true)
     } else {
       // No item in the Plot is updated by the user, reload the plot without updating VisSpec
       if ($networksList && $networksList.length > 0) {
-        console.log("changing to ", $selectedNetworkIndex);
+        console.log("changing to ", $selectedNetworkIndex)
         /*
         Note that structuredClone does not work on the svelte store.
         Same goes for JSON.stringify and JSON.parse which throws circular reference error.
         Hence the usage of lodash.clonedeep
         */
-        currentNetwork = cloneDeep($networksList[$selectedNetworkIndex]);
-        loadNetworkValues(currentNetwork);
-      } else createVegaEmbed(MiserablesData);
+        currentNetwork = cloneDeep($networksList[$selectedNetworkIndex])
+        loadNetworkValues(currentNetwork)
+      } else createVegaEmbed(MiserablesData)
     }
   }
 
-  function loadNetworkValues(network: Network) {
-    updateVisSpec(network, VisSpec);
-    createVegaEmbed(VisSpec);
-    
+  function loadNetworkValues(network: Network, resetVegaId: boolean = false) {
+    updateVisSpec(network, VisSpec, resetVegaId)
+    createVegaEmbed(VisSpec)
   }
-;
   function createVegaEmbed(embeddedNetwork: any) {
-
     vegaEmbed("#viz", embeddedNetwork, { actions: false })
       .then((result) => {
-        viz = result.view;
-        
+        viz = result.view
+
         result.view.addSignalListener("linkDistance", (value, val) => {
-          console.log(parentWidth);
-          if (parentWidth < (currentNetwork.nodes.length + val) * dynamicVegaCanvasConstant) {
-            parentStyle = parentStyleFlexStart;
+          console.log(parentWidth)
+          if (
+            parentWidth <
+            (currentNetwork.nodes.length + val) * DYNAMIC_VEGA_CANVAS_CONSTANT
+          ) {
+            parentStyle = parentStyleFlexStart
           } else {
-            parentStyle = parentStyleCentered;
+            parentStyle = parentStyleCentered
           }
 
           result.view.width(
-            (currentNetwork.nodes.length + val) * dynamicVegaCanvasConstant
-          );
+            (currentNetwork.nodes.length + val) * DYNAMIC_VEGA_CANVAS_CONSTANT
+          )
           result.view.height(
-            (currentNetwork.nodes.length + val) * dynamicVegaCanvasConstant
-          );
-        });
+            (currentNetwork.nodes.length + val) * DYNAMIC_VEGA_CANVAS_CONSTANT
+          )
+        })
 
         result.view.addEventListener("click", function (_, item) {
-          console.log("CLICK", item);
+          console.log("CLICK", item)
           if (!isEditMode) {
-            editModeRequiredModalData.isOpen = true;
-            return;
+            editModeRequiredModalData.isOpen = true
+            return
           }
           // @ts-ignore
-          detailedItem = item.datum;
-          hoverData = undefined;
-          nodeDetailModalData.isOpen = true;
-        });
+          detailedItem = item.datum
+          hoverData = undefined
+          plotDetailModalData.isOpen = true
+        })
         result.view.addEventListener("mouseover", function (event, item) {
-          console.log("MOUSEOVER", item);
-          const container = document.getElementById("viz");
-          const containerRect = container.getBoundingClientRect();
+          console.log("MOUSEOVER", item)
+          const container = document.getElementById("viz")
+          const containerRect = container.getBoundingClientRect()
 
           // console.log(window.)
           if (item != undefined && item.datum != undefined) {
             // @ts-ignore
             if (item != undefined && item.path != undefined) {
               // @ts-ignore
-              console.log(item.datum);
+              console.log(item.datum)
               hoverData = new HoverData(
                 HoverType.LINK,
                 item.datum,
@@ -111,7 +114,7 @@
                 event.pageX,
                 // @ts-ignore
                 event.pageY
-              );
+              )
             } else {
               hoverData = new HoverData(
                 HoverType.NODE,
@@ -121,89 +124,83 @@
                 event.pageX,
                 // @ts-ignore
                 event.pageY
-              );
+              )
             }
           }
-        });
+        })
         result.view.addEventListener("mouseout", function (_, item) {
-          console.log("MOUSEOUT", item);
-          hoverData = undefined;
-        });
+          console.log("MOUSEOUT", item)
+          hoverData = undefined
+        })
         console.log(currentNetwork.links.length)
         
         // 
-        result.view.signal('linkDistance', currentNetwork.nodes.length/2);
+        result.view.signal('linkDistance', Math.max(currentNetwork.nodes.length/2,15));
         // updateLinkDistance(VisSpec,currentNetwork.nodes.length)
         // viz.width((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
         // viz.height((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
   }
 
   async function updateNetworkInFirebaseStorage() {
     const nodeFile = toCSVFile(
       UploadedFileType.NODE_FILE,
-      Object.keys(new Node()),
+      Object.keys(currentNetwork.nodes[0]),
       currentNetwork.nodes
-    );
+    )
     const edgeFile = toCSVFile(
       UploadedFileType.EDGE_FILE,
-      Object.keys(new Link()),
-      currentNetwork.links.map((link) => {
-        return {
-          // @ts-ignore
-          source: link.source.index,
-          // @ts-ignore
-          target: link.target.index,
-          value: link.value,
-        };
-      })
-    );
+      Object.keys(currentNetwork.links[0]),
+      currentNetwork.links
+    )
+
     await uploadNetworkToStorage(currentNetwork.metadata, nodeFile, edgeFile)
       .then(() => {
-        console.log("Uploaded network to storage");
-        $networksList[$selectedNetworkIndex] = currentNetwork;
-        loadNetwork(true);
-        progressBarData.isPresent = false;
+        console.log("Uploaded network to storage")
+        $networksList[$selectedNetworkIndex] = currentNetwork
+        loadNetwork(true)
+        progressBarData.isPresent = false
       })
       .catch((error) => {
-        progressBarData.isPresent = false;
-        console.log("Error uploading network to storage", error);
-        uploadingNetworkErrorModalData.isOpen = true;
-      });
+        progressBarData.isPresent = false
+        console.log("Error uploading network to storage", error)
+        uploadingNetworkErrorModalData.isOpen = true
+      })
   }
 
   // Run an onMount function to initialize the plot
   onMount(() => {
+    //currentNetwork = cloneDeep($networksList[$selectedNetworkIndex])
     isPlottable =
       $networksList[$selectedNetworkIndex].nodes.length <
-      $maxNumberOfNodesForPlot;
+      $maxNumberOfNodesForPlot
 
     // Anytime the networksList store value is updated, update the network
-    if (isPlottable) loadNetwork(false);
+    if (isPlottable) loadNetwork(false)
 
-    const parentElement = document.querySelector(`.${parentClass}`);
+    const parentElement = document.querySelector(`.${parentClass}`)
     parentWidth = parseInt(
       getComputedStyle(parentElement).getPropertyValue("width"),
       10
-    );
+    )
     // vegaEmbed("#viz", VisSpec, { actions: false })
     //   .then((result) => {
 
     //   result.view.width((currentNetwork.nodes.length+startNodeDistance)*dynamicVegaCanvasConstant)
     //   result.view.height((currentNetwork.nodes.length+startNodeDistance)*dynamicVegaCanvasConstant)
     // })
-  });
+  })
 
-  let viz = undefined;
-  let currentNetwork: Network = undefined; // Will be set in onMount()
-  let nodeDetailModalData: ModalData = new ModalData();
+  let viz = undefined
+  let currentNetwork: Network = undefined // Will be set in onMount()
+  let plotDetailModalData: ModalData = new ModalData()
   let uploadingNetworkErrorModalData: ModalData = new ModalData(
     undefined,
     "Error Uploading Network",
     `There was an error uploading the network to storage. Please try again. If the problem persists, please contact the developers.`,
     false
-  );
+  )
 
   let editModeRequiredModalData: ModalData = new ModalData(
     undefined,
@@ -214,28 +211,29 @@
   Once complete, click the save button to save your changes.
   `,
     false
-  );
+  )
   let progressBarData: ProgressBarData = new ProgressBarData(
     false,
     "Updating the network..."
-  );
-  let hoverData: HoverData = undefined;
-  let detailedItem: Node | Link = undefined;
-  let isEditMode: boolean = false;
-  let isPlottable: boolean = true;
-  $: isPlottable = $networksList[0].nodes.length < $maxNumberOfNodesForPlot;
+  )
+  let hoverData: HoverData = undefined
+  let detailedItem: object = undefined
+  let isEditMode: boolean = false
+  let isPlottable: boolean = true
+  $: isPlottable = $networksList[0].nodes.length < $maxNumberOfNodesForPlot
   // Anytime the user updates a node or a link in the modal, update the network
 
-  const dynamicVegaCanvasConstant = 8;
-  const startNodeDistance = 15;
-  let parentStyle = `background: white; display: flex; flex-direction: column; align-items: center; flex-wrap: nowrap; justify-content: space-between;`;
-  const parentClass = "mainContent";
-  let parentStyleCentered = `background: white; display: flex; flex-direction: column; align-items: center; flex-wrap: nowrap; justify-content: space-between;`;
-  let parentStyleFlexStart = `background: white; display: flex; flex-direction: column; align-items: flex-start; flex-wrap: nowrap; justify-content: space-between;`;
-  let parentWidth = 0;
+  const DYNAMIC_VEGA_CANVAS_CONSTANT = 8
+  const startNodeDistance = 15
+  let parentStyle = `background: white; display: flex; flex-direction: column; align-items: center; flex-wrap: nowrap; justify-content: space-between;`
+  const parentClass = "mainContent"
+  let parentStyleCentered = `background: white; display: flex; flex-direction: column; align-items: center; flex-wrap: nowrap; justify-content: space-between;`
+  let parentStyleFlexStart = `background: white; display: flex; flex-direction: column; align-items: flex-start; flex-wrap: nowrap; justify-content: space-between;`
+  let parentWidth = 0
+
   function updateItem(event: CustomEvent) {
-    let updatedItem: Node | Link = event.detail.updatedItem;
-    console.log("updating item", updatedItem);
+    let updatedItem: object = event.detail.updatedItem
+    console.log("updating item", updatedItem)
     if (updatedItem.source != null) {
       currentNetwork.links.forEach((link, index) => {
         if (
@@ -248,26 +246,17 @@
           ).equals(updatedItem as Link)
         ) {
           // @ts-ignore
-          currentNetwork.links[index].value = updatedItem.value;
+          currentNetwork.links[index].value = updatedItem.value
         }
-      });
+      })
     } else {
-      currentNetwork.nodes[updatedItem.index] = updatedItem;
+      currentNetwork.nodes[updatedItem.index] = updatedItem
     }
-    loadNetwork(true);
+    loadNetwork(true)
   }
 
   let index: number = $selectedNetworkIndex
-  let placeholder: string = "Please select a network from the list";
-
-  function selected(index: number) {
-    if (typeof index !== "number") {
-      return;
-    }
-    $selectedNetworkIndex = index;
-    loadNetwork(false);
-    return;
-  }
+  let placeholder: string = "Please select a network from the list"
 </script>
 
 <div class="info">
@@ -284,7 +273,14 @@
   in:fly={{ y: -50, duration: 250, delay: 300 }}
 >
   <div class="dropdown">
-    <select class="select" bind:value={index} on:click={() => selected(index)}>
+    <select
+      class="select"
+      bind:value={index}
+      on:change={() => {
+        $selectedNetworkIndex = index
+        loadNetwork(false)
+      }}
+    >
       <option>{placeholder}</option>
       {#each $networksList as network, index}
         <option class="optionDropdown" value={index}>
@@ -342,17 +338,17 @@
           type={"secondary"}
           fontsize={100}
           on:click={async () => {
-            isEditMode = false;
-            progressBarData.isPresent = true;
-            updateNetworkInFirebaseStorage();
+            isEditMode = false
+            progressBarData.isPresent = true
+            updateNetworkInFirebaseStorage()
           }}>Save Changes</CustomButton
         >
         <CustomButton
           type={"secondary"}
           fontsize={100}
           on:click={() => {
-            isEditMode = false;
-            loadNetwork(false);
+            isEditMode = false
+            loadNetwork(false)
           }}>Discard</CustomButton
         >
       {/if}
@@ -371,22 +367,24 @@
   </div>
 
   {#if isPlottable}
-    <div id="viz" style="background-color: white;"/>
+    <div id="viz" style="background-color: white;" />
   {:else}
     {$networksList[$selectedNetworkIndex].metadata.name} is too large to be plotted,
-    for performance reasons. Currently, it has {currentNetwork.nodes.length} nodes
-    and {currentNetwork.links.length} edges. The limit for plotting is set at {$maxNumberOfNodesForPlot}
+    for performance reasons. Currently, it has {$networksList[
+      $selectedNetworkIndex
+    ].nodes.length} nodes and {$networksList[$selectedNetworkIndex].links
+      .length} edges. The limit for plotting is set at {$maxNumberOfNodesForPlot}
   {/if}
 
-  {#if nodeDetailModalData.isOpen}
+  {#if plotDetailModalData.isOpen}
     <!--
     The assumption is that the names of the nodes will not change. Also it is not possible to
     add/remove nodes in the edit mode. For this, the user has to change the network itself via
     uploading a new nodes file.
       -->
     <PlotDetailModal
-      bind:open={nodeDetailModalData.isOpen}
-      on:closeModal={() => (nodeDetailModalData.isOpen = false)}
+      bind:open={plotDetailModalData.isOpen}
+      on:closeModal={() => (plotDetailModalData.isOpen = false)}
       {detailedItem}
       on:updateItem={updateItem}
     />

@@ -231,7 +231,7 @@
 {#if hoverData !== undefined}
   <Hover {hoverData} />
 {/if}
-{#if edgeData.length > 0}
+<!-- {#if edgeData.length > 0}
   <div id="edge_data">
     <table>
       <tr>
@@ -248,7 +248,7 @@
       {/each}
     </table>
   </div>
-{/if}
+{/if} -->
 
 <style lang="scss">
   .viz {
