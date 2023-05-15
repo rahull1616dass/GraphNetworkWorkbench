@@ -33,7 +33,7 @@ spec:
         volumeMounts:
           - mountPath: /mlflow
             name: mlflow-directory
-      priorityClassName: "research-high"
+      priorityClassName: "research-med"
       imagePullSecrets:
       - name: lsx-registry
       restartPolicy: "Always"

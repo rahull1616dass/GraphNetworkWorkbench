@@ -42,11 +42,11 @@
   let hiddenLayers = [
     { permanent: true, checked: false, size: 10 },
     { permanent: true, checked: false, size: 10 },
-  ];
-  let customizedSplitDefined: boolean = false;
-
+  ]
+  let customizedSplitDefined: boolean = false
+  
   // These values should be set by UI Elements later on
-  let task = new Task(
+  const DEFAULT_TASK: Task = new Task(
     undefined, // taskID
     undefined, // mlModelType,
     undefined, // taskType,
@@ -62,10 +62,17 @@
     undefined // yColumn,
   );
 
+  let task = DEFAULT_TASK
+
+
   // For debug purposes, mock data can be used to generate the ExperimentResult page without
   // connecting to the backend
-  const USE_MOCK_DATA: boolean = false;
-  if (USE_MOCK_DATA) {
+  const USE_MOCK_NODE_DATA: boolean = false
+  const USE_MOCK_LINK_DATA: boolean = false
+  if(USE_MOCK_NODE_DATA && USE_MOCK_LINK_DATA){
+    throw new Error("Cannot use both mock node and link data")
+  }
+  if (USE_MOCK_NODE_DATA) {
     task = new Task(
       "cJuui4MU0OYn5YyeLu6Z", // taskID
       MLModelType.GCNCONV, // mlModelType,
@@ -105,6 +112,168 @@
         "5": [-6.1562, 0.6418],
       }
     );
+  }
+  if (USE_MOCK_LINK_DATA) {
+    task = new Task(
+      "4huJyQ1Ucxlnk11UbmpZ", // taskID
+      MLModelType.SAGECONV, // mlModelType,
+      TaskType.EDGE_PREDICTION, // taskType,
+      3, // epochs,
+      0.8, // trainPercentage,
+      false, //useCustomSplit
+      0.01, // learningRate
+      [10, 10], // hiddenLayerSizes
+      390, // seed
+      undefined, // createdAt,
+      ExperimentState.RESULT, // experimentState,
+      ["group"], // xColumns,
+      "", // yColumn,
+      "Based on the provided data, here are some recommendations for optimizing the graph neural network model:1. Increase the number of epoch: The model was only trained for 3 epochs, which might not be enough to properly train the model. Increasing the number of epochs can make the model learn better representations and improve its performance.2. Increase the size of negative samples: The model is trained with negative sampling which can be optimized by tweaking the size of negative samples. By increasing the number of negative samples, the model can learn better representations of non-edges, which can improve its performance.3. Use different optimizer: ADAM may not be the best optimizer for the model. Exploring other optimizers such as SGD, RMSprop, or Adagrad may improve the model's performance.4. Add more features: Using only one feature might limit the model's ability to capture complex relationships between nodes. Adding more features such as node degree, graph structure, or node labels can improve the model's",
+      0.5,
+      0.25,
+      0.5,
+      0.3333,
+      0.5,
+      [0.8577, 0.802, 0.7518],
+      {
+        "23-25": "true",
+        "23-26": "false",
+        "23-29": "true",
+        "24-25": "true",
+        "24-26": "false",
+        "24-29": "false",
+        "25-23": "true",
+        "25-24": "true",
+        "25-25": "false",
+        "25-26": "false",
+        "25-29": "false",
+        "26-23": "false",
+        "26-25": "false",
+        "26-26": "false",
+        "29-23": "true",
+        "29-24": "true",
+        "29-25": "false",
+        "29-26": "true",
+        "29-29": "false",
+      },
+      {
+        "0": [-1.323, -0.0074],
+        "1": [-1.2623, 0.0346],
+        "2": [-0.9013, 0.2842],
+        "3": [-1.4012, -0.0614],
+        "4": [-1.4012, -0.0614],
+        "5": [-1.4012, -0.0614],
+        "6": [-1.4012, -0.0614],
+        "7": [-1.4012, -0.0614],
+        "8": [-0.6514, 0.457],
+        "9": [0.8047, -0.351],
+        "10": [-1.4012, -0.0614],
+        "11": [-1.4012, -0.0614],
+        "12": [-1.4012, -0.0614],
+        "13": [-1.1512, 0.1114],
+        "14": [1.4295, 0.081],
+        "15": [1.4295, 0.081],
+        "16": [-1.4012, -0.0614],
+        "17": [-1.4012, -0.0614],
+        "18": [1.4295, 0.081],
+        "19": [-0.9846, 0.2266],
+        "20": [1.4295, 0.081],
+        "21": [-1.4012, -0.0614],
+        "22": [1.4295, 0.081],
+        "23": [1.4295, 0.081],
+        "24": [1.4295, 0.081],
+        "25": [1.4295, 0.081],
+        "26": [1.4295, 0.081],
+        "27": [1.1171, -0.135],
+        "28": [1.013, -0.207],
+        "29": [1.4295, 0.081],
+        "30": [0.8047, -0.351],
+        "31": [1.2213, -0.063],
+        "32": [1.2213, -0.063],
+        "33": [1.209, -0.0714],
+      }
+    )
+  }
+  if (USE_MOCK_LINK_DATA) {
+    task = new Task(
+      "4huJyQ1Ucxlnk11UbmpZ", // taskID
+      MLModelType.SAGECONV, // mlModelType,
+      TaskType.EDGE_PREDICTION, // taskType,
+      3, // epochs,
+      0.8, // trainPercentage,
+      false, //useCustomSplit
+      0.01, // learningRate
+      [10, 10], // hiddenLayerSizes
+      390, // seed
+      undefined, // createdAt,
+      ExperimentState.RESULT, // experimentState,
+      ["group"], // xColumns,
+      "", // yColumn,
+      "Based on the provided data, here are some recommendations for optimizing the graph neural network model:1. Increase the number of epoch: The model was only trained for 3 epochs, which might not be enough to properly train the model. Increasing the number of epochs can make the model learn better representations and improve its performance.2. Increase the size of negative samples: The model is trained with negative sampling which can be optimized by tweaking the size of negative samples. By increasing the number of negative samples, the model can learn better representations of non-edges, which can improve its performance.3. Use different optimizer: ADAM may not be the best optimizer for the model. Exploring other optimizers such as SGD, RMSprop, or Adagrad may improve the model's performance.4. Add more features: Using only one feature might limit the model's ability to capture complex relationships between nodes. Adding more features such as node degree, graph structure, or node labels can improve the model's",
+      0.5,
+      0.25,
+      0.5,
+      0.3333,
+      0.5,
+      [0.8577, 0.802, 0.7518],
+      {
+        "23-25": "true",
+        "23-26": "false",
+        "23-29": "true",
+        "24-25": "true",
+        "24-26": "false",
+        "24-29": "false",
+        "25-23": "true",
+        "25-24": "true",
+        "25-25": "false",
+        "25-26": "false",
+        "25-29": "false",
+        "26-23": "false",
+        "26-25": "false",
+        "26-26": "false",
+        "29-23": "true",
+        "29-24": "true",
+        "29-25": "false",
+        "29-26": "true",
+        "29-29": "false",
+      },
+      {
+        "0": [-1.323, -0.0074],
+        "1": [-1.2623, 0.0346],
+        "2": [-0.9013, 0.2842],
+        "3": [-1.4012, -0.0614],
+        "4": [-1.4012, -0.0614],
+        "5": [-1.4012, -0.0614],
+        "6": [-1.4012, -0.0614],
+        "7": [-1.4012, -0.0614],
+        "8": [-0.6514, 0.457],
+        "9": [0.8047, -0.351],
+        "10": [-1.4012, -0.0614],
+        "11": [-1.4012, -0.0614],
+        "12": [-1.4012, -0.0614],
+        "13": [-1.1512, 0.1114],
+        "14": [1.4295, 0.081],
+        "15": [1.4295, 0.081],
+        "16": [-1.4012, -0.0614],
+        "17": [-1.4012, -0.0614],
+        "18": [1.4295, 0.081],
+        "19": [-0.9846, 0.2266],
+        "20": [1.4295, 0.081],
+        "21": [-1.4012, -0.0614],
+        "22": [1.4295, 0.081],
+        "23": [1.4295, 0.081],
+        "24": [1.4295, 0.081],
+        "25": [1.4295, 0.081],
+        "26": [1.4295, 0.081],
+        "27": [1.1171, -0.135],
+        "28": [1.013, -0.207],
+        "29": [1.4295, 0.081],
+        "30": [0.8047, -0.351],
+        "31": [1.2213, -0.063],
+        "32": [1.2213, -0.063],
+        "33": [1.209, -0.0714],
+      }
+    )
   }
 
   let isCustomizeModalOpen: boolean = false;
@@ -257,10 +426,7 @@
   }
 
   function startNewExperiment() {
-    task.state = ExperimentState.CREATE;
-    task.taskType = undefined;
-    task.mlModelType = undefined;
-    task.xColumns = [];
+    task = DEFAULT_TASK
   }
 
   function addHiddenLayer() {
@@ -652,7 +818,7 @@
     </div>
   </div>
   {:else if task.state === ExperimentState.RESULT}
-    <ExperimentResults {task} {currentNetwork} {startNewExperiment} />
+    <ExperimentResults {task} {currentNetwork} on:newExperiment={() => startNewExperiment()} />
   {:else if task.state === ExperimentState.ERROR}
     <InfoText>Error: {task.errorMessage}</InfoText>
     <div class="newExperiment">

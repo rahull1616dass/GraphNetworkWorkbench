@@ -19,8 +19,8 @@
   let hoverData: HoverData = undefined
   // Dynamically adjust the hover offset based on screen size
   const HOVER_OFFSET = {
-    x: 300,
-    y: 850,
+    x: 0,
+    y: 0,
   }
   export let currentNetwork: Network = undefined
 
@@ -63,16 +63,18 @@
         if (task.predictions[node.index] === undefined) {
           // @ts-ignore
           node.result = PredictionResult.IN_TRAIN_SET
-        } else if (
+        } 
+        else if (node[task.yColumn] !== null) {
           // @ts-ignore
-          task.predictions[node.index] === node[task.yColumn].toString()
-        ) {
+          if(task.predictions[node.index] === node[task.yColumn].toString()){
           // @ts-ignore
-          node.result = PredictionResult.CORRECT
-        } else {
+            node.result = PredictionResult.CORRECT
+          }
+          else {
           // @ts-ignore
           node.result = PredictionResult.WRONG
-        }
+          }
+        } 
       })
 
       nodeData = networkToPlot.nodes.map((node) => ({
@@ -85,6 +87,7 @@
       updateVisSpec(networkToPlot, VisSpec)
       setColorKey(
         VisSpec,
+        "nodes",
         "result",
         ["#808080", "#FF0000", "#097969"]
         //TaskType.NODE_CLASSIFICATION
@@ -140,10 +143,11 @@
             matchingLink.result = PredictionResult.WRONG
           }
         } else {
+          // This link was not in the original network, so we need to add it but mark it as wrong
           if (value) {
             networkToPlot.links.push({
-              source: source,
-              target: target,
+              source: parseInt(source, 10),
+              target: parseInt(target, 10),
               result: PredictionResult.WRONG,
             })
           }
@@ -159,14 +163,16 @@
       }))
       dispatch("edgeData", edgeData)
       console.log("xxx")
+      updateVisSpec(networkToPlot, VisSpec)
+      setColorKey(
+        VisSpec,
+        "edges",
+        "result",
+        ["#808080", "#FF0000", "#097969"]
+      //TaskType.EDGE_PREDICTION
+    )
     }
-    // updateVisSpec(networkToPlot, VisSpec)
-    // setColorKey(
-    //   VisSpec,
-    //   "result",
-    //   ["#808080", "#FF0000", "#097969"]
-    //   //TaskType.EDGE_PREDICTION
-    // )
+    
   }
 
   vegaEmbed("#predictionPlot", VisSpec, { actions: false })
@@ -192,7 +198,7 @@
               // @ts-ignore
               event.pageX + HOVER_OFFSET.x - containerRect.left,
               // @ts-ignore
-              event.pageY + HOVER_OFFSET.y - containerRect.top
+              event.pageY + HOVER_OFFSET.y - (containerRect.top*0.5)
             )
           } else {
             hoverData = new HoverData(
@@ -208,7 +214,7 @@
               // @ts-ignore
               event.pageX + HOVER_OFFSET.x - containerRect.left,
               // @ts-ignore
-              event.pageY + HOVER_OFFSET.y - containerRect.top
+              event.pageY + HOVER_OFFSET.y - (containerRect.top*0.5)
             )
           }
         }

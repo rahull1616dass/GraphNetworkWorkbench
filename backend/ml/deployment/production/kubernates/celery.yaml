@@ -48,7 +48,7 @@ spec:
             name: project-code-for-celery
           - mountPath: /mlflow
             name: celery-mlflow-volume
-      priorityClassName: "research-high"
+      priorityClassName: "research-med"
       imagePullSecrets:
       - name: lsx-registry
       restartPolicy: "Always"
