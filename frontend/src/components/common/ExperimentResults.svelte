@@ -13,6 +13,7 @@
   import { fade } from "svelte/transition"
   import CustomModal from "./CustomModal.svelte"
   import { createEventDispatcher } from "svelte"
+  import CustomDataTable from "./CustomDataTable.svelte";
 
   export let task: Task = undefined
   export let currentNetwork: Network = undefined
@@ -30,6 +31,8 @@
   }
 
   let showDetails = false
+  let showRunDetails = false
+  // $: buttonText = showDetails ? "Hide Run Details" : "Show Run Details";
 
   function toggleDetails() {
     showDetails = !showDetails
@@ -285,7 +288,21 @@
       on:click={() => downloadPDF()}>Download PDF</CustomButton
     >
   </div>
+  <div class="show_details">
+    <CustomButton
+      type={"secondary"}
+      inverse={false}
+      fontsize={120}
+      on:click={() => { showRunDetails = !showRunDetails; }}>Show/Hide Run Details</CustomButton
+    >
+  </div>
 </div>
+
+{#if showRunDetails === true}
+
+<CustomDataTable {currentNetwork} {task} />
+
+{:else}
 
 <div class="flex-container">
   <svg width="600" height="600">
@@ -549,6 +566,7 @@
 </div>
 
 <div />
+{/if}
 
 <style>
   .plots-container {

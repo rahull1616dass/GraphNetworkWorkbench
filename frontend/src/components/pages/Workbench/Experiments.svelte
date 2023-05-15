@@ -69,7 +69,7 @@
   // For debug purposes, mock data can be used to generate the ExperimentResult page without
   // connecting to the backend
   const USE_MOCK_NODE_DATA: boolean = false
-  const USE_MOCK_LINK_DATA: boolean = false
+  const USE_MOCK_LINK_DATA: boolean = true
   if (USE_MOCK_NODE_DATA && USE_MOCK_LINK_DATA) {
     throw new Error("Cannot use both mock node and link data")
   }
