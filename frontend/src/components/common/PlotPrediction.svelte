@@ -189,11 +189,7 @@
             console.log(item.path)
             hoverData = new HoverData(
               HoverType.LINK,
-              new Link(
-                item.datum.source.datum.name,
-                item.datum.target.datum.name,
-                item.datum.value
-              ),
+              item.datum,
               undefined,
               // @ts-ignore
               event.pageX + HOVER_OFFSET.x - containerRect.left,
@@ -204,13 +200,7 @@
             hoverData = new HoverData(
               HoverType.NODE,
               undefined,
-              new Node(
-                item.datum.name,
-                undefined,
-                item.datum.group,
-                item.datum.index,
-                undefined
-              ),
+              item.datum,
               // @ts-ignore
               event.pageX + HOVER_OFFSET.x - containerRect.left,
               // @ts-ignore
