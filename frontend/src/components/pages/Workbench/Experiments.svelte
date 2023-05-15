@@ -894,6 +894,10 @@
   }
 
   .content {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
     margin: 0 2rem;
   }
   .inputNumber {
