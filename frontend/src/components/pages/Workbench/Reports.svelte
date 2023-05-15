@@ -53,7 +53,7 @@
       .then((incomingTasks) => {
         tasks = incomingTasks
         // @ts-ignore
-        tasks = tasks.filter((task) => ExperimentState[task.state] === ExperimentState.RESULT)
+        tasks = tasks.filter((task) => ExperimentState[task.state] !== ExperimentState.CREATE)
         for (var i = 0; i < tasks.length; i++) {
           // @ts-ignore
           tasks[i].index = i
@@ -118,6 +118,7 @@
       <tr>
         <th></th>
         <th>ID</th>
+        <th>Status</th>
         <th>Task Type</th>
         <th>ML Model</th>
         <th>Epochs</th>
@@ -131,6 +132,31 @@
   <tr on:click={() => showRow(task.id)}>
     <td><input type="checkbox" bind:checked={selectedRows[task.id]} on:click|stopPropagation={(e) => selectRow(task.id, e)} /></td>
     <td>{'Experiment ' + task.id}</td>
+    <td>
+      {#if task.state === ExperimentState.RESULT}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" width="20" height="20">
+        <circle style="fill:#4CAF50;" cx="26" cy="26" r="26"/>
+        <polyline style="fill:none;stroke:#FFFFFF;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" points="38,15 22,33 15,25"/>
+      </svg>
+
+      {:else if task.state === ExperimentState.ERROR}
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" width="20" height="20">
+        <circle style="fill:#F44336;" cx="26" cy="26" r="26"/>
+        <line x1="16" y1="16" x2="36" y2="36" style="stroke:#FFFFFF;stroke-width:2"/>
+        <line x1="36" y1="16" x2="16" y2="36" style="stroke:#FFFFFF;stroke-width:2"/>
+      </svg>
+
+      {:else if task.state === ExperimentState.PROGRESS}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" width="20" height="20">
+        <circle style="fill:transparent; stroke:#FFA500; stroke-width:5" cx="26" cy="26" r="23"/>
+      </svg>
+      
+      
+      {/if}
+      <!-- {task.state} -->
+      
+    </td>
     <td>{task.taskType}</td>
     <td>{task.mlModelType}</td>
     <td>{task.epochs}</td>
@@ -168,6 +194,12 @@
 
 <style lang="scss">
 
+svg {
+  width: 20px;
+  height: 20px;
+}
+
+
 .report_container {
   position: absolute;
   top: 50%;
@@ -179,7 +211,7 @@
   background-color: #f0f0f0; /* Light gray background for contrast */
   border-radius: 10px; /* Rounded corners */
   box-shadow: 0px 0px 10px rgba(0,0,0,0.1); /* Slight shadow for a lifted effect */
-  max-height: 70%;
+  max-height: 50%;
   overflow: auto;
 }
 

@@ -1,6 +1,6 @@
 export const enum ExperimentState {
-  CREATE,
-  PROGRESS,
-  RESULT,
-  ERROR,
+  CREATE = "CREATE",
+  PROGRESS = "PROGRESS",
+  RESULT = "RESULT",
+  ERROR = "ERROR",
 }
