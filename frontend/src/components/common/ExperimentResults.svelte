@@ -14,10 +14,11 @@
   import CustomModal from "./CustomModal.svelte"
   import { createEventDispatcher } from "svelte"
   import CustomDataTable from "./CustomDataTable.svelte";
+  import { networksList, selectedNetworkIndex } from "../../stores"
 
   export let task: Task = undefined
-  export let currentNetwork: Network = undefined
   const dispatch = createEventDispatcher()
+  let currentNetwork = $networksList[$selectedNetworkIndex]
 
   let showExplanation = false
 
@@ -552,7 +553,6 @@
   </p>
   <PlotPrediction
     {task}
-    {currentNetwork}
     on:predictionPlotLoaded={(e) => {
       experimentPlots["plotPrediction"] = e.detail
     }}

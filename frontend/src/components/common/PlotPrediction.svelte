@@ -22,7 +22,7 @@
     x: 0,
     y: 0,
   }
-  export let currentNetwork: Network = undefined
+  let currentNetwork: Network = $networksList[$selectedNetworkIndex]
 
   export let nodeData: Array<{ name: string; index: number; result: string }> =
     []
