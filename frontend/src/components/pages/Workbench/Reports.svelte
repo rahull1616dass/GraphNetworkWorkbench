@@ -178,7 +178,9 @@
 
 {:else if currentView === 'compare'}
   <!-- Comparison View -->
-  <ComparisonView {selectedRowIds} on:back={backToTable} />
+  <!-- {selectedTask.id} -->
+
+  <ComparisonView {selectedRowIds} {tasks} currentNetwork={$networksList[$selectedNetworkIndex]} on:back={backToTable} />
 {/if}
 
   

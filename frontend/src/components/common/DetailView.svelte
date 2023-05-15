@@ -1,12 +1,13 @@
 <script>
-  export let task;
-  export let selectedNetworkIndex;
   import { createEventDispatcher } from "svelte";
   import ExperimentResults from "./ExperimentResults.svelte";
   import CustomButton from "./CustomButton.svelte";
+
   const dispatch = createEventDispatcher();
 
-  let forReport = false;
+  export let task;
+  export let selectedNetworkIndex;
+
 </script>
 
 <CustomButton type="secondary" inverse={true} on:click={() => dispatch("back")}

@@ -78,10 +78,11 @@
 <style>
 
 .container {
-    position: absolute;
-    top: 50%;
+    position: flex;
+    /* top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); */
+    margin:auto;
     width: 80%;
     padding: 20px;
     box-sizing: border-box;
