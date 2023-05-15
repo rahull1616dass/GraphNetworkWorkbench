@@ -7,7 +7,7 @@
   import { unchangeableAttributes } from "../../../../stores"
 
   export let open: boolean = false
-  export let detailedItem: Node | Link = undefined
+  export let detailedItem: object = undefined
 
   const dispatch = createEventDispatcher()
 </script>
