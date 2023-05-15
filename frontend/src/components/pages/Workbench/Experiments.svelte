@@ -427,6 +427,9 @@
 
   function startNewExperiment() {
     task = DEFAULT_TASK
+
+    // This explicit reset is needed to ensure that the reactivity of Svelte is fired
+    task.state = ExperimentState.CREATE
   }
 
   function addHiddenLayer() {
