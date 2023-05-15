@@ -32,7 +32,7 @@ export default {
   ],
   "scales": [
     { "name": "colorNodes", "type": "ordinal", "domain": { "data": "node-data", "field": "group" }, "range": { "scheme": "category10" } },
-    { "name": "edgeColor", "type": "ordinal", "domain": { "data": "link-data", "field": "result" }, "range": ["#808080", "#FF0000", "#097969"] }
+    { "name": "edgeColor", "type": "ordinal", "domain": { "data": "link-data", "field": "result" }, "range": { "scheme": "category10" } }
   ],
   "marks": [
     {
