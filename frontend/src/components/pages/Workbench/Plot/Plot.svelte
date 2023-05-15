@@ -57,7 +57,7 @@
   }
 
   function loadNetworkValues(network: Network, resetVegaId: boolean = false) {
-    updateVisSpec(network, VisSpec, resetVegaId)
+    updateVisSpec(network, VisSpec)
     createVegaEmbed(VisSpec)
   }
   function createVegaEmbed(embeddedNetwork: any) {
@@ -97,8 +97,6 @@
         })
         result.view.addEventListener("mouseover", function (event, item) {
           console.log("MOUSEOVER", item)
-          const container = document.getElementById("viz")
-          const containerRect = container.getBoundingClientRect()
 
           // console.log(window.)
           if (item != undefined && item.datum != undefined) {
@@ -133,9 +131,12 @@
           hoverData = undefined
         })
         console.log(currentNetwork.links.length)
-        
-        // 
-        result.view.signal('linkDistance', Math.max(currentNetwork.nodes.length/2,15));
+
+        //
+        result.view.signal(
+          "linkDistance",
+          Math.max(currentNetwork.nodes.length / 2, 15)
+        )
         // updateLinkDistance(VisSpec,currentNetwork.nodes.length)
         // viz.width((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
         // viz.height((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
@@ -149,18 +150,26 @@
       Object.keys(currentNetwork.nodes[0]),
       currentNetwork.nodes
     )
+
     const edgeFile = toCSVFile(
       UploadedFileType.EDGE_FILE,
       Object.keys(currentNetwork.links[0]),
-      currentNetwork.links
+      currentNetwork.links.map((link) => {
+        const { source, target, ...otherProps } = link
+        return {
+          ...otherProps,
+          source: source.index,
+          target: target.index,
+        }
+      })
     )
-
     await uploadNetworkToStorage(currentNetwork.metadata, nodeFile, edgeFile)
       .then(() => {
         console.log("Uploaded network to storage")
         $networksList[$selectedNetworkIndex] = currentNetwork
         loadNetwork(true)
         progressBarData.isPresent = false
+        isEditMode = false
       })
       .catch((error) => {
         progressBarData.isPresent = false
@@ -216,6 +225,7 @@
     false,
     "Updating the network..."
   )
+
   let hoverData: HoverData = undefined
   let detailedItem: object = undefined
   let isEditMode: boolean = false
@@ -234,24 +244,28 @@
   function updateItem(event: CustomEvent) {
     let updatedItem: object = event.detail.updatedItem
     console.log("updating item", updatedItem)
+
     if (updatedItem.source != null) {
       currentNetwork.links.forEach((link, index) => {
         if (
-          new Link(
-            // @ts-ignore
-            link.source.datum.name,
-            // @ts-ignore
-            link.target.datum.name,
-            link.value
-          ).equals(updatedItem as Link)
+          link.source.index === updatedItem.source.index &&
+          link.target.index === updatedItem.target.index
         ) {
-          // @ts-ignore
-          currentNetwork.links[index].value = updatedItem.value
+          // Copy all properties except for 'source' and 'target'
+          const { source, target, ...otherAttributes } = updatedItem
+
+          // Assign 'source' and 'target' from link.source.datum and link.target.datum
+          currentNetwork.links[index] = {
+            source: link.source,
+            target: link.target,
+            ...otherAttributes,
+          }
         }
       })
     } else {
       currentNetwork.nodes[updatedItem.index] = updatedItem
     }
+
     loadNetwork(true)
   }
 
@@ -337,8 +351,7 @@
         <CustomButton
           type={"secondary"}
           fontsize={100}
-          on:click={async () => {
-            isEditMode = false
+          on:click={() => {
             progressBarData.isPresent = true
             updateNetworkInFirebaseStorage()
           }}>Save Changes</CustomButton
