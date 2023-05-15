@@ -1,11 +1,10 @@
 <script>
-  export let task;
-  export let selectedNetworkIndex;
   import { createEventDispatcher } from "svelte";
   import ExperimentResults from "./ExperimentResults.svelte";
   import CustomButton from "./CustomButton.svelte";
   const dispatch = createEventDispatcher();
 
+  export let task;
   let forReport = false;
 </script>
 
@@ -13,4 +12,4 @@
   >Back to Reports Page</CustomButton
 >
 
-<ExperimentResults {task} currentNetwork={selectedNetworkIndex} />
+<ExperimentResults {task} />

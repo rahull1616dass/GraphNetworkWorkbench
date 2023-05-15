@@ -827,7 +827,6 @@
   {:else if task.state === ExperimentState.RESULT}
     <ExperimentResults
       {task}
-      {currentNetwork}
       on:newExperiment={() => startNewExperiment()}
     />
   {:else if task.state === ExperimentState.ERROR}
