@@ -23,7 +23,7 @@
           {#if detailedItem[key] != null}
             <TextInput
               labelText={key}
-              value={detailedItem[key]}
+              value={key === 'source' ? detailedItem.source.datum.index : key === 'target' ? detailedItem.target.datum.index : detailedItem[key]}
               disabled={$unchangeableAttributes.includes(key)}
               on:input={(e) => {
                 console.log("input: ", e)
@@ -38,6 +38,7 @@
         {/each}
       </Form>
     </div>
+    
 
     <div slot="footer">
       <CustomButton
