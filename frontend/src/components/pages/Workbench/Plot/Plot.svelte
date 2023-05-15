@@ -132,7 +132,7 @@
         console.log(currentNetwork.links.length)
         
         // 
-        result.view.signal('linkDistance', currentNetwork.nodes.length/2);
+        result.view.signal('linkDistance', Math.max(currentNetwork.nodes.length/2,15));
         // updateLinkDistance(VisSpec,currentNetwork.nodes.length)
         // viz.width((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
         // viz.height((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
