@@ -78,12 +78,11 @@
 <style>
 
 .container {
-    position: flex;
-    /* top: 50%;
+    
+    top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); */
-    margin:auto;
-    width: 80%;
+    align-self: center;
+    width: 50%;
     padding: 20px;
     box-sizing: border-box;
     background-color: #f0f0f0; /* Light gray background for contrast */

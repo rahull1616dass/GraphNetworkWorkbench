@@ -174,7 +174,7 @@
 {:else if currentView === 'detail'}
 
   <!-- Detail View -->
-  <DetailView task={selectedTask} {selectedNetworkIndex} on:back={backToTable} />
+  <DetailView task={selectedTask} on:back={backToTable} />
 
 {:else if currentView === 'compare'}
   <!-- Comparison View -->

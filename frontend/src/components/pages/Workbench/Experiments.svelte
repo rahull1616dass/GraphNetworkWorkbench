@@ -827,7 +827,6 @@
   {:else if task.state === ExperimentState.RESULT}
     <ExperimentResults
       {task}
-      {currentNetwork}
       on:newExperiment={() => startNewExperiment()}
     />
   {:else if task.state === ExperimentState.ERROR}
@@ -894,6 +893,10 @@
   }
 
   .content {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
     margin: 0 2rem;
   }
   .inputNumber {

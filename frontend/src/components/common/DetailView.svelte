@@ -6,12 +6,11 @@
   const dispatch = createEventDispatcher();
 
   export let task;
-  export let selectedNetworkIndex;
-
+  let forReport = false;
 </script>
 
 <CustomButton type="secondary" inverse={true} on:click={() => dispatch("back")}
   >Back to Reports Page</CustomButton
 >
 
-<ExperimentResults {task} currentNetwork={selectedNetworkIndex} />
+<ExperimentResults {task} />
