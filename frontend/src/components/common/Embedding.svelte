@@ -4,6 +4,7 @@
   import { default as vegaEmbed } from "vega-embed";
   import { createEventDispatcher } from "svelte";
   import type { Task } from "../../definitions/task";
+  import cloneDeep from "lodash.clonedeep";
 
   export let task: Task = undefined;
   let id = `embedding-${Math.random().toString(36).substring(2, 15)}`;
@@ -16,14 +17,18 @@
   });
 
   function loadEmbedding() {
+    // Create a deep copy of EmbeddingVisSpec
+    let EmbeddingVisSpecCopy = cloneDeep(EmbeddingVisSpec);
+
+    // Modify the copy instead of the original
     // @ts-ignore
-    EmbeddingVisSpec.data.values = Object.values(task.embeddings).map(
+    EmbeddingVisSpecCopy.data.values = Object.values(task.embeddings).map(
       ([x, y]) => ({ x, y })
     );
-    vegaEmbed("#" + id, EmbeddingVisSpec).then((result) => {
+    vegaEmbed("#" + id, EmbeddingVisSpecCopy).then((result) => {
       dispatcher("plotLoaded", result.view);
     });
   }
 </script>
 
-<div {id} />
+<div id={id} />
