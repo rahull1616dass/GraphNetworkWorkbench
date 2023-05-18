@@ -13,4 +13,4 @@
   >Back to Reports Page</CustomButton
 >
 
-<ExperimentResults {task} />
+<ExperimentResults {task} forReport={true} />

@@ -17,6 +17,7 @@
   import { networksList, selectedNetworkIndex } from "../../stores"
 
   export let task: Task = undefined
+  export let forReport = false
   const dispatch = createEventDispatcher()
   let currentNetwork = $networksList[$selectedNetworkIndex]
 
@@ -271,6 +272,7 @@
 </script>
 
 <div class="buttons-container">
+  {#if forReport !== true}
   <div class="newExperiment">
     <CustomButton
       type={"secondary"}
@@ -281,6 +283,7 @@
       >New Experiment
     </CustomButton>
   </div>
+  {/if}
   <div class="download_results">
     <CustomButton
       type={"secondary"}
