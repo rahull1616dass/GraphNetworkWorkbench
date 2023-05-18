@@ -5,33 +5,32 @@
 
   const dispatch = createEventDispatcher();
 
-  export let selectedRowIds
+  export let selectedRowIds;
   export let tasks;
   export let currentNetwork;
 
+  let selectedTasks = tasks.filter(task => selectedRowIds.includes(task.id));
+  $: document.documentElement.style.setProperty('--selected-tasks', selectedTasks.length);
 </script>
 
-
-
-<div  class="arrow-button">
-  <CustomButton type="secondary" inverse={true} on:click={() => dispatch("back")}
-    >&lt;&lt;Back</CustomButton
+<div class="arrow-button">
+  <CustomButton
+    type="secondary"
+    inverse={true}
+    on:click={() => dispatch("back")}>&lt;&lt;Back</CustomButton
   >
-  </div>
+</div>
 
 <div>
-
   <div class="comparison-container">
-{#each selectedRowIds as id}
-  {#each tasks as task}
-    {#if task.id === id}
-    
-      <ComparisonSingleView {task} {currentNetwork} />
-    
-    {/if}
-  {/each}
-{/each}
-</div>
+    {#each selectedRowIds as id}
+      {#each tasks as task}
+        {#if task.id === id}
+          <ComparisonSingleView {task} {currentNetwork} />
+        {/if}
+      {/each}
+    {/each}
+  </div>
 </div>
 
 <style>
@@ -51,8 +50,8 @@
   }
   .comparison-container {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Creates 2 equal-width columns */
+    grid-template-columns: repeat(var(--selected-tasks), 1fr);
+    /* grid-template-columns: 1fr 1fr; Creates 2 equal-width columns */
     gap: 10px; /* Optional: Adds some space between the columns */
   }
 </style>
-

@@ -19,8 +19,12 @@
   let edgeDataResult;
 </script>
 
-<CustomDataTable {currentNetwork} {task} />
+<div class="comparison-single-view">
 
+
+<div class="datatable">
+<CustomDataTable {currentNetwork} {task}/>
+</div>
 <div class="container">
   <table>
     <thead>
@@ -82,20 +86,29 @@
   </div>
 </div>
 
-
+</div>
 
 <style>
+  .comparison-single-view {
+    display: flex;
+    flex-direction: column;
+  }
+
   .plot-wrapper {
     position: flex;
     width: 100%; /* Adjust this value to change the size of the plots */
     margin-right: -20px;
   }
+  .datatable {
+    margin-bottom: 5%;
+  }
 
   .container {
     position: flex;
     margin: auto;
-    width: 50%;
-    padding: 20px;
+    margin-bottom: 5%;
+    width: 75%;
+    /* padding: 20px; */
     box-sizing: border-box;
     background-color: #f0f0f0; /* Light gray background for contrast */
     border-radius: 10px; /* Rounded corners */

@@ -2,10 +2,11 @@
   import { TaskType } from "../../definitions/taskType";
   export let currentNetwork;
   export let task;
+  export let width = "75%";
 
 </script>
 
-<div class='container'>
+<div class='container' style="width: {width};">
 
 
 
