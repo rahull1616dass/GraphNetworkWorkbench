@@ -9,8 +9,11 @@
   export let tasks;
   export let currentNetwork;
 
-  let selectedTasks = tasks.filter(task => selectedRowIds.includes(task.id));
-  $: document.documentElement.style.setProperty('--selected-tasks', selectedTasks.length);
+  let selectedTasks = tasks.filter((task) => selectedRowIds.includes(task.id));
+  $: document.documentElement.style.setProperty(
+    "--selected-tasks",
+    selectedTasks.length
+  );
 </script>
 
 <div class="arrow-button">

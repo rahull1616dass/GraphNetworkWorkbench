@@ -3,14 +3,10 @@
   export let currentNetwork;
   export let task;
   export let width = "75%";
-
 </script>
 
-<div class='container' style="width: {width};">
-
-
-
-<table>
+<div class="container" style="width: {width};">
+  <table>
     <thead>
       <tr>
         <th>Required Fields</th>
@@ -33,10 +29,10 @@
         <td>{task.taskType}</td>
       </tr>
       {#if task.taskType === TaskType.NODE_CLASSIFICATION}
-      <tr class:highlight={task.yColumn === undefined}>
-        <td>{"Column to Predict"}</td>
-        <td>{task.yColumn} </td>
-      </tr>
+        <tr class:highlight={task.yColumn === undefined}>
+          <td>{"Column to Predict"}</td>
+          <td>{task.yColumn} </td>
+        </tr>
       {/if}
 
       <tr class:highlight={task.xColumns.length === 0}>
@@ -73,12 +69,10 @@
       </tr>
     </tbody>
   </table>
-
 </div>
 
 <style>
-
-.container {
+  .container {
     display: flex;
     align-self: center;
     margin: auto;
@@ -91,7 +85,7 @@
     overflow: auto;
   }
 
-table {
+  table {
     border-collapse: collapse;
     width: 100%;
   }
@@ -111,9 +105,7 @@ table {
     background-color: #f2f2f2;
   }
 
-
   .highlight {
     background-color: #ffcccc !important; /* Change the color to your desired highlight color */
   }
-
 </style>

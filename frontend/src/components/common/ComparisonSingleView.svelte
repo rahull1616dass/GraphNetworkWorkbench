@@ -20,72 +20,69 @@
 </script>
 
 <div class="comparison-single-view">
+  <div class="datatable">
+    <CustomDataTable {currentNetwork} {task} />
+  </div>
+  <div class="container">
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{"Accuracy"}</td>
+          <td>{task.accuracy}</td>
+        </tr>
 
+        <tr>
+          <td>{"Precision"}</td>
+          <td>{task.precision}</td>
+        </tr>
 
-<div class="datatable">
-<CustomDataTable {currentNetwork} {task}/>
-</div>
-<div class="container">
-  <table>
-    <thead>
-      <tr>
-        <th>Parameter</th>
-        <th>Value</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{"Accuracy"}</td>
-        <td>{task.accuracy}</td>
-      </tr>
-
-      <tr>
-        <td>{"Precision"}</td>
-        <td>{task.precision}</td>
-      </tr>
-
-      <tr>
-        <td>{"Recall"}</td>
-        <td>{task.recall}</td>
-      </tr>
-      <tr>
-        <td>{"F1 Score"}</td>
-        <td>{task.f1} </td>
-      </tr>
-      <tr>
-        <td>{"AUC"}</td>
-        <td>{task.auc} </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<div class="plots-container">
-  <div class="plot-wrapper">
-    <h4>Loss Function</h4>
-    <div>
-      <PlotLoss
-        losses={task.losses}
-        on:plotLoaded={(e) => {
-          experimentPlots["plotLoss"] = e.detail;
-        }}
-      />
-    </div>
+        <tr>
+          <td>{"Recall"}</td>
+          <td>{task.recall}</td>
+        </tr>
+        <tr>
+          <td>{"F1 Score"}</td>
+          <td>{task.f1} </td>
+        </tr>
+        <tr>
+          <td>{"AUC"}</td>
+          <td>{task.auc} </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-  <div class="plot-wrapper">
-    <h4>Node Embedding</h4>
-    <div>
-      <Embedding
-        {task}
-        on:plotLoaded={(e) => {
-          experimentPlots["plotNodeEmbedding"] = e.detail;
-        }}
-      />
+  <div class="plots-container">
+    <div class="plot-wrapper">
+      <h4>Loss Function</h4>
+      <div>
+        <PlotLoss
+          losses={task.losses}
+          on:plotLoaded={(e) => {
+            experimentPlots["plotLoss"] = e.detail;
+          }}
+        />
+      </div>
+    </div>
+
+    <div class="plot-wrapper">
+      <h4>Node Embedding</h4>
+      <div>
+        <Embedding
+          {task}
+          on:plotLoaded={(e) => {
+            experimentPlots["plotNodeEmbedding"] = e.detail;
+          }}
+        />
+      </div>
     </div>
   </div>
-</div>
-
 </div>
 
 <style>

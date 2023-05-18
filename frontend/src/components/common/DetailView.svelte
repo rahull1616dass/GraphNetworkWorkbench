@@ -8,10 +8,12 @@
   let forReport = false;
 </script>
 
-<div  class="arrow-button">
-<CustomButton type="secondary" inverse={true} on:click={() => dispatch("back")}
-  >&lt;&lt;Back</CustomButton
->
+<div class="arrow-button">
+  <CustomButton
+    type="secondary"
+    inverse={true}
+    on:click={() => dispatch("back")}>&lt;&lt;Back</CustomButton
+  >
 </div>
 <ExperimentResults {task} forReport={true} />
 
