@@ -43,6 +43,7 @@
     cursor: pointer;
     padding: 0.5rem;
     color: var(--wueblue);
+    margin-bottom: 2%;
   }
 
   .arrow-button:hover {

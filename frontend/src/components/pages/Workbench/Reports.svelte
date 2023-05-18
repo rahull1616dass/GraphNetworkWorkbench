@@ -73,13 +73,26 @@
 
 
   function selectRow(taskId: string, event) {  
-    if(event.target.checked) {
-      selectedRowIds = [...selectedRowIds, taskId];
-    } else {
-      selectedRowIds = selectedRowIds.filter(id => id !== taskId);
-    }
-    selectedRows = { ...selectedRows, [taskId]: event.target.checked };
+  // Set maximum number of selectable rows
+  const maxSelectableRows = 5;
+
+  // Check if user is trying to select a row and the maximum number of selectable rows has been reached
+  if(event.target.checked && selectedRowIds.length >= maxSelectableRows) {
+    // If so, ignore the click and return early
+    //alert("You cannot select more than 5 rows at a time. Please deselect some rows before selecting more.");
+    event.target.checked = false; // Reset the checkbox to its previous state
+    return;
+  } else if(event.target.checked) {
+    // If the maximum number of selectable rows hasn't been reached, add the new row to the selection
+    selectedRowIds = [...selectedRowIds, taskId];
+  } else {
+    // If the user is deselecting a row, remove it from the selection
+    selectedRowIds = selectedRowIds.filter(id => id !== taskId);
   }
+  
+  selectedRows = { ...selectedRows, [taskId]: event.target.checked };
+}
+
 
   function showRow(taskId: string) {  
     selectedRowId = taskId;
