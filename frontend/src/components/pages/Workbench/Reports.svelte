@@ -108,6 +108,10 @@
     type={DropdownSelectorType.NETWORK}
   />
 
+  <div class="compare_button">
+  <CustomButton type="secondary" on:click={() => {currentView = 'compare'}}>Compare</CustomButton>
+</div>
+
 
   <!-- Table View -->
   <dıv class='report_container'>
@@ -169,7 +173,6 @@
   </table>
 </dıv>
 
-  <button on:click={compareRows}>Compare</button>
 
 {:else if currentView === 'detail'}
 
@@ -196,6 +199,10 @@
 
 <style lang="scss">
 
+  .compare_button{
+    margin-bottom: 2%;
+  }
+
 svg {
   width: 20px;
   height: 20px;
@@ -203,17 +210,16 @@ svg {
 
 
 .report_container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
+  display: flex;
+  align-self: center;
+  margin: auto;
+  width: 75%;
   padding: 20px;
   box-sizing: border-box;
   background-color: #f0f0f0; /* Light gray background for contrast */
   border-radius: 10px; /* Rounded corners */
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.1); /* Slight shadow for a lifted effect */
-  max-height: 50%;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Slight shadow for a lifted effect */
+  max-height: 500px;
   overflow: auto;
 }
 

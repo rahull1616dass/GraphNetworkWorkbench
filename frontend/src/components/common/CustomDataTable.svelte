@@ -87,6 +87,7 @@
     background-color: #f0f0f0; /* Light gray background for contrast */
     border-radius: 10px; /* Rounded corners */
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Slight shadow for a lifted effect */
+    overflow: auto;
   }
 
 table {
