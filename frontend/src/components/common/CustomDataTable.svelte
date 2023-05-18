@@ -78,11 +78,10 @@
 <style>
 
 .container {
-    
-    top: 50%;
-    left: 50%;
+    display: flex;
     align-self: center;
-    width: 50%;
+    margin: auto;
+    width: 75%;
     padding: 20px;
     box-sizing: border-box;
     background-color: #f0f0f0; /* Light gray background for contrast */

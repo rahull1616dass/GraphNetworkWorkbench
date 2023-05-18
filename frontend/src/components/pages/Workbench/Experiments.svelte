@@ -849,16 +849,15 @@
     display: flex;
     justify-content: center;
     position: flex;
-    width: 80%;
+    width: 60%;
     margin: 0 auto;
   }
 
   .progress_bar_container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
+    position: flex;
+    justify-content: center;
+    margin: 0 auto;
+    width: 60%;
     padding: 20px;
     box-sizing: border-box;
     background-color: #f0f0f0; /* Light gray background for contrast */
@@ -871,18 +870,20 @@
   }
 
   .fixed-left-arrow {
-    position: fixed;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1000;
+    position: flex;
+    // right: 10px;
+    // top: 50%;
+    // transform: translateY(-50%);
+    // margin: auto;
+    // z-index: 1000;
   }
 
   .fixed-right-arrow {
-    position: fixed;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: flex;
+    // right: 10px;
+    // top: 50%;
+    // transform: translateY(-50%);
+    // margin: auto;
     z-index: 1000;
   }
 

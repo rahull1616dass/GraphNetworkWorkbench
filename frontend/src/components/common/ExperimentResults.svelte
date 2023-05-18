@@ -301,8 +301,9 @@
 
 {#if showRunDetails === true}
 
+<div class="datatable">
 <CustomDataTable {currentNetwork} {task} />
-
+</div>
 {:else}
 
 <div class="flex-container">
@@ -569,6 +570,11 @@
 {/if}
 
 <style>
+  .datatable {
+    margin-top: 10%;
+    margin-left: 10%;
+    margin-right: 10%;
+  }
   .plots-container {
     display: flex;
     justify-content: space-around;
