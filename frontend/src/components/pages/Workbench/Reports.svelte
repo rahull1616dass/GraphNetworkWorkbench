@@ -15,6 +15,7 @@
   import DetailView from "../../common/DetailView.svelte"
   import ComparisonView from "../../common/ComparisonView.svelte"
   import { onMount } from "svelte"
+  import CustomDataTable from "../../common/CustomDataTable.svelte";
 
 
   // let selectedRows: Record<string, boolean> = {};
@@ -76,10 +77,21 @@
   // Set maximum number of selectable rows
   const maxSelectableRows = 5;
 
+  // Find the task with the given ID
+  const task = tasks.find(task => task.id === taskId);
+
+  // Check if the task exists and its state is 'RESULT'
+  if(task && task.state !== 'RESULT') {
+    // If the task is not in 'RESULT' state, ignore the click and return early
+    // alert("You can only select tasks that are in the 'RESULT' state.");
+    event.target.checked = false; // Reset the checkbox to its previous state
+    return;
+  }
+
   // Check if user is trying to select a row and the maximum number of selectable rows has been reached
   if(event.target.checked && selectedRowIds.length >= maxSelectableRows) {
     // If so, ignore the click and return early
-    //alert("You cannot select more than 5 rows at a time. Please deselect some rows before selecting more.");
+    // alert("You cannot select more than 5 rows at a time. Please deselect some rows before selecting more.");
     event.target.checked = false; // Reset the checkbox to its previous state
     return;
   } else if(event.target.checked) {
@@ -92,6 +104,7 @@
   
   selectedRows = { ...selectedRows, [taskId]: event.target.checked };
 }
+
 
 
   function showRow(taskId: string) {  
@@ -189,8 +202,25 @@
 
 {:else if currentView === 'detail'}
 
+  {#if selectedTask.state === ExperimentState.RESULT}
+    
+
   <!-- Detail View -->
   <DetailView task={selectedTask} on:back={backToTable} />
+
+  {:else}
+
+  <div  class="arrow-button">
+    <CustomButton type="secondary" inverse={true} on:click={backToTable}
+      >&lt;&lt;Back</CustomButton
+    >
+    </div>
+
+  <div class="datatable">
+    <CustomDataTable currentNetwork={$networksList[$selectedNetworkIndex]} task={selectedTask} />
+    </div>
+
+  {/if}
 
 {:else if currentView === 'compare'}
   <!-- Comparison View -->
@@ -211,6 +241,27 @@
 </div>
 
 <style lang="scss">
+
+.datatable {
+    margin-top: 10%;
+    margin-left: 10%;
+    margin-right: 10%;
+  }
+
+.arrow-button {
+    position: flex;
+    z-index: 1000;
+    font-size: 1rem;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--wueblue);
+  }
+
+  .arrow-button:hover {
+    color: #ccc;
+  }
 
   .compare_button{
     margin-bottom: 2%;
