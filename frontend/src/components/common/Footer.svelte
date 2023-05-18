@@ -1,5 +1,5 @@
 <footer>
-    <div class="copyright"><p>&copy; 2022 XTAI Lab Team 2023. All rights reserved.</p></div>
+    <div class="copyright"><p>&copy; XTAI Lab Team 2023. All rights reserved.</p></div>
 </footer>
 
 <style>
@@ -7,7 +7,7 @@
         padding: 40px;
         text-align: center;
         background-color: white;
-    }
+    }s
     .copyright{
         color: #aaa;
         font-size: 14px;
