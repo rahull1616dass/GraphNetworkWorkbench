@@ -53,7 +53,10 @@ def get_basic_data(data_files: Dict[str, str], params: MLParams, label_encoder: 
         graph_data.x = torch.from_numpy(np.eye(nodes.shape[0])).to(torch.float32)
     else:
         graph_data: Data = from_networkx(graph, params.x_columns)
-        graph_data.x = graph_data.x.to(torch.float32)
+        graph_data.x = torch.cat(
+            (graph_data.x.to(torch.float32), torch.from_numpy(np.eye(nodes.shape[0])).to(torch.float32)),
+            dim=1
+        )
 
     # check if we need the class for node classification
     if isinstance(params, ClassificationParams):
