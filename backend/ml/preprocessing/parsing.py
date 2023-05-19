@@ -58,17 +58,17 @@ def get_basic_data(data_files: Dict[str, str], params: MLParams, label_encoder: 
             dim=1
         )
 
-    # check if we need the class for node classification
+    # Check if it is classification task
     if isinstance(params, ClassificationParams):
         params: ClassificationParams = params
         graph_data.y = torch.tensor(label_encoder.fit_transform(nodes[params.y_column]))
 
-    # check is the custom nodes split was made
-    if params.train_percentage is None:
-        train_mask, val_mask, test_mask = generate_custom_masks(nodes)
-        graph_data.train_mask = train_mask
-        graph_data.val_mask = val_mask
-        graph_data.test_mask = test_mask
+        # check the custom split only in classification task
+        if params.use_custom_split:
+            train_mask, val_mask, test_mask = generate_custom_masks(nodes)
+            graph_data.train_mask = train_mask
+            graph_data.val_mask = val_mask
+            graph_data.test_mask = test_mask
 
     return graph_data
 

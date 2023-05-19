@@ -11,6 +11,7 @@ class MLParams(BaseModel):
     ml_model_type: str
     seed: int = 42
     x_columns: List[str]
+    use_custom_split: bool = False
 
 
 class ClassificationParams(MLParams):
