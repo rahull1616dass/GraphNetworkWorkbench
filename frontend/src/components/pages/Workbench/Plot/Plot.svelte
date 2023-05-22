@@ -131,9 +131,11 @@
           hoverData = undefined
         })
         console.log(currentNetwork.links.length)
-        
+        linkDistance = Math.max(Math.min(currentNetwork.links.length/4, currentNetwork.nodes.length/2),15)
         // changing the size of the graph
-        result.view.signal('linkDistance', Math.max(Math.min(currentNetwork.links.length/4, currentNetwork.nodes.length/2),15));
+        result.view.signal('linkDistance', linkDistance);
+
+        currentVega = result
         // updateLinkDistance(VisSpec,currentNetwork.nodes.length)
         // viz.width((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
         // viz.height((currentNetwork.links.length + 15) * dynamicVegaCanvasConstant);
@@ -196,6 +198,10 @@
     //   result.view.width((currentNetwork.nodes.length+startNodeDistance)*dynamicVegaCanvasConstant)
     //   result.view.height((currentNetwork.nodes.length+startNodeDistance)*dynamicVegaCanvasConstant)
     // })
+
+    viz = document.getElementById('viz');
+    viz.addEventListener('wheel', handleScroll, { passive: false });
+
   })
 
   let viz = undefined
@@ -238,6 +244,12 @@
   let parentStyleFlexStart = `background: white; display: flex; flex-direction: column; align-items: flex-start; flex-wrap: nowrap; justify-content: space-between;`
   let parentWidth = 0
 
+  let linkDistance =0
+
+  let currentVega
+
+  let  lastScrollTop
+
   function updateItem(event: CustomEvent) {
     let updatedItem: object = event.detail.updatedItem
     console.log("updating item", updatedItem)
@@ -266,6 +278,31 @@
     loadNetwork(true)
   }
 
+  function preventScrollWhenOverViz(event) {
+    event.preventDefault();
+  }
+  function handleScroll(event) {
+    console.log("calling")
+
+    event.preventDefault();
+    linkDistance = calculateLinkDistance(event.deltaY, linkDistance );
+    
+    currentVega.view.signal('linkDistance', linkDistance);
+  }
+
+  function calculateLinkDistance(deltaY, distance) {
+    // Implement your logic here. This is just a dummy example.
+    if (deltaY > 0){
+      console.log(deltaY)
+    // Wheel was rotated upwards, or scrolling down
+    distance--;
+  } else {
+    // Wheel was rotated downwards, or scrolling up
+    distance++;
+    console.log(deltaY)
+  }
+  return distance
+  }
   let index: number = $selectedNetworkIndex
   let placeholder: string = "Please select a network from the list"
 </script>
