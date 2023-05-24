@@ -129,7 +129,7 @@ def classify_nodes(data: Data, params: MLParams, encoder: LabelEncoder):
         accuracy, precision, recall, f1, roc_auc = node_classifier.get_all_metrics(data_to_use)
 
         predictions: List = encoder.inverse_transform(node_classifier.predict(data_to_use).tolist())
-        test_node_indices = torch.arange(0, data_to_use.x.size()[0])[data_to_use.test_mask]
+        test_node_indices = torch.arange(0, data_to_use.x.cpu().size()[0])[data_to_use.test_mask.cpu()]
         node_idx_pred_class_pairs = {node_idx: str(pred_class)
                                      for node_idx, pred_class in zip(test_node_indices, predictions)}
 
