@@ -667,7 +667,7 @@
                     on:closePopup={closePlotPopup}
                     seed={task.seed}
                     {currentNetwork}
-                    groupColumn={task.yColumn}
+                    columnToSplit={task.yColumn}
                     trainPercentage={task.trainPercentage}
                   />
                 {/if}

@@ -64,7 +64,7 @@ export async function updateLinkDistance(visSpec: VisualizationSpec, newDistance
 }
 export function setColorKey(
   visSpec: VisualizationSpec,
-  target: "nodes" | "edges",
+  target: string, // "nodes" or "edges"
   colorKey: string,
   colorPalette: string[] = undefined
 ): VisualizationSpec {

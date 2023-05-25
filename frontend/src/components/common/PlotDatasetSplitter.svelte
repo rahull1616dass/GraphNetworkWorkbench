@@ -22,9 +22,8 @@
   export let currentNetwork: Network = undefined
   let networkToUpdate: Network = undefined
   export let nameColumn: string = "name"
-  export let groupColumn: string = "group"
+  export let columnToSplit: string = "group"
   let hoverData: HoverData = undefined
-
 
   let shouldCheckSplits: boolean = false
   const groupSplits = {}
@@ -33,11 +32,11 @@
   $: if (shouldCheckSplits === true) {
     // Get all the unique values in currentNetwork.nodes[groupColumn]
     const uniqueGroups = Array.from(
-      new Set(networkToUpdate.nodes.map((node) => node[groupColumn]))
+      new Set(networkToUpdate.nodes.map((node) => node[columnToSplit]))
     )
     isTrainTestSplitValid = uniqueGroups.every((group) => {
       const nodesInGroup = networkToUpdate.nodes.filter(
-        (node) => node[groupColumn] == group
+        (node) => node[columnToSplit] == group
       )
       const nodesInGroupTrain = nodesInGroup.filter(
         (node) => node[COLUMN_IS_TRAIN] == true
@@ -70,7 +69,12 @@
     }
     updateVisSpec(networkToUpdate, VisSpec)
     if (isFirstLoad) {
-      setColorKey(VisSpec, COLUMN_IS_TRAIN)
+      setColorKey(
+        VisSpec,
+        "nodes",
+        COLUMN_IS_TRAIN,
+        ["#ff0000", "#00ff00"]
+      )
     }
     vegaEmbed("#viz", VisSpec, { actions: false })
       .then((result) => {
@@ -116,7 +120,7 @@
                 new Node(
                   item.datum[nameColumn],
                   undefined,
-                  item.datum[groupColumn],
+                  item.datum[columnToSplit],
                   item.datum.index,
                   undefined,
                   // @ts-ignore
@@ -149,7 +153,7 @@
         nodes will change to reflect the new status.
     </div>
     <div class="condition">
-      For each of the unique value in the <b>{groupColumn}</b> column (the column you selected to 
+      For each of the unique value in the <b>{columnToSplit}</b> column (the column you selected to 
       be predicted), there has to be at least one node in the training set and one node in the test set.
       {#each Object.entries(groupSplits) as [group, groupSplit]}
         <p>Group {group}: {groupSplit.train} nodes in training set, {groupSplit.test} nodes in test set.</p>

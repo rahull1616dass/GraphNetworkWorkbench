@@ -14,6 +14,7 @@ class MLRequest(CamelModel):
     learning_rate: float = 0.01
     ml_model_type: str
     seed: int = 42
+    use_custom_split: bool = False
 
 
 class ClassificationRequest(MLRequest):

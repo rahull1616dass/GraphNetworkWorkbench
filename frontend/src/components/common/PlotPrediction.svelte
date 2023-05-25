@@ -89,7 +89,7 @@
         VisSpec,
         "nodes",
         "result",
-        ["#808080", "#FF0000", "#097969"]
+        ["#808080", "#097969", "#FF0000"]
         //TaskType.NODE_CLASSIFICATION
       )
     } else if (task.taskType === TaskType.EDGE_PREDICTION) {

@@ -63,6 +63,7 @@
   let nodeFiles: File[] = []
   let edgeFiles: File[] = []
   let newNetwork = new Network(new Metadata())
+  newNetwork.metadata.color = $paletteColors[0]
   
   let randomId = cryptoRandomString({ length: 4, type: "url-safe" })
   $: newNetwork.metadata.id = `${newNetwork.metadata.name}-${randomId}`
