@@ -74,7 +74,7 @@ export default {
       "encode": {
         "enter": {
           "fill": { "scale": "colorNodes", "field": "group" },
-          "stroke": { "value": "white" },
+          // "stroke": { "value": "white" },
           "xfocus": { "signal": "cx" },
           "yfocus": { "signal": "cy" }
         },
@@ -86,7 +86,7 @@ export default {
       "transform": [
         {
           "type": "force",
-          "iterations": 300,
+          "iterations": 100,
           "restart": { "signal": "restart" },
           "static": { "signal": "static" },
           "signal": "force",
