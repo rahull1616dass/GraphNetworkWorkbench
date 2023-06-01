@@ -63,18 +63,16 @@
         if (task.predictions[node.index] === undefined) {
           // @ts-ignore
           node.result = PredictionResult.IN_TRAIN_SET
-        } 
-        else if (node[task.yColumn] !== null) {
+        } else if (node[task.yColumn] !== null) {
           // @ts-ignore
-          if(task.predictions[node.index] === node[task.yColumn].toString()){
-          // @ts-ignore
+          if (task.predictions[node.index] === node[task.yColumn].toString()) {
+            // @ts-ignore
             node.result = PredictionResult.CORRECT
+          } else {
+            // @ts-ignore
+            node.result = PredictionResult.WRONG
           }
-          else {
-          // @ts-ignore
-          node.result = PredictionResult.WRONG
-          }
-        } 
+        }
       })
 
       nodeData = networkToPlot.nodes.map((node) => ({
@@ -133,7 +131,7 @@
 
         if (matchingLink !== undefined) {
           // Mark this link as found in predictions
-          matchingLink.inPredictions = true
+          //matchingLink.inPredictions = true
 
           if (value) {
             // @ts-ignore
@@ -168,11 +166,10 @@
         VisSpec,
         "edges",
         "result",
-        ["#808080", "#FF0000", "#097969"]
-      //TaskType.EDGE_PREDICTION
-    )
+        ["#097969", "#808080", "#FF0000"]
+        //TaskType.EDGE_PREDICTION
+      )
     }
-    
   }
 
   vegaEmbed("#predictionPlot", VisSpec, { actions: false })
@@ -180,8 +177,8 @@
       dispatch("predictionPlotLoaded", result.view)
       result.view.addEventListener("mouseover", function (event, item) {
         console.log("MOUSEOVER", item)
-        const container = document.getElementById("predictionPlot");
-        const containerRect = container.getBoundingClientRect();
+        const container = document.getElementById("predictionPlot")
+        const containerRect = container.getBoundingClientRect()
         if (item != undefined && item.datum != undefined) {
           // @ts-ignore
           if (item != undefined && item.path != undefined) {
@@ -194,7 +191,7 @@
               // @ts-ignore
               event.pageX + HOVER_OFFSET.x - containerRect.left,
               // @ts-ignore
-              event.pageY + HOVER_OFFSET.y - (containerRect.top*0.5)
+              event.pageY + HOVER_OFFSET.y - containerRect.top * 0.5
             )
           } else {
             hoverData = new HoverData(
@@ -204,7 +201,7 @@
               // @ts-ignore
               event.pageX + HOVER_OFFSET.x - containerRect.left,
               // @ts-ignore
-              event.pageY + HOVER_OFFSET.y - (containerRect.top*0.5)
+              event.pageY + HOVER_OFFSET.y - containerRect.top * 0.5
             )
           }
         }
@@ -221,6 +218,7 @@
 {#if hoverData !== undefined}
   <Hover {hoverData} />
 {/if}
+
 <!-- {#if edgeData.length > 0}
   <div id="edge_data">
     <table>
