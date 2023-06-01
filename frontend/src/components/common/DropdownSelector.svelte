@@ -21,10 +21,11 @@
     MLModelType.GCNCONV,
     MLModelType.SAGECONV,
   ];
-  let taskTypes: TaskType[] = [
-    TaskType.NODE_CLASSIFICATION,
-    TaskType.EDGE_PREDICTION,
-  ];
+  let taskTypes: Record<string, TaskType> = 
+  {
+    "Node Classification": TaskType.NODE_CLASSIFICATION,
+    "Edge Prediction": TaskType.EDGE_PREDICTION,
+  }
 
   // remove the is_train column from the nodeColumns array
   $: nodeColumns = Object.keys(
@@ -82,9 +83,9 @@
       <option class="placeholder" value={undefined} disabled selected
         >{placeholder}</option
       >
-      {#each taskTypes as task, _}
-        <option class="optionDropdown" value={task}>
-          {task}
+      {#each Object.entries(taskTypes) as [key, value]}
+        <option class="optionDropdown" value={value}>
+          {key}
         </option>
       {/each}
       <!-- {#each Object.entries(taskTypes) as [task, value]}
